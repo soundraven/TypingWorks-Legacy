@@ -11,7 +11,8 @@
     "camelcase": "off",
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": "off",
-    "vue/static-class-names-order": "error"
+    "vue/static-class-names-order": "error",
+    "prettier/prettier": ["error", { "endOfLine": "auto" }]
   },
   "overrides": [
     {
