@@ -1,0 +1,24 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:nuxt/recommended",
+    "@nuxtjs/eslint-config-typescript",
+    "plugin:prettier/recommended"
+  ],
+  "rules": {
+    "vue/no-multiple-template-root": 0,
+    "no-console": "off",
+    "camelcase": "off",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "vue/static-class-names-order": "error"
+  },
+  "overrides": [
+    {
+      "files": ["pages/**/*.vue", "layouts/*.vue"],
+      "rules": {
+        "vue/multi-word-component-names": "off"
+      }
+    }
+  ]
+}
