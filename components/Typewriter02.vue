@@ -34,8 +34,6 @@ const endTyping = () => {
     totalTime = (endTime - startTime) / 1000;
 
     calculateTypingSpeed(totalTime);
-
-    // typedText.value = ""
 };
 
 const calculateTypingSpeed = (takenTime) => {
