@@ -14,7 +14,7 @@
 <script setup lang="ts">
 const targetText = "The quick brown fox jumps over the lazy dog";
 const typedText = ref("");
-
+console.log("test");
 let wpm = 0;
 let cpm = 0;
 
