@@ -22,11 +22,6 @@ let startTime = 0;
 let endTime = 0;
 let totalTime = 0;
 
-// wpm = Math.floor((60 / typeCount) * correctChr)
-// if (wpm === Infinity || isNaN(wpm)) {
-//     return 0;
-// }
-
 const startTyping = () => {
     const date = new Date();
     startTime = date.getTime();
