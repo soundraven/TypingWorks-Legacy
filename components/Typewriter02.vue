@@ -2,19 +2,22 @@
     <div>
         <p>다음 문구를 따라 작성</p>
         <p>{{ targetText }}</p>
-        <input v-model="typedText" type="text" autofocus />
+        <input
+            v-model="typedText"
+            type="text"
+            autofocus
+            @input="startTyping"
+            @keyup.enter="endTyping"
+        />
         <p>타이핑 속도: {{ wpm }} WPM</p>
         <p>타이핑 속도: {{ cpm }} CPM</p>
-
-        <button @click="startTyping()">Start</button>
-        <button @click="endTyping()">End</button>
     </div>
 </template>
 
 <script setup lang="ts">
 const targetText = "The quick brown fox jumps over the lazy dog";
 const typedText = ref("");
-console.log("test");
+
 let wpm = 0;
 let cpm = 0;
 
@@ -23,6 +26,7 @@ let endTime = 0;
 let totalTime = 0;
 
 const startTyping = () => {
+    if (startTime !== 0) return;
     const date = new Date();
     startTime = date.getTime();
 };
@@ -51,5 +55,6 @@ const calculateTypingSpeed = (takenTime) => {
     }
 
     typedText.value = "";
+    startTime = 0;
 };
 </script>
