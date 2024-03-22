@@ -1,7 +1,14 @@
 <template>
     <div>
         <p>다음 문구를 따라 작성</p>
-        <p>{{ targetTxt }}</p>
+        <p>
+            <template v-for="(char, index) in splitedTargetTxt" :key="index">
+                <span :class="{ [$style.typo]: typoArray[index] }">
+                    {{ char }}
+                </span>
+            </template>
+        </p>
+
         <input
             v-model="typedTxt"
             type="text"
@@ -9,6 +16,7 @@
             @input="
                 startTyping();
                 currentTyping();
+                checkTypo();
             "
             @keyup.enter="endTyping"
         />
@@ -22,8 +30,14 @@
 </template>
 
 <script setup lang="ts">
+// 원본 문장
 const targetTxt = "The quick brown fox jumps over the lazy dog";
+// 원본 문장을 글자 단위로 분할
+const splitedTargetTxt = targetTxt.split("");
+// 유저가 타이핑한 문장
 const typedTxt = ref("");
+// 쪼갠 문장의 길이와 동일한 새 배열 생성, 각 요소는 false
+const typoArray = ref(new Array(splitedTargetTxt.length).fill(false));
 
 const wpm = ref(0);
 const cpm = ref(0);
@@ -50,6 +64,17 @@ const currentTyping = () => {
     calcTypingSpeed(elapsedTime.value);
 };
 
+// typoArray에서 true인 i는 오타를 의미
+const checkTypo = () => {
+    for (let i = 0; i < targetTxt.length; i++) {
+        if (typedTxt.value[i] && typedTxt.value[i] !== targetTxt[i]) {
+            typoArray.value[i] = true;
+        } else {
+            typoArray.value[i] = false;
+        }
+    }
+};
+
 const endTyping = () => {
     const date = new Date();
     endTime.value = date.getTime();
@@ -65,7 +90,7 @@ const endTyping = () => {
 const calcTypingSpeed = (takenTime) => {
     const totalWords = typedTxt.value.trim();
     const actualWords = totalWords === "" ? 0 : totalWords.split(" ").length;
-
+    // 계산 공식에 문제 있는 것 같음. 나중에 다시 확인하기
     if (actualWords !== 0) {
         wpm.value = Math.round((actualWords / takenTime) * 60);
     }
@@ -75,3 +100,9 @@ const calcTypingSpeed = (takenTime) => {
     }
 };
 </script>
+
+<style lang="scss" module>
+.typo {
+    color: red;
+}
+</style>
