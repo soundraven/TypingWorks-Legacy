@@ -1,9 +1,9 @@
 <template>
     <div>
         <p>다음 문구를 따라 작성</p>
-        <p>{{ targetText }}</p>
+        <p>{{ targetTxt }}</p>
         <input
-            v-model="typedText"
+            v-model="typedTxt"
             type="text"
             autofocus
             @input="
@@ -22,8 +22,8 @@
 </template>
 
 <script setup lang="ts">
-const targetText = "The quick brown fox jumps over the lazy dog";
-const typedText = ref("");
+const targetTxt = "The quick brown fox jumps over the lazy dog";
+const typedTxt = ref("");
 
 const wpm = ref(0);
 const cpm = ref(0);
@@ -38,7 +38,6 @@ const startTyping = () => {
     if (startTime.value === 0) {
         const date = new Date();
         startTime.value = date.getTime();
-        console.log("타이핑시작");
     }
 };
 
@@ -46,24 +45,25 @@ const currentTyping = () => {
     if (startTime.value !== 0) {
         const date = new Date();
         lastTypingTime.value = date.getTime();
-        console.log("타이핑체크");
         elapsedTime.value = (lastTypingTime.value - startTime.value) / 1000;
     }
-    calculateTypingSpeed(elapsedTime.value);
+    calcTypingSpeed(elapsedTime.value);
 };
 
 const endTyping = () => {
     const date = new Date();
     endTime.value = date.getTime();
-    console.log(endTime.value);
     totalTime.value = (endTime.value - startTime.value) / 1000;
-    console.log(totalTime.value);
 
-    calculateTypingSpeed(totalTime.value);
+    calcTypingSpeed(totalTime.value);
+
+    typedTxt.value = "";
+    startTime.value = 0;
+    elapsedTime.value = 0;
 };
 
-const calculateTypingSpeed = (takenTime) => {
-    const totalWords = typedText.value.trim();
+const calcTypingSpeed = (takenTime) => {
+    const totalWords = typedTxt.value.trim();
     const actualWords = totalWords === "" ? 0 : totalWords.split(" ").length;
 
     if (actualWords !== 0) {
@@ -73,8 +73,5 @@ const calculateTypingSpeed = (takenTime) => {
     if (totalWords.length !== 0) {
         cpm.value = Math.round((totalWords.length / takenTime) * 60);
     }
-
-    // typedText.value = "";
-    // startTime.value = 0;
 };
 </script>
