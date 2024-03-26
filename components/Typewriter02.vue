@@ -13,11 +13,7 @@
             v-model="typedTxt"
             type="text"
             autofocus
-            @input="
-                startTyping();
-                currentTyping();
-                checkTypo();
-            "
+            @input="startTyping"
             @keyup.enter="endTyping"
         />
         <p>타이핑 속도: {{ wpm }} WPM</p>
@@ -31,7 +27,8 @@
 
 <script setup lang="ts">
 // 원본 문장
-const targetTxt = "The quick brown fox jumps over the lazy dog";
+// const targetTxt = "The quick brown fox jumps over the lazy dog";
+const targetTxt = "동해물과 백두산이 마르고 닳도록";
 // 원본 문장을 글자 단위로 분할
 const splitedTargetTxt = targetTxt.split("");
 // 유저가 타이핑한 문장
@@ -44,15 +41,22 @@ const cpm = ref(0);
 
 const startTime = ref(0);
 const lastTypingTime = ref(0);
+// 현재 경과시간만 초로 나오고 나머지는 타임스탬프 형식
 const elapsedTime = ref(0);
 const endTime = ref(0);
 const totalTime = ref(0);
 
+// 경과시간 계산 반복하는 setTimeOut Id
+let elapsedTimerId;
+
 const startTyping = () => {
-    if (startTime.value === 0) {
+    if (startTime.value === null || 0) {
         const date = new Date();
         startTime.value = date.getTime();
+        startTypingSpeedCalc();
     }
+    currentTyping();
+    checkTypo();
 };
 
 const currentTyping = () => {
@@ -66,6 +70,8 @@ const currentTyping = () => {
 
 // typoArray에서 true인 i는 오타를 의미
 const checkTypo = () => {
+    console.log(typedTxt.value);
+    console.log(typoArray.value);
     for (let i = 0; i < targetTxt.length; i++) {
         if (typedTxt.value[i] && typedTxt.value[i] !== targetTxt[i]) {
             typoArray.value[i] = true;
@@ -75,7 +81,27 @@ const checkTypo = () => {
     }
 };
 
+const keepCheckElapsedTime = () => {
+    const date = new Date();
+    const currentTime = date.getTime();
+    elapsedTime.value = (currentTime - startTime.value) / 1000;
+    calcTypingSpeed(elapsedTime.value);
+};
+
+const startTypingSpeedCalc = () => {
+    elapsedTimerId = setTimeout(function repeat() {
+        keepCheckElapsedTime();
+        elapsedTimerId = setTimeout(repeat, 100);
+    }, 100);
+};
+
+const stopTypingSpeedCalc = () => {
+    clearTimeout(elapsedTimerId);
+};
+
 const endTyping = () => {
+    stopTypingSpeedCalc();
+
     const date = new Date();
     endTime.value = date.getTime();
     totalTime.value = (endTime.value - startTime.value) / 1000;
