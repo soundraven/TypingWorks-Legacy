@@ -16,7 +16,9 @@
         "node": "18.x"
     },
     "dependencies": {
+        "@nuxt/ui": "^2.15.0",
         "@pinia/nuxt": "^0.5.1",
+        "hangul-js": "^0.2.6",
         "lodash-es": "^4.17.21",
         "nuxt": "^3.10.2",
         "pinia": "^2.1.7",

@@ -22,19 +22,27 @@
         <p>타이핑 끝난 시간: {{ endTime }}</p>
         <p>마지막으로 한 타이핑 시간: {{ lastTypingTime }}</p>
         <p>elapsedTime: {{ elapsedTime }}</p>
+        <p>한글/영어 {{ targetLanguage }}</p>
+        <button @click="toggleLanguage()">한글/영어 변환</button>
     </div>
 </template>
 
 <script setup lang="ts">
+import * as hangul from "hangul-js";
 // 원본 문장
 // const targetTxt = "The quick brown fox jumps over the lazy dog";
-const targetTxt = "동해물과 백두산이 마르고 닳도록";
+// const targetTxt = "동해물과 백두산이 마르고 닳도록";
+const targetTxt = ref("");
+const targetLanguage = ref("ko");
 // 원본 문장을 글자 단위로 분할
-const splitedTargetTxt = targetTxt.split("");
+// const splitedTargetTxt = targetTxt.value.split("");
+const splitedTargetTxt = ref<string[]>([]);
 // 유저가 타이핑한 문장
 const typedTxt = ref("");
 // 쪼갠 문장의 길이와 동일한 새 배열 생성, 각 요소는 false
-const typoArray = ref(new Array(splitedTargetTxt.length).fill(false));
+// const typoArray = ref(new Array(splitedTargetTxt.value.length).fill(false));
+// const typoArray = ref<boolean[]>([]);
+const typoArray = ref<boolean[]>([]);
 
 const wpm = ref(0);
 const cpm = ref(0);
@@ -49,8 +57,23 @@ const totalTime = ref(0);
 // 경과시간 계산 반복하는 setTimeOut Id
 let elapsedTimerId;
 
+onMounted(() => {
+    if (targetLanguage.value === "ko") {
+        targetTxt.value = "동해물과 백두산이 마르고 닳도록";
+        readyTxt();
+    } else {
+        targetTxt.value = "The quick brown fox jumps over the lazy dog";
+        readyTxt();
+    }
+});
+
+const readyTxt = () => {
+    splitedTargetTxt.value = targetTxt.value.split("");
+    typoArray.value = new Array(splitedTargetTxt.value.length).fill(false);
+};
+
 const startTyping = () => {
-    if (startTime.value === null || 0) {
+    if (startTime.value === 0) {
         const date = new Date();
         startTime.value = date.getTime();
         startTypingSpeedCalc();
@@ -70,10 +93,8 @@ const currentTyping = () => {
 
 // typoArray에서 true인 i는 오타를 의미
 const checkTypo = () => {
-    console.log(typedTxt.value);
-    console.log(typoArray.value);
-    for (let i = 0; i < targetTxt.length; i++) {
-        if (typedTxt.value[i] && typedTxt.value[i] !== targetTxt[i]) {
+    for (let i = 0; i < targetTxt.value.length; i++) {
+        if (typedTxt.value[i] && typedTxt.value[i] !== targetTxt.value[i]) {
             typoArray.value[i] = true;
         } else {
             typoArray.value[i] = false;
@@ -113,16 +134,38 @@ const endTyping = () => {
     elapsedTime.value = 0;
 };
 
+// 한글과 영어 속도 계산을 다르게 처리
 const calcTypingSpeed = (takenTime) => {
     const totalWords = typedTxt.value.trim();
     const actualWords = totalWords === "" ? 0 : totalWords.split(" ").length;
-    // 계산 공식에 문제 있는 것 같음. 나중에 다시 확인하기
-    if (actualWords !== 0) {
-        wpm.value = Math.round((actualWords / takenTime) * 60);
+    if (targetTxt.value.match(/^[a-zA-Z]+$/)) {
+        if (actualWords !== 0) {
+            wpm.value = Math.round((actualWords / takenTime) * 60);
+        }
+        if (totalWords.length !== 0) {
+            cpm.value = Math.round((totalWords.length / takenTime) * 60);
+        }
+    } else {
+        const disassembleTxt = hangul.disassemble(typedTxt.value);
+        if (actualWords !== 0) {
+            wpm.value = Math.round((actualWords / takenTime) * 60);
+        }
+        if (disassembleTxt.length !== 0) {
+            cpm.value = Math.round((disassembleTxt.length / takenTime) * 60);
+        }
     }
+    // 계산 공식에 문제 있는 것 같음. 나중에 다시 확인하기
+};
 
-    if (totalWords.length !== 0) {
-        cpm.value = Math.round((totalWords.length / takenTime) * 60);
+const toggleLanguage = () => {
+    if (targetLanguage.value === "ko") {
+        targetLanguage.value = "en";
+        targetTxt.value = "The quick brown fox jumps over the lazy dog";
+        readyTxt();
+    } else {
+        targetLanguage.value = "ko";
+        targetTxt.value = "동해물과 백두산이 마르고 닳도록";
+        readyTxt();
     }
 };
 </script>
