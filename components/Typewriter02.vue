@@ -25,7 +25,8 @@
         <p>마지막으로 한 타이핑 시간: {{ lastTypingTime }}</p>
         <p>elapsedTime: {{ elapsedTime }}</p>
         <p>한글/영어 {{ targetLanguage }}</p>
-        <p>정확도: {{ typoRate }}%</p>
+        <p>정확도: {{ typingAccuracy }}%</p>
+        <p>진행도: {{ typingProgress }}%</p>
         <button @click="toggleLanguage()">한글/영어 변환</button>
     </div>
 </template>
@@ -43,7 +44,8 @@ const splitedTargetTxt = ref<string[]>([]);
 const typedTxt = ref("");
 // 쪼갠 문장의 길이와 동일한 새 배열 생성, 각 요소는 false
 const typoArray = ref<boolean[]>([]);
-const typoRate = ref(0);
+const typingAccuracy = ref(0);
+const typingProgress = ref(0);
 
 const wpm = ref(0);
 const cpm = ref(0);
@@ -76,6 +78,7 @@ const startTyping = () => {
     currentTyping();
     checkTypo();
     accuracy();
+    progress();
 };
 
 // 마지막으로 타이핑한 시간 기준으로 경과시간을 계산
@@ -101,11 +104,17 @@ const checkTypo = () => {
 // 입력 텍스트의 정확도 계산
 const accuracy = () => {
     const typoCount = typoArray.value.filter((value) => value === true).length;
-    typoRate.value = Math.round(
+    typingAccuracy.value = Math.round(
         ((typoArray.value.length - typoCount) / typoArray.value.length) * 100,
     );
 };
 
+const progress = () => {
+    typingProgress.value = Math.round(
+        (typedTxt.value.split("").length / targetTxt.value.split("").length) *
+            100,
+    );
+};
 // 현재 시간 기준으로 경과시간 및 타이핑 속도 계산
 const keepCheckElapsedTime = () => {
     const date = new Date();
@@ -139,10 +148,18 @@ const endTyping = () => {
     targetTxt.value = target.quote;
     targetPerson.value = target.person;
     readyTxt();
+    resetInfo();
+};
 
+const resetInfo = () => {
+    stopTypingSpeedCalc();
     typedTxt.value = "";
     startTime.value = 0;
     elapsedTime.value = 0;
+    wpm.value = 0;
+    cpm.value = 0;
+    typingAccuracy.value = 0;
+    typingProgress.value = 0;
 };
 
 // 한글과 영어 속도 계산을 다르게 처리
@@ -177,7 +194,9 @@ const toggleLanguage = () => {
     const target = getTargetTxt(targetLanguage);
     targetTxt.value = target.quote;
     targetPerson.value = target.person;
+
     readyTxt();
+    resetInfo();
 };
 
 // 오타 확인을 위해 문장 글자단위로 분해
