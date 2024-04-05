@@ -26,10 +26,12 @@
         "vue-router": "^4.2.5"
     },
     "devDependencies": {
+        "@element-plus/nuxt": "^1.0.8",
         "@nuxtjs/eslint-config-typescript": "^12.1.0",
         "@nuxtjs/eslint-module": "^4.1.0",
         "@vueuse/core": "^10.9.0",
         "@vueuse/nuxt": "^10.9.0",
+        "element-plus": "^2.6.3",
         "eslint": "^8.57.0",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-nuxt": "^4.0.0",

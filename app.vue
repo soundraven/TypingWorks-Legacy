@@ -5,8 +5,14 @@
             <NuxtPage />
             {{ nuxtApp?.$app_origin }}
         </NuxtLayout>
-
-        <Typewriter02 />
+        <TypeArea />
+        <el-button @click="ElMessage('hello')">button</el-button>
+        <ElButton :icon="ElIconEditPen" type="success">button</ElButton>
+        <LazyElButton type="warning">lazy button</LazyElButton>
+        <div>
+            <el-button>Default</el-button>
+            <el-icon><User style="font-size: 24px" /></el-icon>
+        </div>
     </div>
 </template>
 

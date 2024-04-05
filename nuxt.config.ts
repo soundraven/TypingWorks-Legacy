@@ -28,6 +28,7 @@ export default defineNuxtConfig({
     },
     css: ["~/assets/css/main.scss"],
     modules: [
+        "@element-plus/nuxt",
         "@nuxtjs/eslint-module",
         "@vueuse/nuxt", // https://vueuse.org/guide/#nuxt
         "@pinia/nuxt", // https://pinia.vuejs.org/ssr/nuxt.html
