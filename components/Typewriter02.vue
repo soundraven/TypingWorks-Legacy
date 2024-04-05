@@ -2,6 +2,8 @@
     <div>
         <p>다음 문구를 따라 작성</p>
         <p>
+            {{ targetPerson }}
+            <br />
             <template v-for="(char, index) in splitedTargetTxt" :key="index">
                 <span :class="{ [$style.typo]: typoArray[index] }">
                     {{ char }}
@@ -23,12 +25,17 @@
         <p>마지막으로 한 타이핑 시간: {{ lastTypingTime }}</p>
         <p>elapsedTime: {{ elapsedTime }}</p>
         <p>한글/영어 {{ targetLanguage }}</p>
+        <p>정확도: {{ typoRate }}%</p>
         <button @click="toggleLanguage()">한글/영어 변환</button>
     </div>
 </template>
 
 <script setup lang="ts">
 import * as hangul from "hangul-js";
+import EnQuotes from "@/assets/LifeQuotesEN";
+import KrQuotes from "@/assets/LifeQuotesKR";
+
+const targetPerson = ref("");
 const targetTxt = ref("");
 const targetLanguage = ref("ko");
 const splitedTargetTxt = ref<string[]>([]);
@@ -36,6 +43,7 @@ const splitedTargetTxt = ref<string[]>([]);
 const typedTxt = ref("");
 // 쪼갠 문장의 길이와 동일한 새 배열 생성, 각 요소는 false
 const typoArray = ref<boolean[]>([]);
+const typoRate = ref(0);
 
 const wpm = ref(0);
 const cpm = ref(0);
@@ -51,13 +59,10 @@ const totalTime = ref(0);
 let elapsedTimerId;
 
 onMounted(() => {
-    if (targetLanguage.value === "ko") {
-        targetTxt.value = "동해물과 백두산이 마르고 닳도록";
-        readyTxt();
-    } else {
-        targetTxt.value = "The quick brown fox jumps over the lazy dog";
-        readyTxt();
-    }
+    const target = getTargetTxt(targetLanguage);
+    targetTxt.value = target.quote;
+    targetPerson.value = target.person;
+    readyTxt();
 });
 
 const startTyping = () => {
@@ -70,6 +75,7 @@ const startTyping = () => {
     // startTime 있으면 속도, 오타만 검사
     currentTyping();
     checkTypo();
+    accuracy();
 };
 
 // 마지막으로 타이핑한 시간 기준으로 경과시간을 계산
@@ -90,6 +96,14 @@ const checkTypo = () => {
             typoArray.value[i] = false;
         }
     }
+};
+
+// 입력 텍스트의 정확도 계산
+const accuracy = () => {
+    const typoCount = typoArray.value.filter((value) => value === true).length;
+    typoRate.value = Math.round(
+        ((typoArray.value.length - typoCount) / typoArray.value.length) * 100,
+    );
 };
 
 // 현재 시간 기준으로 경과시간 및 타이핑 속도 계산
@@ -120,6 +134,11 @@ const endTyping = () => {
     totalTime.value = (endTime.value - startTime.value) / 1000;
 
     calcTypingSpeed(totalTime.value);
+
+    const target = getTargetTxt(targetLanguage);
+    targetTxt.value = target.quote;
+    targetPerson.value = target.person;
+    readyTxt();
 
     typedTxt.value = "";
     startTime.value = 0;
@@ -152,19 +171,35 @@ const calcTypingSpeed = (takenTime) => {
 const toggleLanguage = () => {
     if (targetLanguage.value === "ko") {
         targetLanguage.value = "en";
-        targetTxt.value = "The quick brown fox jumps over the lazy dog";
-        readyTxt();
     } else {
         targetLanguage.value = "ko";
-        targetTxt.value = "동해물과 백두산이 마르고 닳도록";
-        readyTxt();
     }
+    const target = getTargetTxt(targetLanguage);
+    targetTxt.value = target.quote;
+    targetPerson.value = target.person;
+    readyTxt();
 };
 
 // 오타 확인을 위해 문장 글자단위로 분해
 const readyTxt = () => {
     splitedTargetTxt.value = targetTxt.value.split("");
     typoArray.value = new Array(splitedTargetTxt.value.length).fill(false);
+};
+
+const getTargetTxt = (language) => {
+    let targetJson = "";
+    if (language.value === "en") {
+        targetJson = EnQuotes;
+    } else {
+        targetJson = KrQuotes;
+    }
+
+    const randomIndex = Math.floor(Math.random() * targetJson.length);
+
+    return {
+        quote: targetJson[randomIndex].quote,
+        person: targetJson[randomIndex].person,
+    };
 };
 </script>
 
