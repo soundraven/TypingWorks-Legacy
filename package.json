@@ -12,9 +12,6 @@
         "preview": "nuxt preview",
         "postinstall": "nuxt prepare"
     },
-    "engines": {
-        "node": "18.x"
-    },
     "dependencies": {
         "@nuxt/ui": "^2.15.0",
         "@pinia/nuxt": "^0.5.1",
