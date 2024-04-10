@@ -1,3 +1,6 @@
-export const getPercentage = (value: number, max: number): number => {
-    return Math.round((value / max) * 100)
+export const getPercentage = (
+    typedText: number,
+    targetText: number,
+): number => {
+    return Math.round((typedText / targetText) * 100)
 }

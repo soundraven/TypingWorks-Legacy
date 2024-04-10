@@ -8,3 +8,8 @@ export enum TypoStatus {
     Correct = 1,
     Error = 2,
 }
+
+export enum Language {
+    korean = "ko",
+    english = "en",
+}

@@ -3,7 +3,7 @@
         <div :class="$style.typing">
             <div :class="$style.text">
                 <span
-                    v-for="(char, index) in splitedTargetTxt"
+                    v-for="(char, index) in splitedTargetText"
                     :key="index"
                     :class="[getTypoClass(index)]"
                 >
@@ -17,11 +17,12 @@
 
         <div :class="$style.inputs">
             <input
-                v-model="typedTxt"
+                v-model="typedText"
                 type="text"
                 autofocus
                 @keyup="keydownEventHandler"
                 @keyup.enter="endTyping"
+                @paste="preventPaste"
             />
         </div>
 
@@ -45,16 +46,16 @@
 import * as hangul from "hangul-js"
 import EnQuotes from "@/assets/LifeQuotesEN.json"
 import KrQuotes from "@/assets/LifeQuotesKR.json"
-import { TypoStatus, type Quote } from "~/structure/quotes"
+import { TypoStatus, Language, type Quote } from "~/structure/quotes"
 
 const $style = useCssModule()
 //v-memo 확인해보기
 const targetPerson: Ref<string> = ref("")
-const targetTxt: Ref<string> = ref("")
-const targetLanguage: Ref<string> = ref("ko")
-const splitedTargetTxt: Ref<string[]> = ref([])
+const targetText: Ref<string> = ref("")
+const targetLanguage: Ref<Language> = ref(Language.korean)
+const splitedTargetText: Ref<string[]> = ref([])
 // 유저가 타이핑한 문장
-const typedTxt: Ref<string> = ref("")
+const typedText: Ref<string> = ref("")
 const parsingText: Ref<string> = ref("")
 
 // 쪼갠 문장의 길이와 동일한 새 배열 생성, 각 요소는 false
@@ -63,31 +64,29 @@ const typoArray: Ref<boolean[]> = ref([])
 // 문장 입력 상태 혹은 틀림/맞음 체크
 const typoStatus: Ref<{ [k: number]: TypoStatus }> = ref({})
 
-const typingAccuracy = ref(0)
-const typingProgress = ref(0)
+const typingAccuracy: Ref<number> = ref(0)
+const typingProgress: Ref<number> = ref(0)
 
-const wpm = ref(0)
-const cpm = ref(0)
+const wpm: Ref<number> = ref(0)
+const cpm: Ref<number> = ref(0)
 
-const startTime = ref(0)
-const lastTypingTime = ref(0)
+const startTime: Ref<number> = ref(0)
+const lastTypingTime: Ref<number> = ref(0)
 // 현재 경과시간만 초로 나오고 나머지는 타임스탬프 형식
-const elapsedTime = ref(0)
-const endTime = ref(0)
-const totalTime = ref(0)
+const elapsedTime: Ref<number> = ref(0)
+const endTime: Ref<number> = ref(0)
+const totalTime: Ref<number> = ref(0)
 
 // 경과시간 계산 반복하는 setTimeOut Id
 const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
 
-// onBeforeMount(() => {})
-
 onMounted(() => {
     if (process.server) return
 
-    const target = getTargetTxt(targetLanguage)
-    targetTxt.value = target.quote
+    const target: Quote = getTargetText()
+    targetText.value = target.quote
     targetPerson.value = target.person
-    readyTxt()
+    readyText()
 
     // console.log(TypoStatus.NotInput)
 
@@ -96,6 +95,10 @@ onMounted(() => {
 //타입캐스팅
 const keydownEventHandler = (e: KeyboardEvent) => {
     startTyping((e.currentTarget as HTMLInputElement).value)
+}
+
+const preventPaste = (e: ClipboardEvent) => {
+    e.preventDefault()
 }
 
 // const onChangeEventHandler = (e: Event) => {
@@ -132,28 +135,28 @@ const checkTypo = () => {
     typoStatus.value = {}
 
     /*
-    if (typedTxt.value.length <= i)
-        if (typedTxt.value[i] && typedTxt.value[i] !== targetTxt.value[i]) {
+    if (typedText.value.length <= i)
+        if (typedText.value[i] && typedText.value[i] !== targetText.value[i]) {
             typoStatus.value[i] = TypoStatus.Error
         } else {
             typoStatus.value[i] = TypoStatus.Correct
         } */
-    // console.log(typedTxt.value)
+    // console.log(typedText.value)
     for (let i = 0; i < parsingText.value.length; i++) {
-        if (targetTxt.value[i] == undefined) continue
-        if (targetTxt.value[i] == parsingText.value[i]) {
+        if (targetText.value[i] == undefined) continue
+        if (targetText.value[i] == parsingText.value[i]) {
             typoStatus.value[i] = TypoStatus.Correct
         } else {
             typoStatus.value[i] = TypoStatus.Error
         }
     }
-
-    // console.log(typoStatus.value)
 }
 
 // 입력 텍스트의 정확도 계산
 const accuracy = () => {
-    const typoCount = typoArray.value.filter((value) => value === true).length
+    const typoCount = typoArray.value.filter(
+        (value: boolean) => value === true,
+    ).length
     typingAccuracy.value = Math.round(
         ((typoArray.value.length - typoCount) / typoArray.value.length) * 100,
     )
@@ -162,17 +165,17 @@ const accuracy = () => {
 const progress = () => {
     typingProgress.value = getPercentage(
         parsingText.value.split("").length,
-        targetTxt.value.split("").length,
+        targetText.value.split("").length,
     )
     // Math.round(
-    //     (typedTxt.value.split("").length / targetTxt.value.split("").length) *
+    //     (typedText.value.split("").length / targetText.value.split("").length) *
     //         100,
     // )
 }
 // 현재 시간 기준으로 경과시간 및 타이핑 속도 계산
 const keepCheckElapsedTime = () => {
     const date = new Date()
-    const currentTime = date.getTime()
+    const currentTime: number = date.getTime()
     elapsedTime.value = (currentTime - startTime.value) / 1000
     calcTypingSpeed(elapsedTime.value)
 }
@@ -199,16 +202,16 @@ const endTyping = () => {
 
     calcTypingSpeed(totalTime.value)
 
-    const target = getTargetTxt(targetLanguage)
-    targetTxt.value = target.quote
+    const target: Quote = getTargetText()
+    targetText.value = target.quote
     targetPerson.value = target.person
-    readyTxt()
+    readyText()
     resetInfo()
 }
 
 const resetInfo = () => {
     stopTypingSpeedCalc()
-    typedTxt.value = ""
+    typedText.value = ""
     parsingText.value = ""
     startTime.value = 0
     elapsedTime.value = 0
@@ -219,10 +222,11 @@ const resetInfo = () => {
 }
 
 // 한글과 영어 속도 계산을 다르게 처리
-const calcTypingSpeed = (takenTime) => {
-    const totalWords = parsingText.value.trim()
-    const splitByWords = totalWords === "" ? 0 : totalWords.split(" ").length
-    if (targetTxt.value.match(/^[a-zA-Z]+$/)) {
+const calcTypingSpeed = (takenTime: number) => {
+    const totalWords: string = parsingText.value.trim()
+    const splitByWords: number =
+        totalWords === "" ? 0 : totalWords.split(" ").length
+    if (targetText.value.match(/^[a-zA-Z]+$/)) {
         if (splitByWords !== 0) {
             wpm.value = Math.round((splitByWords / takenTime) * 60)
         }
@@ -230,62 +234,56 @@ const calcTypingSpeed = (takenTime) => {
             cpm.value = Math.round((totalWords.length / takenTime) * 60)
         }
     } else {
-        const disassembleTxt = hangul.disassemble(parsingText.value)
+        const disassembleText: string[] = hangul.disassemble(parsingText.value)
         if (splitByWords !== 0) {
             wpm.value = Math.round((splitByWords / takenTime) * 60)
         }
-        if (disassembleTxt.length !== 0) {
-            cpm.value = Math.round((disassembleTxt.length / takenTime) * 60)
+        if (disassembleText.length !== 0) {
+            cpm.value = Math.round((disassembleText.length / takenTime) * 60)
         }
     }
     // 계산 공식에 문제 있는 것 같음. 속도가 너무 빠르게 나오는?
 }
 
 const toggleLanguage = () => {
-    targetLanguage.value = targetLanguage.value == "ko" ? "en" : "ko"
+    targetLanguage.value =
+        targetLanguage.value === Language.korean
+            ? Language.english
+            : Language.korean
 
-    // if (targetLanguage.value === "ko") {
-    //     targetLanguage.value = "en"
-    // } else {
-    //     targetLanguage.value = "ko"
-    // }
-
-    const target = getTargetTxt(targetLanguage)
-    targetTxt.value = target.quote
+    const target: Quote = getTargetText()
+    targetText.value = target.quote
     targetPerson.value = target.person
 
-    readyTxt()
+    readyText()
     resetInfo()
 }
 
 // 오타 확인을 위해 문장 글자단위로 분해
-const readyTxt = () => {
-    splitedTargetTxt.value = targetTxt.value.split("")
-    typoArray.value = new Array(splitedTargetTxt.value.length).fill(false)
+const readyText = () => {
+    splitedTargetText.value = targetText.value.split("")
+    typoArray.value = new Array(splitedTargetText.value.length).fill(false)
 }
 
-const getTargetTxt = (language: Ref<string>): Quote => {
+const getTargetText = (): Quote => {
     let targetDatas: Quote[] = []
-    if (language.value === "en") {
-        targetDatas = EnQuotes
-    } else {
-        targetDatas = KrQuotes
-    }
+    targetLanguage.value === Language.korean
+        ? (targetDatas = KrQuotes)
+        : (targetDatas = EnQuotes)
 
-    const randomIndex = Math.floor(Math.random() * targetDatas.length)
+    const randomIndex: number = Math.floor(Math.random() * targetDatas.length)
     return targetDatas[randomIndex]
 }
 
 const getTypoClass = (index: number): string => {
     if (typoStatus.value[index] == null) return ""
-
     if (typoStatus.value[index] == TypoStatus.Error) return $style.typo
     return $style.success
 }
 
 const getElapsedTime = (): string => {
-    const min = Math.floor(elapsedTime.value / 60)
-    const sec = elapsedTime.value % 60
+    const min: number = Math.floor(elapsedTime.value / 60)
+    const sec: number = elapsedTime.value % 60
 
     return `${min}분 ${sec}초`
 }
