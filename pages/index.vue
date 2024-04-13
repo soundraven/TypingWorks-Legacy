@@ -7,13 +7,18 @@
         <p>lodash: {{ $_.join(array, "") }}</p>
         <p>vueuse useMouse: {{ x }}, {{ y }}</p>
     </div>
+    <div>
+        <NuxtLink to="/">랜딩페이지</NuxtLink>
+        <NuxtLink to="/typings">타이핑페이지</NuxtLink>
+        <NuxtLink to="/">랜딩페이지</NuxtLink>
+    </div>
 </template>
 
 <script setup>
 definePageMeta({
     middleware: ["auth"],
-});
+})
 
-const array = ref([1, 2, 3]);
-const { x, y } = useMouse();
+const array = ref([1, 2, 3])
+const { x, y } = useMouse()
 </script>

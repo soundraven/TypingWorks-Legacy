@@ -1,34 +1,50 @@
 <template>
     <div :class="$style.index">
         <div :class="$style.typing">
-            <div :class="$style.text">
-                <span
-                    v-for="(char, index) in splitedTargetText"
-                    :key="index"
-                    :class="[getTypoClass(index)]"
-                >
-                    {{ char }}
-                </span>
+            <div :class="[$style.icon, $style.gridItem]">로고위치</div>
+            <div :class="[$style.language, $style.gridItem]">
+                토글언어
+                <button @click="toggleLanguage()">한글/영어 변환</button>
             </div>
-            <div :class="$style.person">
+            <div :class="[$style.blink, $style.gridItem]">타이핑반짝임</div>
+            <div :class="[$style.sentence, $style.gridItem]">문장변경</div>
+            <div :class="[$style.wpm, $style.gridItem]">WPM: {{ wpm }}</div>
+            <div :class="[$style.cpm, $style.gridItem]">CPM: {{ cpm }}</div>
+            <div :class="[$style.accuracy, $style.gridItem]">
+                정확도: {{ typingAccuracy }}
+            </div>
+            <div :class="[$style.progress, $style.gridItem]">
+                진행도: {{ typingProgress }}
+            </div>
+            <div :class="[$style.count, $style.gridItem]">카운트</div>
+            <div :class="[$style.person, $style.gridItem]">
                 {{ targetPerson }}
             </div>
+            <div :class="[$style.textArea, $style.gridItem]">
+                <div :class="$style.text">
+                    <span
+                        v-for="(char, index) in splitedTargetText"
+                        :key="index"
+                        :class="[getTypoClass(index)]"
+                    >
+                        {{ char }}
+                    </span>
+                </div>
+                <div :class="$style.inputs">
+                    <input
+                        v-model="typedText"
+                        type="text"
+                        autofocus
+                        placeholder="위에 보이는 문장을 따라 타이핑해보세요."
+                        @keyup="keydownEventHandler"
+                        @keyup.enter="endTyping"
+                        @paste="preventPaste"
+                    />
+                </div>
+            </div>
         </div>
 
-        <div :class="$style.inputs">
-            <input
-                v-model="typedText"
-                type="text"
-                autofocus
-                @keyup="keydownEventHandler"
-                @keyup.enter="endTyping"
-                @paste="preventPaste"
-            />
-        </div>
-
-        <p>타이핑 속도: {{ wpm }} WPM</p>
-        <p>타이핑 속도: {{ cpm }} CPM</p>
-        <p>타이핑 시작 시간: {{ startTime }}</p>
+        <!-- <p>타이핑 시작 시간: {{ startTime }}</p>
         <p>타이핑 끝난 시간: {{ endTime }}</p>
         <p>
             마지막으로 한 타이핑 시간:
@@ -37,8 +53,7 @@
         <p>elapsedTime: {{ getElapsedTime() }}</p>
         <p>한글/영어 {{ targetLanguage }}</p>
         <p>정확도: {{ typingAccuracy }}%</p>
-        <p>진행도: {{ typingProgress }}%</p>
-        <button @click="toggleLanguage()">한글/영어 변환</button>
+        <p>진행도: {{ typingProgress }}%</p> -->
     </div>
 </template>
 
@@ -87,7 +102,6 @@ onMounted(() => {
     targetText.value = target.quote
     targetPerson.value = target.person
     readyText()
-
     // console.log(TypoStatus.NotInput)
 
     // window.addEventListener
@@ -222,6 +236,7 @@ const resetInfo = () => {
 }
 
 // 한글과 영어 속도 계산을 다르게 처리
+// 함수빼기
 const calcTypingSpeed = (takenTime: number) => {
     const totalWords: string = parsingText.value.trim()
     const splitByWords: number =
@@ -300,51 +315,126 @@ const getElapsedTime = (): string => {
 
     flex-direction: column;
 
+    border: 1px solid yellow;
+
     > .typing {
-        width: 100%;
-        padding-inline: 60px;
+        width: 1000px;
+        height: 500px;
 
-        > .text {
-            font-size: 60px;
+        display: grid;
+        grid-template: repeat(8, 1fr) / repeat(10, 1fr);
+        grid-template-areas:
+            "i i i l l b b b . ."
+            "i i i l l b b b . ."
+            "i i i s s w c . n n"
+            "i i i s s a p t t t"
+            "x x x x x x x x x x"
+            "x x x x x x x x x x"
+            "x x x x x x x x x x"
+            ". . . . . . . . . .";
 
-            > span {
-                transition-property: color;
-                transition-duration: 0.2s;
-                transition-timing-function: ease-out;
+        color: black;
+
+        margin-inline: auto;
+
+        > .gridItem {
+            border: 1px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        > .icon {
+            grid-area: i;
+        }
+
+        > .language {
+            grid-area: l;
+        }
+
+        > .blink {
+            grid-area: b;
+        }
+
+        > .sentence {
+            grid-area: s;
+        }
+
+        > .wpm {
+            grid-area: w;
+        }
+
+        > .cpm {
+            grid-area: c;
+        }
+
+        > .accuracy {
+            grid-area: a;
+        }
+
+        > .progress {
+            grid-area: p;
+        }
+
+        > .person {
+            grid-area: t;
+        }
+
+        > .count {
+            grid-area: n;
+        }
+
+        > .textArea {
+            grid-area: x;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+
+            > .text {
+                font-size: 20px;
+                margin-right: auto;
+
+                > span {
+                    transition-property: color;
+                    transition-duration: 0.2s;
+                    transition-timing-function: ease-out;
+                }
+
+                .typo {
+                    color: red;
+                }
+                .success {
+                    color: blue;
+                }
             }
 
-            .typo {
-                color: red;
-            }
-            .success {
-                color: blue;
+            > .inputs {
+                width: 100%;
+                text-align: left;
+                padding: 30px;
+
+                > input {
+                    width: 100%;
+                    font-size: 20px;
+                    color: black;
+
+                    border: none;
+                    border-bottom: 2px solid #ccc;
+                    outline: none;
+
+                    &::placeholder {
+                        color: #ccc; /* Change placeholder text color to gray */
+                    }
+                }
             }
         }
+
         > .person {
             color: #ccc;
-            font-size: 20px;
+            font-size: 18px;
             font-style: italic;
-
-            margin-top: 10px;
-        }
-    }
-    > .inputs {
-        width: 100%;
-        padding-inline: 60px;
-
-        > input {
-            width: 100%;
-
-            outline: none;
-            border: none;
-            border-bottom: 1px solid #ccc;
-
-            padding: 10px;
-            padding-inline: 20px;
-
-            font-size: 60px;
-
-            color: black;
         }
     }
 }

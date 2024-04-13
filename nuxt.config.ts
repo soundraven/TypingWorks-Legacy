@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 // https://nuxt.com/docs/getting-started/configuration#nuxt-configuration
+// import type { MyEnv } from "~/structure/env"
 export default defineNuxtConfig({
     devtools: { enabled: true },
     nitro: {
@@ -15,6 +16,9 @@ export default defineNuxtConfig({
         // public에 들어가면 클라이언트에서 확인이 가능
         public: {
             SECRET_KEY: process.env,
+        },
+        private: {
+            // SECRET_KEY: process.env.SECRET_KEY,
         },
     },
     vite: {
@@ -33,4 +37,4 @@ export default defineNuxtConfig({
         "@vueuse/nuxt", // https://vueuse.org/guide/#nuxt
         "@pinia/nuxt", // https://pinia.vuejs.org/ssr/nuxt.html
     ],
-});
+})
