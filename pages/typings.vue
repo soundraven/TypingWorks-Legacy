@@ -3,6 +3,12 @@
         <div :class="$style.typing">
             <div :class="[$style.icon, $style.gridItem]">로고위치</div>
             <div :class="[$style.language, $style.gridItem]">
+                <div :class="$style.langToggle">
+                    <span>Ko</span>
+                </div>
+                <div>
+                    <span>En</span>
+                </div>
                 토글언어
                 <button @click="toggleLanguage()">한글/영어 변환</button>
             </div>
@@ -92,6 +98,7 @@
                         @paste="preventPaste"
                     />
                 </div>
+                <div :class="$style.nextText">다음으로 나올 문장</div>
             </div>
         </div>
 
@@ -399,6 +406,7 @@ const getElapsedTime = (): string => {
 </script>
 
 <style lang="scss" module>
+$u: 18px;
 .index {
     width: 100%;
     min-height: 100dvh;
@@ -412,36 +420,42 @@ const getElapsedTime = (): string => {
     border: 1px solid yellow;
 
     > .typing {
-        width: 1000px;
+        width: 1200px;
         height: 500px;
 
         display: grid;
         grid-template: repeat(8, 1fr) / repeat(10, 1fr);
         grid-template-areas:
-            "i i i l l b b b . ."
-            "i i i l l b b b . ."
+            "i i i l l . . b b b"
+            "i i i l l . . b b b"
             "i i i s s w c . n n"
             "i i i s s a p t t t"
             "x x x x x x x x x x"
             "x x x x x x x x x x"
             "x x x x x x x x x x"
-            ". . . . . . . . . .";
-
+            "x x x x x x x x x x";
         gap: 10px;
 
+        background-color: #f5f5f5;
+        border: 1px solid rgb(58, 58, 60, 0.1);
+        border-radius: 10px;
+        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
         color: black;
 
         margin-inline: auto;
+        padding: 20px;
 
         > .gridItem {
-            // border: 1px solid black;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
 
-            box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.15);
+            background-color: #ffffff;
+
+            border: 1px solid rgb(58, 58, 60, 0.09);
             border-radius: 10px;
+            box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.2);
         }
 
         > .icon {
@@ -460,7 +474,6 @@ const getElapsedTime = (): string => {
             justify-content: center;
             align-items: center;
 
-            border: 1px solid red;
             padding: 5px;
 
             .R0,
@@ -468,18 +481,27 @@ const getElapsedTime = (): string => {
             .R2,
             .R3,
             .R4 {
-                width: 100%;
-                height: 100%;
+                width: 92%;
+                height: 92%;
 
                 display: flex;
                 justify-content: center;
 
                 > div {
-                    width: 18px;
-                    height: 18px;
-                    margin: auto;
+                    width: $u;
+                    height: $u;
+
+                    background-color: white;
+
+                    border: 1px solid rgb(58, 58, 60, 0.09);
                     border-radius: 5px;
-                    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.15);
+                    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
+
+                    margin: auto;
+                }
+
+                > .Escape {
+                    background-color: pink;
                 }
 
                 > .ControlLeft,
@@ -489,33 +511,52 @@ const getElapsedTime = (): string => {
                 .AltRight,
                 .Fn,
                 .ControlRight {
-                    width: 22.5px;
+                    width: $u * 1.25;
+                    background-color: #e1e1e1;
                 }
 
                 > .Tab,
                 .Backslash {
-                    width: 27px;
+                    width: $u * 1.5;
+                    background-color: #e1e1e1;
+                }
+
+                > .Backslash {
+                    background-color: white;
                 }
 
                 > .CapsLock {
-                    width: 31.5px;
+                    width: $u * 1.75;
+                    background-color: #e1e1e1;
+                }
+
+                > .Backspace {
+                    width: $u * 2;
+                    background-color: #e1e1e1;
                 }
 
                 > .ShiftLeft,
                 .Enter {
-                    width: 40.5px;
+                    width: $u * 2.25;
+                    background-color: #e1e1e1;
+                }
+
+                > .Enter {
+                    background-color: #a2f5e6;
                 }
 
                 > .ShiftRight {
-                    width: 49.5px;
+                    width: $u * 2.75;
+                    background-color: #e1e1e1;
                 }
 
                 > .Space {
-                    width: 112.5px;
+                    width: $u * 6.25;
+                    background-color: white;
                 }
 
                 > .blink {
-                    background-color: greenyellow;
+                    background-color: grey;
                     // transition: ease-out;
                     // transition-duration: 0.5s;
                 }
@@ -552,6 +593,7 @@ const getElapsedTime = (): string => {
 
         > .textArea {
             grid-area: x;
+
             display: flex;
             justify-content: center;
             align-items: center;
@@ -593,6 +635,11 @@ const getElapsedTime = (): string => {
                         color: #ccc; /* Change placeholder text color to gray */
                     }
                 }
+            }
+
+            > .nextText {
+                width: 100%;
+                text-align: left;
             }
         }
 
