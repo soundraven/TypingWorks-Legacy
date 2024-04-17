@@ -3,6 +3,7 @@
 // import type { MyEnv } from "~/structure/env"
 export default defineNuxtConfig({
     devtools: { enabled: true },
+    // serverMiddleware: [{ path: "/api", handler: "~/api/index.js" }],
     nitro: {
         compressPublicAssets: true, // 빌드시 정적파일을 압축하여 파일의 크기를 줄여서, 페이지 로딩 개선
         routeRules: {
@@ -15,7 +16,7 @@ export default defineNuxtConfig({
         // SECRET_KEY: process.env.SECRET_KEY,
         // public에 들어가면 클라이언트에서 확인이 가능
         public: {
-            SECRET_KEY: process.env,
+            API: process.env.API_URL,
         },
         private: {
             // SECRET_KEY: process.env.SECRET_KEY,

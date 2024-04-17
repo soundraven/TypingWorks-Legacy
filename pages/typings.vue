@@ -6,7 +6,58 @@
                 토글언어
                 <button @click="toggleLanguage()">한글/영어 변환</button>
             </div>
-            <div :class="[$style.blink, $style.gridItem]">타이핑반짝임</div>
+            <div :class="[$style.blinkBox, $style.gridItem]">
+                <div :class="$style.R4">
+                    <div
+                        v-for="(key, index) in R4"
+                        :key="'key' + index"
+                        :class="[
+                            getPressedKeyClass(key),
+                            { [$style.blink]: pressedKey === key },
+                        ]"
+                    ></div>
+                </div>
+                <div :class="$style.R3">
+                    <div
+                        v-for="(key, index) in R3"
+                        :key="'key' + index"
+                        :class="[
+                            getPressedKeyClass(key),
+                            { [$style.blink]: pressedKey === key },
+                        ]"
+                    ></div>
+                </div>
+                <div :class="$style.R2">
+                    <div
+                        v-for="(key, index) in R2"
+                        :key="'key' + index"
+                        :class="[
+                            getPressedKeyClass(key),
+                            { [$style.blink]: pressedKey === key },
+                        ]"
+                    ></div>
+                </div>
+                <div :class="$style.R1">
+                    <div
+                        v-for="(key, index) in R1"
+                        :key="'key' + index"
+                        :class="[
+                            getPressedKeyClass(key),
+                            { [$style.blink]: pressedKey === key },
+                        ]"
+                    ></div>
+                </div>
+                <div :class="$style.R0">
+                    <div
+                        v-for="(key, index) in R0"
+                        :key="'key_' + index"
+                        :class="[
+                            getPressedKeyClass(key),
+                            { [$style.blink]: pressedKey === key },
+                        ]"
+                    ></div>
+                </div>
+            </div>
             <div :class="[$style.sentence, $style.gridItem]">문장변경</div>
             <div :class="[$style.wpm, $style.gridItem]">WPM: {{ wpm }}</div>
             <div :class="[$style.cpm, $style.gridItem]">CPM: {{ cpm }}</div>
@@ -37,7 +88,7 @@
                         autofocus
                         placeholder="위에 보이는 문장을 따라 타이핑해보세요."
                         @keyup="keydownEventHandler"
-                        @keyup.enter="endTyping"
+                        @keyup.enter.prevent="endTyping"
                         @paste="preventPaste"
                     />
                 </div>
@@ -58,12 +109,30 @@
 </template>
 
 <script setup lang="ts">
+const typingBlink = (e) => {
+    console.log(e.code)
+    getActiveClass(e)
+}
+const getActiveClass = (e) => {
+    console.log(e.code)
+    e.code === "Enter" ? $style.active : ""
+}
+
+const getPressedKeyClass = (key: string): string => {
+    return `${$style[key] || ""}`
+}
+
+const pressedKey: Ref<string> = ref("")
+
 import * as hangul from "hangul-js"
 import EnQuotes from "@/assets/LifeQuotesEN.json"
 import KrQuotes from "@/assets/LifeQuotesKR.json"
 import { TypoStatus, Language, type Quote } from "~/structure/quotes"
+import { R0, R1, R2, R3, R4 } from "~/utils/keyArray"
 
 const $style = useCssModule()
+const runtime = useRuntimeConfig()
+
 //v-memo 확인해보기
 const targetPerson: Ref<string> = ref("")
 const targetText: Ref<string> = ref("")
@@ -92,20 +161,42 @@ const elapsedTime: Ref<number> = ref(0)
 const endTime: Ref<number> = ref(0)
 const totalTime: Ref<number> = ref(0)
 
+const isTyped: Ref<boolean> = ref(false)
+
 // 경과시간 계산 반복하는 setTimeOut Id
 const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
 
 onMounted(() => {
     if (process.server) return
-
+    // runtime.public.API
     const target: Quote = getTargetText()
     targetText.value = target.quote
     targetPerson.value = target.person
     readyText()
     // console.log(TypoStatus.NotInput)
 
-    // window.addEventListener
+    window.addEventListener("keydown", handleKeyDown)
+    window.addEventListener("keyup", handleKeyUp)
 })
+
+onBeforeUnmount(() => {
+    window.removeEventListener("keydown", handleKeyDown)
+    window.removeEventListener("keyup", handleKeyUp)
+})
+
+const handleKeyDown = (e: KeyboardEvent) => {
+    console.log(e)
+    pressedKey.value = e.code
+    // isTyped.value = true
+
+    // setTimeout(() => {
+    //     isTyped.value = false
+    // }, 500)
+}
+const handleKeyUp = (e: KeyboardEvent) => {
+    console.log(e)
+    pressedKey.value = ""
+}
 //타입캐스팅
 const keydownEventHandler = (e: KeyboardEvent) => {
     startTyping((e.currentTarget as HTMLInputElement).value)
@@ -219,12 +310,14 @@ const endTyping = () => {
     const target: Quote = getTargetText()
     targetText.value = target.quote
     targetPerson.value = target.person
+
     readyText()
     resetInfo()
 }
 
 const resetInfo = () => {
     stopTypingSpeedCalc()
+
     typedText.value = ""
     parsingText.value = ""
     startTime.value = 0
@@ -241,6 +334,7 @@ const calcTypingSpeed = (takenTime: number) => {
     const totalWords: string = parsingText.value.trim()
     const splitByWords: number =
         totalWords === "" ? 0 : totalWords.split(" ").length
+
     if (targetText.value.match(/^[a-zA-Z]+$/)) {
         if (splitByWords !== 0) {
             wpm.value = Math.round((splitByWords / takenTime) * 60)
@@ -279,7 +373,7 @@ const readyText = () => {
     splitedTargetText.value = targetText.value.split("")
     typoArray.value = new Array(splitedTargetText.value.length).fill(false)
 }
-
+//삼항연산자 쓰지말고 스위치 쓰기
 const getTargetText = (): Quote => {
     let targetDatas: Quote[] = []
     targetLanguage.value === Language.korean
@@ -289,7 +383,7 @@ const getTargetText = (): Quote => {
     const randomIndex: number = Math.floor(Math.random() * targetDatas.length)
     return targetDatas[randomIndex]
 }
-
+//비교할거면 다 === 아니면 다 == 통일좀
 const getTypoClass = (index: number): string => {
     if (typoStatus.value[index] == null) return ""
     if (typoStatus.value[index] == TypoStatus.Error) return $style.typo
@@ -333,16 +427,21 @@ const getElapsedTime = (): string => {
             "x x x x x x x x x x"
             ". . . . . . . . . .";
 
+        gap: 10px;
+
         color: black;
 
         margin-inline: auto;
 
         > .gridItem {
-            border: 1px solid black;
+            // border: 1px solid black;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
+
+            box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
         }
 
         > .icon {
@@ -353,8 +452,74 @@ const getElapsedTime = (): string => {
             grid-area: l;
         }
 
-        > .blink {
+        > .blinkBox {
             grid-area: b;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            border: 1px solid red;
+            padding: 5px;
+
+            .R0,
+            .R1,
+            .R2,
+            .R3,
+            .R4 {
+                width: 100%;
+                height: 100%;
+
+                display: flex;
+                justify-content: center;
+
+                > div {
+                    width: 18px;
+                    height: 18px;
+                    margin: auto;
+                    border-radius: 5px;
+                    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.15);
+                }
+
+                > .ControlLeft,
+                .MetaLeft,
+                .MetaRight,
+                .AltLeft,
+                .AltRight,
+                .Fn,
+                .ControlRight {
+                    width: 22.5px;
+                }
+
+                > .Tab,
+                .Backslash {
+                    width: 27px;
+                }
+
+                > .CapsLock {
+                    width: 31.5px;
+                }
+
+                > .ShiftLeft,
+                .Enter {
+                    width: 40.5px;
+                }
+
+                > .ShiftRight {
+                    width: 49.5px;
+                }
+
+                > .Space {
+                    width: 112.5px;
+                }
+
+                > .blink {
+                    background-color: greenyellow;
+                    // transition: ease-out;
+                    // transition-duration: 0.5s;
+                }
+            }
         }
 
         > .sentence {
@@ -437,5 +602,8 @@ const getElapsedTime = (): string => {
             font-style: italic;
         }
     }
+}
+.Space {
+    width: 120px;
 }
 </style>

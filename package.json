@@ -26,6 +26,7 @@
         "@element-plus/nuxt": "^1.0.8",
         "@nuxtjs/eslint-config-typescript": "^12.1.0",
         "@nuxtjs/eslint-module": "^4.1.0",
+        "@types/express": "^4.17.21",
         "@vueuse/core": "^10.9.0",
         "@vueuse/nuxt": "^10.9.0",
         "element-plus": "^2.6.3",
