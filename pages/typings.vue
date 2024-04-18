@@ -4,14 +4,22 @@
             <div :class="[$style.icon, $style.gridItem]">로고위치</div>
             <div :class="[$style.language, $style.gridItem]">
                 <div :class="$style.langToggle">
-                    <span>Ko</span>
+                    <div
+                        :class="[$style.langBtn, getActiveClass('ko')]"
+                        @click="toggleLanguage('ko')"
+                    >
+                        Ko
+                    </div>
+                    <div
+                        :class="[$style.langBtn, getActiveClass('en')]"
+                        @click="toggleLanguage('en')"
+                    >
+                        En
+                    </div>
                 </div>
-                <div>
-                    <span>En</span>
-                </div>
-                토글언어
-                <button @click="toggleLanguage()">한글/영어 변환</button>
             </div>
+
+            <div></div>
             <div :class="[$style.blinkBox, $style.gridItem]">
                 <div :class="$style.R4">
                     <div
@@ -74,6 +82,7 @@
                 진행도: {{ typingProgress }}
             </div>
             <div :class="[$style.count, $style.gridItem]">카운트</div>
+            <div :class="[$style.keyTheme, $style.gridItem]">키보드테마</div>
             <div :class="[$style.person, $style.gridItem]">
                 {{ targetPerson }}
             </div>
@@ -120,13 +129,17 @@ const typingBlink = (e) => {
     console.log(e.code)
     getActiveClass(e)
 }
-const getActiveClass = (e) => {
-    console.log(e.code)
-    e.code === "Enter" ? $style.active : ""
-}
 
 const getPressedKeyClass = (key: string): string => {
     return `${$style[key] || ""}`
+}
+
+const getActiveClass = (lang: string): string => {
+    if (lang === targetLanguage.value) {
+        return $style.active
+    } else {
+        return ""
+    }
 }
 
 const pressedKey: Ref<string> = ref("")
@@ -361,11 +374,17 @@ const calcTypingSpeed = (takenTime: number) => {
     // 계산 공식에 문제 있는 것 같음. 속도가 너무 빠르게 나오는?
 }
 
-const toggleLanguage = () => {
-    targetLanguage.value =
-        targetLanguage.value === Language.korean
-            ? Language.english
-            : Language.korean
+const toggleLanguage = (lang: string) => {
+    switch (lang) {
+        case Language.korean:
+            targetLanguage.value = Language.korean
+            break
+        case Language.english:
+            targetLanguage.value = Language.english
+            break
+        default:
+            console.log("targetLanguage.value could not be found.")
+    }
 
     const target: Quote = getTargetText()
     targetText.value = target.quote
@@ -406,7 +425,6 @@ const getElapsedTime = (): string => {
 </script>
 
 <style lang="scss" module>
-$u: 18px;
 .index {
     width: 100%;
     min-height: 100dvh;
@@ -428,7 +446,7 @@ $u: 18px;
         grid-template-areas:
             "i i i l l . . b b b"
             "i i i l l . . b b b"
-            "i i i s s w c . n n"
+            "i i i s s w c n kt kt"
             "i i i s s a p t t t"
             "x x x x x x x x x x"
             "x x x x x x x x x x"
@@ -464,6 +482,16 @@ $u: 18px;
 
         > .language {
             grid-area: l;
+
+            > .langToggle {
+                > .langBtn {
+                    background-color: red;
+                }
+
+                > .active {
+                    background-color: blue;
+                }
+            }
         }
 
         > .blinkBox {
@@ -481,6 +509,8 @@ $u: 18px;
             .R2,
             .R3,
             .R4 {
+                $u: 18px;
+
                 width: 92%;
                 height: 92%;
 
@@ -589,6 +619,10 @@ $u: 18px;
 
         > .count {
             grid-area: n;
+        }
+
+        > .keyTheme {
+            grid-area: kt;
         }
 
         > .textArea {

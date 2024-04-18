@@ -2,7 +2,13 @@
 // https://nuxt.com/docs/getting-started/configuration#nuxt-configuration
 // import type { MyEnv } from "~/structure/env"
 export default defineNuxtConfig({
-    devtools: { enabled: true },
+    devtools: {
+      enabled: true,
+
+      timeline: {
+        enabled: true,
+      },
+    },
     // serverMiddleware: [{ path: "/api", handler: "~/api/index.js" }],
     nitro: {
         compressPublicAssets: true, // 빌드시 정적파일을 압축하여 파일의 크기를 줄여서, 페이지 로딩 개선
