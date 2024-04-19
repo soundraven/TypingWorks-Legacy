@@ -24,6 +24,7 @@
     },
     "devDependencies": {
         "@element-plus/nuxt": "^1.0.8",
+        "@nuxtjs/color-mode": "^3.4.0",
         "@nuxtjs/eslint-config-typescript": "^12.1.0",
         "@nuxtjs/eslint-module": "^4.1.0",
         "@types/express": "^4.17.21",

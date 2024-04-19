@@ -1,4 +1,12 @@
 <template>
+    <IconLight @click="$colorMode.preference = 'light'" />
+    <IconDark @click="$colorMode.preference = 'dark'" />
+
+    <IconSepia @click="$colorMode.preference = 'sepia'" />
+    <IconSystem @click="$colorMode.preference = 'system'" />
+    <ColorScheme placeholder="..." tag="span">
+        Color mode: <b>{{ $colorMode.preference }}</b>
+    </ColorScheme>
     <div :class="$style.index">
         <div :class="$style.typing">
             <div :class="[$style.icon, $style.gridItem]">로고위치</div>
@@ -18,8 +26,9 @@
                     </div>
                 </div>
             </div>
-
-            <div></div>
+            <div :class="[$style.screenMode, $style.gridItem]">
+                <ColorModePicker />
+            </div>
             <div :class="[$style.blinkBox, $style.gridItem]">
                 <div :class="$style.R4">
                     <div
@@ -151,6 +160,7 @@ import { TypoStatus, Language, type Quote } from "~/structure/quotes"
 import { R0, R1, R2, R3, R4 } from "~/utils/keyArray"
 
 const $style = useCssModule()
+const colorMode = useColorMode()
 const runtime = useRuntimeConfig()
 
 //v-memo 확인해보기
@@ -444,8 +454,8 @@ const getElapsedTime = (): string => {
         display: grid;
         grid-template: repeat(8, 1fr) / repeat(10, 1fr);
         grid-template-areas:
-            "i i i l l . . b b b"
-            "i i i l l . . b b b"
+            "i i i l l m m b b b"
+            "i i i l l m m b b b"
             "i i i s s w c n kt kt"
             "i i i s s a p t t t"
             "x x x x x x x x x x"
@@ -458,7 +468,6 @@ const getElapsedTime = (): string => {
         border: 1px solid rgb(58, 58, 60, 0.1);
         border-radius: 10px;
         box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
-        color: black;
 
         margin-inline: auto;
         padding: 20px;
@@ -492,6 +501,14 @@ const getElapsedTime = (): string => {
                     background-color: blue;
                 }
             }
+        }
+
+        > .screenMode {
+            grid-area: m;
+            display: flex;
+            background-color: var(--bg);
+            position: relative;
+            z-index: 0;
         }
 
         > .blinkBox {

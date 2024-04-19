@@ -43,5 +43,16 @@ export default defineNuxtConfig({
         // "@nuxtjs/eslint-module",
         "@vueuse/nuxt", // https://vueuse.org/guide/#nuxt
         "@pinia/nuxt", // https://pinia.vuejs.org/ssr/nuxt.html
+        "@nuxtjs/color-mode", // https://color-mode.nuxtjs.org/
     ],
+    colorMode: {
+        preference: "system", // default value of $colorMode.preference
+        fallback: "light", // fallback value if not system preference found
+        hid: "nuxt-color-mode-script",
+        globalName: "__NUXT_COLOR_MODE__",
+        componentName: "ColorScheme",
+        classPrefix: "",
+        classSuffix: "-mode",
+        storageKey: "nuxt-color-mode",
+    },
 })

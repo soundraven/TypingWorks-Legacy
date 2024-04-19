@@ -9,8 +9,8 @@
     </div>
     <div>
         <NuxtLink to="/">랜딩페이지</NuxtLink>
-        <NuxtLink to="/typings">타이핑페이지</NuxtLink>
-        <NuxtLink to="/">랜딩페이지</NuxtLink>
+        <NuxtLink to="/typings" style="margin: 20px">타이핑페이지</NuxtLink>
+        <NuxtLink to="/example" style="margin: 20px">예제</NuxtLink>
     </div>
 </template>
 
