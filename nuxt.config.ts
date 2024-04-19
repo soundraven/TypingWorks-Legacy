@@ -3,11 +3,11 @@
 // import type { MyEnv } from "~/structure/env"
 export default defineNuxtConfig({
     devtools: {
-      enabled: true,
-
-      timeline: {
         enabled: true,
-      },
+
+        timeline: {
+            enabled: true,
+        },
     },
     // serverMiddleware: [{ path: "/api", handler: "~/api/index.js" }],
     nitro: {
