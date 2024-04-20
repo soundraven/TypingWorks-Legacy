@@ -5,72 +5,30 @@
             <div :class="[$style.language, $style.gridItem]">
                 <div :class="$style.langToggle">
                     <div
-                        :class="[$style.langBtn, getActiveClass('ko')]"
-                        @click="toggleLanguage('ko')"
+                        :class="[
+                            $style.langBtn,
+                            getActiveClass(Language.korean),
+                        ]"
+                        @click="toggleLanguage(Language.korean)"
                     >
                         Ko
                     </div>
                     <div
-                        :class="[$style.langBtn, getActiveClass('en')]"
-                        @click="toggleLanguage('en')"
+                        :class="[
+                            $style.langBtn,
+                            getActiveClass(Language.english),
+                        ]"
+                        @click="toggleLanguage(Language.english)"
                     >
                         En
                     </div>
                 </div>
             </div>
-
-            <div></div>
+            <div :class="[$style.screenMode, $style.gridItem]">
+                <ColorModePicker />
+            </div>
             <div :class="[$style.blinkBox, $style.gridItem]">
-                <div :class="$style.R4">
-                    <div
-                        v-for="(key, index) in R4"
-                        :key="'key' + index"
-                        :class="[
-                            getPressedKeyClass(key),
-                            { [$style.blink]: pressedKey === key },
-                        ]"
-                    ></div>
-                </div>
-                <div :class="$style.R3">
-                    <div
-                        v-for="(key, index) in R3"
-                        :key="'key' + index"
-                        :class="[
-                            getPressedKeyClass(key),
-                            { [$style.blink]: pressedKey === key },
-                        ]"
-                    ></div>
-                </div>
-                <div :class="$style.R2">
-                    <div
-                        v-for="(key, index) in R2"
-                        :key="'key' + index"
-                        :class="[
-                            getPressedKeyClass(key),
-                            { [$style.blink]: pressedKey === key },
-                        ]"
-                    ></div>
-                </div>
-                <div :class="$style.R1">
-                    <div
-                        v-for="(key, index) in R1"
-                        :key="'key' + index"
-                        :class="[
-                            getPressedKeyClass(key),
-                            { [$style.blink]: pressedKey === key },
-                        ]"
-                    ></div>
-                </div>
-                <div :class="$style.R0">
-                    <div
-                        v-for="(key, index) in R0"
-                        :key="'key_' + index"
-                        :class="[
-                            getPressedKeyClass(key),
-                            { [$style.blink]: pressedKey === key },
-                        ]"
-                    ></div>
-                </div>
+                <TypingBlink />
             </div>
             <div :class="[$style.sentence, $style.gridItem]">문장변경</div>
             <div :class="[$style.wpm, $style.gridItem]">WPM: {{ wpm }}</div>
@@ -102,56 +60,35 @@
                         type="text"
                         autofocus
                         placeholder="위에 보이는 문장을 따라 타이핑해보세요."
-                        @keyup="keydownEventHandler"
-                        @keyup.enter.prevent="endTyping"
+                        @keyup="keyupEventHandler"
+                        @keydown.enter.prevent="endTyping"
+                        @compositionstart="beforeCheckTypo"
+                        @compositionupdate="beforeCheckTypo"
+                        @compositionend="beforeCheckTypo"
                         @paste="preventPaste"
                     />
                 </div>
                 <div :class="$style.nextText">다음으로 나올 문장</div>
             </div>
         </div>
-
-        <!-- <p>타이핑 시작 시간: {{ startTime }}</p>
-        <p>타이핑 끝난 시간: {{ endTime }}</p>
-        <p>
-            마지막으로 한 타이핑 시간:
-            {{ new Date(lastTypingTime).toLocaleTimeString() }}
-        </p>
-        <p>elapsedTime: {{ getElapsedTime() }}</p>
-        <p>한글/영어 {{ targetLanguage }}</p>
-        <p>정확도: {{ typingAccuracy }}%</p>
-        <p>진행도: {{ typingProgress }}%</p> -->
     </div>
 </template>
 
 <script setup lang="ts">
-const typingBlink = (e) => {
-    console.log(e.code)
-    getActiveClass(e)
-}
-
-const getPressedKeyClass = (key: string): string => {
-    return `${$style[key] || ""}`
-}
-
-const getActiveClass = (lang: string): string => {
-    if (lang === targetLanguage.value) {
-        return $style.active
-    } else {
-        return ""
-    }
-}
-
-const pressedKey: Ref<string> = ref("")
-
-import * as hangul from "hangul-js"
+import { disassemble } from "hangul-js"
 import EnQuotes from "@/assets/LifeQuotesEN.json"
 import KrQuotes from "@/assets/LifeQuotesKR.json"
 import { TypoStatus, Language, type Quote } from "~/structure/quotes"
-import { R0, R1, R2, R3, R4 } from "~/utils/keyArray"
 
+//겹칠때 AS 쓸수있다
+import { throttle as LodashThrottle } from "lodash"
+
+// import type Quote from "~"
 const $style = useCssModule()
+const colorMode = useColorMode()
 const runtime = useRuntimeConfig()
+//enum으로관리하기
+const screenColors = ["light", "dark", "sepia", "system"]
 
 //v-memo 확인해보기
 const targetPerson: Ref<string> = ref("")
@@ -193,44 +130,30 @@ onMounted(() => {
     targetText.value = target.quote
     targetPerson.value = target.person
     readyText()
-    // console.log(TypoStatus.NotInput)
 
-    window.addEventListener("keydown", handleKeyDown)
-    window.addEventListener("keyup", handleKeyUp)
+    window.addEventListener(
+        "scroll",
+        LodashThrottle((e) => {
+            console.log(window.scrollY)
+        }, 500),
+    )
+
+    console.log(runtime.public.API)
 })
 
-onBeforeUnmount(() => {
-    window.removeEventListener("keydown", handleKeyDown)
-    window.removeEventListener("keyup", handleKeyUp)
-})
-
-const handleKeyDown = (e: KeyboardEvent) => {
-    console.log(e)
-    pressedKey.value = e.code
-    // isTyped.value = true
-
-    // setTimeout(() => {
-    //     isTyped.value = false
-    // }, 500)
-}
-const handleKeyUp = (e: KeyboardEvent) => {
-    console.log(e)
-    pressedKey.value = ""
-}
 //타입캐스팅
-const keydownEventHandler = (e: KeyboardEvent) => {
-    startTyping((e.currentTarget as HTMLInputElement).value)
+const keyupEventHandler = (e: KeyboardEvent) => {
+    startTyping((e.currentTarget as HTMLInputElement).value, e)
 }
 
 const preventPaste = (e: ClipboardEvent) => {
     e.preventDefault()
 }
 
-// const onChangeEventHandler = (e: Event) => {
-//     console.log("b", (e.currentTarget as HTMLInputElement).value)
-// }
-
-const startTyping = (text: string) => {
+const startTyping = (
+    text: string,
+    e: KeyboardEvent | undefined = undefined,
+) => {
     parsingText.value = text
 
     // 시작시 startTime 체크
@@ -241,9 +164,23 @@ const startTyping = (text: string) => {
     }
     // startTime 있으면 속도, 오타만 검사
     currentTyping()
-    checkTypo()
     accuracy()
     progress()
+
+    // checkTypo()
+    if (
+        targetLanguage.value != Language.korean ||
+        e?.key.toLowerCase() == "space" ||
+        e?.key.toLowerCase() == "backspace"
+    ) {
+        checkTypo()
+    }
+
+    // if (targetLanguage.value === Language.korean) {
+
+    // } else {
+    //     checkTypo()
+    // }
 }
 
 // 마지막으로 타이핑한 시간 기준으로 경과시간을 계산
@@ -251,27 +188,26 @@ const currentTyping = () => {
     const date = new Date()
     lastTypingTime.value = date.getTime()
     elapsedTime.value = (lastTypingTime.value - startTime.value) / 1000
-    // 경과시간을 받아 속도 계산
-    calcTypingSpeed(elapsedTime.value)
+}
+
+const beforeCheckTypo = (e: CompositionEvent) => {
+    if (e.type === "compositionupdate" || e.type === "compositionstart") {
+        return
+    } else {
+        checkTypo()
+    }
 }
 
 // typoArray에서 true인 i는 오타를 의미
 const checkTypo = () => {
     typoStatus.value = {}
 
-    /*
-    if (typedText.value.length <= i)
-        if (typedText.value[i] && typedText.value[i] !== targetText.value[i]) {
-            typoStatus.value[i] = TypoStatus.Error
-        } else {
-            typoStatus.value[i] = TypoStatus.Correct
-        } */
-    // console.log(typedText.value)
     for (let i = 0; i < parsingText.value.length; i++) {
         if (targetText.value[i] == undefined) continue
         if (targetText.value[i] == parsingText.value[i]) {
             typoStatus.value[i] = TypoStatus.Correct
         } else {
+            console.log(parsingText.value[i])
             typoStatus.value[i] = TypoStatus.Error
         }
     }
@@ -292,10 +228,6 @@ const progress = () => {
         parsingText.value.split("").length,
         targetText.value.split("").length,
     )
-    // Math.round(
-    //     (typedText.value.split("").length / targetText.value.split("").length) *
-    //         100,
-    // )
 }
 // 현재 시간 기준으로 경과시간 및 타이핑 속도 계산
 const keepCheckElapsedTime = () => {
@@ -306,15 +238,13 @@ const keepCheckElapsedTime = () => {
 }
 
 // setTimeout 이용해 0.1초마다 속도 계산
+//requestanimationframe 사용해서 주사율 기준으로 가능
 const startTypingSpeedCalc = () => {
-    elapsedTimerId.value = setTimeout(function repeat() {
-        keepCheckElapsedTime()
-        elapsedTimerId.value = setTimeout(repeat, 100)
-    }, 100)
+    elapsedTimerId.value = setInterval(keepCheckElapsedTime, 100)
 }
 
 const stopTypingSpeedCalc = () => {
-    clearTimeout(elapsedTimerId.value)
+    clearInterval(elapsedTimerId.value)
 }
 
 const endTyping = () => {
@@ -348,30 +278,34 @@ const resetInfo = () => {
     typingProgress.value = 0
 }
 
-// 한글과 영어 속도 계산을 다르게 처리
-// 함수빼기
 const calcTypingSpeed = (takenTime: number) => {
+    if (takenTime === 0) return
     const totalWords: string = parsingText.value.trim()
     const splitByWords: number =
         totalWords === "" ? 0 : totalWords.split(" ").length
 
-    if (targetText.value.match(/^[a-zA-Z]+$/)) {
-        if (splitByWords !== 0) {
-            wpm.value = Math.round((splitByWords / takenTime) * 60)
+    switch (targetLanguage.value) {
+        case Language.english: {
+            if (splitByWords !== 0) {
+                wpm.value = Math.round((splitByWords / takenTime) * 60)
+            }
+            if (totalWords.length !== 0) {
+                cpm.value = Math.round((totalWords.length / takenTime) * 60)
+            }
         }
-        if (totalWords.length !== 0) {
-            cpm.value = Math.round((totalWords.length / takenTime) * 60)
-        }
-    } else {
-        const disassembleText: string[] = hangul.disassemble(parsingText.value)
-        if (splitByWords !== 0) {
-            wpm.value = Math.round((splitByWords / takenTime) * 60)
-        }
-        if (disassembleText.length !== 0) {
-            cpm.value = Math.round((disassembleText.length / takenTime) * 60)
+
+        case Language.korean: {
+            const disassembleText: string[] = disassemble(parsingText.value)
+            if (splitByWords !== 0) {
+                wpm.value = Math.round((splitByWords / takenTime) * 60)
+            }
+            if (disassembleText.length !== 0) {
+                cpm.value = Math.round(
+                    (disassembleText.length / takenTime) * 60,
+                )
+            }
         }
     }
-    // 계산 공식에 문제 있는 것 같음. 속도가 너무 빠르게 나오는?
 }
 
 const toggleLanguage = (lang: string) => {
@@ -422,6 +356,14 @@ const getElapsedTime = (): string => {
 
     return `${min}분 ${sec}초`
 }
+
+const getActiveClass = (lang: string): string => {
+    if (lang === targetLanguage.value) {
+        return $style.active
+    } else {
+        return ""
+    }
+}
 </script>
 
 <style lang="scss" module>
@@ -430,22 +372,21 @@ const getElapsedTime = (): string => {
     min-height: 100dvh;
 
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 
-    flex-direction: column;
-
-    border: 1px solid yellow;
+    transition: all 0.5s;
 
     > .typing {
-        width: 1200px;
+        width: 1300px;
         height: 500px;
 
         display: grid;
         grid-template: repeat(8, 1fr) / repeat(10, 1fr);
         grid-template-areas:
-            "i i i l l . . b b b"
-            "i i i l l . . b b b"
+            "i i i . . l m b b b"
+            "i i i . . l m b b b"
             "i i i s s w c n kt kt"
             "i i i s s a p t t t"
             "x x x x x x x x x x"
@@ -454,11 +395,10 @@ const getElapsedTime = (): string => {
             "x x x x x x x x x x";
         gap: 10px;
 
-        background-color: #f5f5f5;
-        border: 1px solid rgb(58, 58, 60, 0.1);
+        background-color: var(--bg-secondary);
+        border: var(--border-color);
         border-radius: 10px;
         box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
-        color: black;
 
         margin-inline: auto;
         padding: 20px;
@@ -469,9 +409,9 @@ const getElapsedTime = (): string => {
             align-items: center;
             justify-content: center;
 
-            background-color: #ffffff;
+            background-color: var(--bg);
 
-            border: 1px solid rgb(58, 58, 60, 0.09);
+            border: rgb(var(--color-gray-200) / 1);
             border-radius: 10px;
             box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.2);
         }
@@ -485,13 +425,36 @@ const getElapsedTime = (): string => {
 
             > .langToggle {
                 > .langBtn {
-                    background-color: red;
+                    width: 80px;
+                    height: 40px;
+
+                    text-align: center;
+                    line-height: 40px;
+
+                    background-color: var(--bg-secondary);
+
+                    border: 2px solid var(--border-color);
+                    border-radius: 7px;
+                    box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.2);
+
+                    transition: all 0.4s;
                 }
 
                 > .active {
-                    background-color: blue;
+                    background-color: var(--color-primary);
                 }
             }
+        }
+
+        > .screenMode {
+            width: 100%;
+            height: 100%;
+            grid-area: m;
+
+            background-color: var(--bg);
+
+            display: flex;
+            flex-direction: row;
         }
 
         > .blinkBox {
@@ -503,94 +466,6 @@ const getElapsedTime = (): string => {
             align-items: center;
 
             padding: 5px;
-
-            .R0,
-            .R1,
-            .R2,
-            .R3,
-            .R4 {
-                $u: 18px;
-
-                width: 92%;
-                height: 92%;
-
-                display: flex;
-                justify-content: center;
-
-                > div {
-                    width: $u;
-                    height: $u;
-
-                    background-color: white;
-
-                    border: 1px solid rgb(58, 58, 60, 0.09);
-                    border-radius: 5px;
-                    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
-
-                    margin: auto;
-                }
-
-                > .Escape {
-                    background-color: pink;
-                }
-
-                > .ControlLeft,
-                .MetaLeft,
-                .MetaRight,
-                .AltLeft,
-                .AltRight,
-                .Fn,
-                .ControlRight {
-                    width: $u * 1.25;
-                    background-color: #e1e1e1;
-                }
-
-                > .Tab,
-                .Backslash {
-                    width: $u * 1.5;
-                    background-color: #e1e1e1;
-                }
-
-                > .Backslash {
-                    background-color: white;
-                }
-
-                > .CapsLock {
-                    width: $u * 1.75;
-                    background-color: #e1e1e1;
-                }
-
-                > .Backspace {
-                    width: $u * 2;
-                    background-color: #e1e1e1;
-                }
-
-                > .ShiftLeft,
-                .Enter {
-                    width: $u * 2.25;
-                    background-color: #e1e1e1;
-                }
-
-                > .Enter {
-                    background-color: #a2f5e6;
-                }
-
-                > .ShiftRight {
-                    width: $u * 2.75;
-                    background-color: #e1e1e1;
-                }
-
-                > .Space {
-                    width: $u * 6.25;
-                    background-color: white;
-                }
-
-                > .blink {
-                    background-color: grey;
-                    // transition: ease-out;
-                    // transition-duration: 0.5s;
-                }
-            }
         }
 
         > .sentence {
@@ -643,11 +518,12 @@ const getElapsedTime = (): string => {
                     transition-timing-function: ease-out;
                 }
 
-                .typo {
+                > .typo {
                     color: red;
                 }
-                .success {
-                    color: blue;
+
+                > .success {
+                    color: var(--color-primary);
                 }
             }
 
