@@ -1,4 +1,12 @@
 <template>
+    <IconLight @click="$colorMode.preference = 'light'" />
+    <IconDark @click="$colorMode.preference = 'dark'" />
+
+    <IconSepia @click="$colorMode.preference = 'sepia'" />
+    <IconSystem @click="$colorMode.preference = 'system'" />
+    <ColorScheme placeholder="..." tag="span">
+        Color mode: <b>{{ $colorMode.preference }}</b>
+    </ColorScheme>
     <div :class="$style.index">
         <div :class="$style.typing">
             <div :class="[$style.icon, $style.gridItem]">로고위치</div>

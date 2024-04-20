@@ -55,8 +55,4 @@ export default defineNuxtConfig({
         classSuffix: "-mode",
         storageKey: "nuxt-color-mode",
     },
-    components: {
-        global: true,
-        dirs: ["~/components"],
-    },
 })
