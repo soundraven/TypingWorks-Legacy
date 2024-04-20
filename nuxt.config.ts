@@ -1,7 +1,15 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 // https://nuxt.com/docs/getting-started/configuration#nuxt-configuration
+// import type { MyEnv } from "~/structure/env"
 export default defineNuxtConfig({
-    devtools: { enabled: true },
+    devtools: {
+        enabled: true,
+
+        timeline: {
+            enabled: true,
+        },
+    },
+    // serverMiddleware: [{ path: "/api", handler: "~/api/index.js" }],
     nitro: {
         compressPublicAssets: true, // 빌드시 정적파일을 압축하여 파일의 크기를 줄여서, 페이지 로딩 개선
         routeRules: {
@@ -14,7 +22,10 @@ export default defineNuxtConfig({
         // SECRET_KEY: process.env.SECRET_KEY,
         // public에 들어가면 클라이언트에서 확인이 가능
         public: {
-            SECRET_KEY: process.env,
+            API: process.env.API_URL,
+        },
+        private: {
+            // SECRET_KEY: process.env.SECRET_KEY,
         },
     },
     vite: {
@@ -28,8 +39,20 @@ export default defineNuxtConfig({
     },
     css: ["~/assets/css/main.scss"],
     modules: [
-        "@nuxtjs/eslint-module",
+        "@element-plus/nuxt",
+        // "@nuxtjs/eslint-module",
         "@vueuse/nuxt", // https://vueuse.org/guide/#nuxt
         "@pinia/nuxt", // https://pinia.vuejs.org/ssr/nuxt.html
+        "@nuxtjs/color-mode", // https://color-mode.nuxtjs.org/
     ],
-});
+    colorMode: {
+        preference: "system", // default value of $colorMode.preference
+        fallback: "light", // fallback value if not system preference found
+        hid: "nuxt-color-mode-script",
+        globalName: "__NUXT_COLOR_MODE__",
+        componentName: "ColorScheme",
+        classPrefix: "",
+        classSuffix: "-mode",
+        storageKey: "nuxt-color-mode",
+    },
+})

@@ -12,22 +12,25 @@
         "preview": "nuxt preview",
         "postinstall": "nuxt prepare"
     },
-    "engines": {
-        "node": "18.x"
-    },
     "dependencies": {
+        "@nuxt/ui": "^2.15.0",
         "@pinia/nuxt": "^0.5.1",
-        "lodash-es": "^4.17.21",
+        "hangul-js": "^0.2.6",
+        "lodash": "^4.17.21",
         "nuxt": "^3.10.2",
         "pinia": "^2.1.7",
         "vue": "^3.4.19",
         "vue-router": "^4.2.5"
     },
     "devDependencies": {
+        "@element-plus/nuxt": "^1.0.8",
+        "@nuxtjs/color-mode": "^3.4.0",
         "@nuxtjs/eslint-config-typescript": "^12.1.0",
         "@nuxtjs/eslint-module": "^4.1.0",
+        "@types/express": "^4.17.21",
         "@vueuse/core": "^10.9.0",
         "@vueuse/nuxt": "^10.9.0",
+        "element-plus": "^2.6.3",
         "eslint": "^8.57.0",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-nuxt": "^4.0.0",
