@@ -1,12 +1,4 @@
 <template>
-    <IconLight @click="$colorMode.preference = 'light'" />
-    <IconDark @click="$colorMode.preference = 'dark'" />
-
-    <IconSepia @click="$colorMode.preference = 'sepia'" />
-    <IconSystem @click="$colorMode.preference = 'system'" />
-    <ColorScheme placeholder="..." tag="span">
-        Color mode: <b>{{ $colorMode.preference }}</b>
-    </ColorScheme>
     <div :class="$style.index">
         <div :class="$style.typing">
             <div :class="[$style.icon, $style.gridItem]">로고위치</div>
@@ -27,7 +19,13 @@
                 </div>
             </div>
             <div :class="[$style.screenMode, $style.gridItem]">
-                <ColorModePicker />
+                <div
+                    v-for="color of screenColors"
+                    :key="color"
+                    @click="$colorMode.preference = color"
+                >
+                    <component :is="`Icon${color}`" />
+                </div>
             </div>
             <div :class="[$style.blinkBox, $style.gridItem]">
                 <div :class="$style.R4">
@@ -192,6 +190,8 @@ const endTime: Ref<number> = ref(0)
 const totalTime: Ref<number> = ref(0)
 
 const isTyped: Ref<boolean> = ref(false)
+
+const screenColors = ["System", "Light", "Dark", "Sepia"]
 
 // 경과시간 계산 반복하는 setTimeOut Id
 const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
