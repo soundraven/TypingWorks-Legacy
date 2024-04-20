@@ -1,3 +1,5 @@
+//keymaps.json 형태로 사용
+
 const keyArray: string[][] = [
     [
         "ControlLeft",

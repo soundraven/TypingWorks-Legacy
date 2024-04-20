@@ -75,15 +75,19 @@
 </template>
 
 <script setup lang="ts">
-import * as hangul from "hangul-js"
+import { disassemble } from "hangul-js"
 import EnQuotes from "@/assets/LifeQuotesEN.json"
 import KrQuotes from "@/assets/LifeQuotesKR.json"
 import { TypoStatus, Language, type Quote } from "~/structure/quotes"
 
+//겹칠때 AS 쓸수있다
+import { throttle as LodashThrottle } from "lodash"
+
+// import type Quote from "~"
 const $style = useCssModule()
 const colorMode = useColorMode()
 const runtime = useRuntimeConfig()
-
+//enum으로관리하기
 const screenColors = ["light", "dark", "sepia", "system"]
 
 //v-memo 확인해보기
@@ -126,19 +130,30 @@ onMounted(() => {
     targetText.value = target.quote
     targetPerson.value = target.person
     readyText()
+
+    window.addEventListener(
+        "scroll",
+        LodashThrottle((e) => {
+            console.log(window.scrollY)
+        }, 500),
+    )
+
+    console.log(runtime.public.API)
 })
 
 //타입캐스팅
 const keyupEventHandler = (e: KeyboardEvent) => {
-    console.log("백스페")
-    startTyping((e.currentTarget as HTMLInputElement).value)
+    startTyping((e.currentTarget as HTMLInputElement).value, e)
 }
 
 const preventPaste = (e: ClipboardEvent) => {
     e.preventDefault()
 }
 
-const startTyping = (text: string) => {
+const startTyping = (
+    text: string,
+    e: KeyboardEvent | undefined = undefined,
+) => {
     parsingText.value = text
 
     // 시작시 startTime 체크
@@ -151,7 +166,21 @@ const startTyping = (text: string) => {
     currentTyping()
     accuracy()
     progress()
-    targetLanguage.value === Language.korean ? beforeCheckTypo : checkTypo
+
+    // checkTypo()
+    if (
+        targetLanguage.value != Language.korean ||
+        e?.key.toLowerCase() == "space" ||
+        e?.key.toLowerCase() == "backspace"
+    ) {
+        checkTypo()
+    }
+
+    // if (targetLanguage.value === Language.korean) {
+
+    // } else {
+    //     checkTypo()
+    // }
 }
 
 // 마지막으로 타이핑한 시간 기준으로 경과시간을 계산
@@ -159,12 +188,10 @@ const currentTyping = () => {
     const date = new Date()
     lastTypingTime.value = date.getTime()
     elapsedTime.value = (lastTypingTime.value - startTime.value) / 1000
-    // 경과시간을 받아 속도 계산
-    calcTypingSpeed(elapsedTime.value)
 }
 
 const beforeCheckTypo = (e: CompositionEvent) => {
-    if (e.type === "compositionupdate" && "compositionstart") {
+    if (e.type === "compositionupdate" || e.type === "compositionstart") {
         return
     } else {
         checkTypo()
@@ -180,6 +207,7 @@ const checkTypo = () => {
         if (targetText.value[i] == parsingText.value[i]) {
             typoStatus.value[i] = TypoStatus.Correct
         } else {
+            console.log(parsingText.value[i])
             typoStatus.value[i] = TypoStatus.Error
         }
     }
@@ -210,15 +238,13 @@ const keepCheckElapsedTime = () => {
 }
 
 // setTimeout 이용해 0.1초마다 속도 계산
+//requestanimationframe 사용해서 주사율 기준으로 가능
 const startTypingSpeedCalc = () => {
-    elapsedTimerId.value = setTimeout(function repeat() {
-        keepCheckElapsedTime()
-        elapsedTimerId.value = setTimeout(repeat, 100)
-    }, 100)
+    elapsedTimerId.value = setInterval(keepCheckElapsedTime, 100)
 }
 
 const stopTypingSpeedCalc = () => {
-    clearTimeout(elapsedTimerId.value)
+    clearInterval(elapsedTimerId.value)
 }
 
 const endTyping = () => {
@@ -269,9 +295,7 @@ const calcTypingSpeed = (takenTime: number) => {
         }
 
         case Language.korean: {
-            const disassembleText: string[] = hangul.disassemble(
-                parsingText.value,
-            )
+            const disassembleText: string[] = disassemble(parsingText.value)
             if (splitByWords !== 0) {
                 wpm.value = Math.round((splitByWords / takenTime) * 60)
             }
@@ -348,22 +372,21 @@ const getActiveClass = (lang: string): string => {
     min-height: 100dvh;
 
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 
-    flex-direction: column;
-
-    border: 1px solid yellow;
+    transition: all 0.5s;
 
     > .typing {
-        width: 1200px;
+        width: 1300px;
         height: 500px;
 
         display: grid;
         grid-template: repeat(8, 1fr) / repeat(10, 1fr);
         grid-template-areas:
-            "i i i l l m m b b b"
-            "i i i l l m m b b b"
+            "i i i . . l m b b b"
+            "i i i . . l m b b b"
             "i i i s s w c n kt kt"
             "i i i s s a p t t t"
             "x x x x x x x x x x"
@@ -372,8 +395,8 @@ const getActiveClass = (lang: string): string => {
             "x x x x x x x x x x";
         gap: 10px;
 
-        background-color: #f5f5f5;
-        border: 1px solid rgb(58, 58, 60, 0.1);
+        background-color: var(--bg-secondary);
+        border: var(--border-color);
         border-radius: 10px;
         box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
 
@@ -386,9 +409,9 @@ const getActiveClass = (lang: string): string => {
             align-items: center;
             justify-content: center;
 
-            background-color: #ffffff;
+            background-color: var(--bg);
 
-            border: 1px solid rgb(58, 58, 60, 0.09);
+            border: rgb(var(--color-gray-200) / 1);
             border-radius: 10px;
             box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.2);
         }
@@ -402,25 +425,36 @@ const getActiveClass = (lang: string): string => {
 
             > .langToggle {
                 > .langBtn {
-                    background-color: red;
+                    width: 80px;
+                    height: 40px;
+
+                    text-align: center;
+                    line-height: 40px;
+
+                    background-color: var(--bg-secondary);
+
+                    border: 2px solid var(--border-color);
+                    border-radius: 7px;
+                    box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.2);
+
+                    transition: all 0.4s;
                 }
 
                 > .active {
-                    background-color: blue;
+                    background-color: var(--color-primary);
                 }
             }
         }
 
         > .screenMode {
+            width: 100%;
+            height: 100%;
             grid-area: m;
-            display: flex;
-            flex-direction: row;
+
             background-color: var(--bg);
 
-            > .colorPicker {
-                width: 60px;
-                display: block;
-            }
+            display: flex;
+            flex-direction: row;
         }
 
         > .blinkBox {
@@ -484,11 +518,12 @@ const getActiveClass = (lang: string): string => {
                     transition-timing-function: ease-out;
                 }
 
-                .typo {
+                > .typo {
                     color: red;
                 }
-                .success {
-                    color: blue;
+
+                > .success {
+                    color: var(--color-primary);
                 }
             }
 

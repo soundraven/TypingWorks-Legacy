@@ -5,6 +5,7 @@
             :key="'key' + index"
             :class="[
                 getPressedKeyClass(key),
+                $style.key,
                 { [$style.blink]: pressedKey === key },
             ]"
         ></div>
@@ -15,6 +16,7 @@
             :key="'key' + index"
             :class="[
                 getPressedKeyClass(key),
+                $style.key,
                 { [$style.blink]: pressedKey === key },
             ]"
         ></div>
@@ -25,6 +27,7 @@
             :key="'key' + index"
             :class="[
                 getPressedKeyClass(key),
+                $style.key,
                 { [$style.blink]: pressedKey === key },
             ]"
         ></div>
@@ -35,6 +38,7 @@
             :key="'key' + index"
             :class="[
                 getPressedKeyClass(key),
+                $style.key,
                 { [$style.blink]: pressedKey === key },
             ]"
         ></div>
@@ -45,6 +49,7 @@
             :key="'key_' + index"
             :class="[
                 getPressedKeyClass(key),
+                $style.key,
                 { [$style.blink]: pressedKey === key },
             ]"
         ></div>
@@ -55,6 +60,7 @@
 import keyArray from "~/utils/keyArray"
 const $style = useCssModule()
 
+//dictionary
 const pressedKey: Ref<string> = ref("")
 
 onMounted(() => {
@@ -165,8 +171,18 @@ $u: 18px;
         background-color: white;
     }
 
+    > .key {
+        transition-property: background-color;
+        transition-timing-function: ease-out;
+        transition-duration: 0.5s;
+
+        &.blink {
+            background-color: grey;
+            transition-duration: 0s;
+        }
+    }
+
     > .blink {
-        background-color: grey;
         // transition: ease-out;
         // transition-duration: 0.5s;
     }
