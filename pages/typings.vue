@@ -20,64 +20,16 @@
             </div>
             <div :class="[$style.screenMode, $style.gridItem]">
                 <div
+                    :class="$style.colorPicker"
                     v-for="color of screenColors"
                     :key="color"
                     @click="$colorMode.preference = color"
                 >
-                    <component :is="`Icon${color}`" />
+                    <component :is="`Icon-${color}`" />
                 </div>
             </div>
             <div :class="[$style.blinkBox, $style.gridItem]">
-                <div :class="$style.R4">
-                    <div
-                        v-for="(key, index) in R4"
-                        :key="'key' + index"
-                        :class="[
-                            getPressedKeyClass(key),
-                            { [$style.blink]: pressedKey === key },
-                        ]"
-                    ></div>
-                </div>
-                <div :class="$style.R3">
-                    <div
-                        v-for="(key, index) in R3"
-                        :key="'key' + index"
-                        :class="[
-                            getPressedKeyClass(key),
-                            { [$style.blink]: pressedKey === key },
-                        ]"
-                    ></div>
-                </div>
-                <div :class="$style.R2">
-                    <div
-                        v-for="(key, index) in R2"
-                        :key="'key' + index"
-                        :class="[
-                            getPressedKeyClass(key),
-                            { [$style.blink]: pressedKey === key },
-                        ]"
-                    ></div>
-                </div>
-                <div :class="$style.R1">
-                    <div
-                        v-for="(key, index) in R1"
-                        :key="'key' + index"
-                        :class="[
-                            getPressedKeyClass(key),
-                            { [$style.blink]: pressedKey === key },
-                        ]"
-                    ></div>
-                </div>
-                <div :class="$style.R0">
-                    <div
-                        v-for="(key, index) in R0"
-                        :key="'key_' + index"
-                        :class="[
-                            getPressedKeyClass(key),
-                            { [$style.blink]: pressedKey === key },
-                        ]"
-                    ></div>
-                </div>
+                <TypingBlink />
             </div>
             <div :class="[$style.sentence, $style.gridItem]">문장변경</div>
             <div :class="[$style.wpm, $style.gridItem]">WPM: {{ wpm }}</div>
@@ -132,30 +84,10 @@
 </template>
 
 <script setup lang="ts">
-const typingBlink = (e) => {
-    console.log(e.code)
-    getActiveClass(e)
-}
-
-const getPressedKeyClass = (key: string): string => {
-    return `${$style[key] || ""}`
-}
-
-const getActiveClass = (lang: string): string => {
-    if (lang === targetLanguage.value) {
-        return $style.active
-    } else {
-        return ""
-    }
-}
-
-const pressedKey: Ref<string> = ref("")
-
 import * as hangul from "hangul-js"
 import EnQuotes from "@/assets/LifeQuotesEN.json"
 import KrQuotes from "@/assets/LifeQuotesKR.json"
 import { TypoStatus, Language, type Quote } from "~/structure/quotes"
-import { R0, R1, R2, R3, R4 } from "~/utils/keyArray"
 
 const $style = useCssModule()
 const colorMode = useColorMode()
@@ -191,7 +123,7 @@ const totalTime: Ref<number> = ref(0)
 
 const isTyped: Ref<boolean> = ref(false)
 
-const screenColors = ["System", "Light", "Dark", "Sepia"]
+const screenColors = ["system", "light", "dark", "sepia"]
 
 // 경과시간 계산 반복하는 setTimeOut Id
 const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
@@ -205,28 +137,15 @@ onMounted(() => {
     readyText()
     // console.log(TypoStatus.NotInput)
 
-    window.addEventListener("keydown", handleKeyDown)
-    window.addEventListener("keyup", handleKeyUp)
+    // window.addEventListener("keydown", handleKeyDown)
+    // window.addEventListener("keyup", handleKeyUp)
 })
 
-onBeforeUnmount(() => {
-    window.removeEventListener("keydown", handleKeyDown)
-    window.removeEventListener("keyup", handleKeyUp)
-})
+// onBeforeUnmount(() => {
+//     window.removeEventListener("keydown", handleKeyDown)
+//     window.removeEventListener("keyup", handleKeyUp)
+// })
 
-const handleKeyDown = (e: KeyboardEvent) => {
-    console.log(e)
-    pressedKey.value = e.code
-    // isTyped.value = true
-
-    // setTimeout(() => {
-    //     isTyped.value = false
-    // }, 500)
-}
-const handleKeyUp = (e: KeyboardEvent) => {
-    console.log(e)
-    pressedKey.value = ""
-}
 //타입캐스팅
 const keydownEventHandler = (e: KeyboardEvent) => {
     startTyping((e.currentTarget as HTMLInputElement).value)
@@ -432,6 +351,14 @@ const getElapsedTime = (): string => {
 
     return `${min}분 ${sec}초`
 }
+
+const getActiveClass = (lang: string): string => {
+    if (lang === targetLanguage.value) {
+        return $style.active
+    } else {
+        return ""
+    }
+}
 </script>
 
 <style lang="scss" module>
@@ -506,9 +433,13 @@ const getElapsedTime = (): string => {
         > .screenMode {
             grid-area: m;
             display: flex;
+            flex-direction: row;
             background-color: var(--bg);
-            position: relative;
-            z-index: 0;
+
+            > .colorPicker {
+                width: 60px;
+                display: block;
+            }
         }
 
         > .blinkBox {
@@ -520,94 +451,6 @@ const getElapsedTime = (): string => {
             align-items: center;
 
             padding: 5px;
-
-            .R0,
-            .R1,
-            .R2,
-            .R3,
-            .R4 {
-                $u: 18px;
-
-                width: 92%;
-                height: 92%;
-
-                display: flex;
-                justify-content: center;
-
-                > div {
-                    width: $u;
-                    height: $u;
-
-                    background-color: white;
-
-                    border: 1px solid rgb(58, 58, 60, 0.09);
-                    border-radius: 5px;
-                    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
-
-                    margin: auto;
-                }
-
-                > .Escape {
-                    background-color: pink;
-                }
-
-                > .ControlLeft,
-                .MetaLeft,
-                .MetaRight,
-                .AltLeft,
-                .AltRight,
-                .Fn,
-                .ControlRight {
-                    width: $u * 1.25;
-                    background-color: #e1e1e1;
-                }
-
-                > .Tab,
-                .Backslash {
-                    width: $u * 1.5;
-                    background-color: #e1e1e1;
-                }
-
-                > .Backslash {
-                    background-color: white;
-                }
-
-                > .CapsLock {
-                    width: $u * 1.75;
-                    background-color: #e1e1e1;
-                }
-
-                > .Backspace {
-                    width: $u * 2;
-                    background-color: #e1e1e1;
-                }
-
-                > .ShiftLeft,
-                .Enter {
-                    width: $u * 2.25;
-                    background-color: #e1e1e1;
-                }
-
-                > .Enter {
-                    background-color: #a2f5e6;
-                }
-
-                > .ShiftRight {
-                    width: $u * 2.75;
-                    background-color: #e1e1e1;
-                }
-
-                > .Space {
-                    width: $u * 6.25;
-                    background-color: white;
-                }
-
-                > .blink {
-                    background-color: grey;
-                    // transition: ease-out;
-                    // transition-duration: 0.5s;
-                }
-            }
         }
 
         > .sentence {
