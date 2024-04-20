@@ -1,40 +1,31 @@
 <template>
-    <IconLight @click="$colorMode.preference = 'light'" />
-    <IconDark @click="$colorMode.preference = 'dark'" />
-
-    <IconSepia @click="$colorMode.preference = 'sepia'" />
-    <IconSystem @click="$colorMode.preference = 'system'" />
-    <ColorScheme placeholder="..." tag="span">
-        Color mode: <b>{{ $colorMode.preference }}</b>
-    </ColorScheme>
     <div :class="$style.index">
         <div :class="$style.typing">
             <div :class="[$style.icon, $style.gridItem]">로고위치</div>
             <div :class="[$style.language, $style.gridItem]">
                 <div :class="$style.langToggle">
                     <div
-                        :class="[$style.langBtn, getActiveClass('ko')]"
-                        @click="toggleLanguage('ko')"
+                        :class="[
+                            $style.langBtn,
+                            getActiveClass(Language.korean),
+                        ]"
+                        @click="toggleLanguage(Language.korean)"
                     >
                         Ko
                     </div>
                     <div
-                        :class="[$style.langBtn, getActiveClass('en')]"
-                        @click="toggleLanguage('en')"
+                        :class="[
+                            $style.langBtn,
+                            getActiveClass(Language.english),
+                        ]"
+                        @click="toggleLanguage(Language.english)"
                     >
                         En
                     </div>
                 </div>
             </div>
             <div :class="[$style.screenMode, $style.gridItem]">
-                <div
-                    :class="$style.colorPicker"
-                    v-for="color of screenColors"
-                    :key="color"
-                    @click="$colorMode.preference = color"
-                >
-                    <component :is="`Icon-${color}`" />
-                </div>
+                <ColorModePicker />
             </div>
             <div :class="[$style.blinkBox, $style.gridItem]">
                 <TypingBlink />
@@ -69,25 +60,17 @@
                         type="text"
                         autofocus
                         placeholder="위에 보이는 문장을 따라 타이핑해보세요."
-                        @keyup="keydownEventHandler"
-                        @keyup.enter.prevent="endTyping"
+                        @keyup="keyupEventHandler"
+                        @keydown.enter.prevent="endTyping"
+                        @compositionstart="beforeCheckTypo"
+                        @compositionupdate="beforeCheckTypo"
+                        @compositionend="beforeCheckTypo"
                         @paste="preventPaste"
                     />
                 </div>
                 <div :class="$style.nextText">다음으로 나올 문장</div>
             </div>
         </div>
-
-        <!-- <p>타이핑 시작 시간: {{ startTime }}</p>
-        <p>타이핑 끝난 시간: {{ endTime }}</p>
-        <p>
-            마지막으로 한 타이핑 시간:
-            {{ new Date(lastTypingTime).toLocaleTimeString() }}
-        </p>
-        <p>elapsedTime: {{ getElapsedTime() }}</p>
-        <p>한글/영어 {{ targetLanguage }}</p>
-        <p>정확도: {{ typingAccuracy }}%</p>
-        <p>진행도: {{ typingProgress }}%</p> -->
     </div>
 </template>
 
@@ -100,6 +83,8 @@ import { TypoStatus, Language, type Quote } from "~/structure/quotes"
 const $style = useCssModule()
 const colorMode = useColorMode()
 const runtime = useRuntimeConfig()
+
+const screenColors = ["light", "dark", "sepia", "system"]
 
 //v-memo 확인해보기
 const targetPerson: Ref<string> = ref("")
@@ -131,8 +116,6 @@ const totalTime: Ref<number> = ref(0)
 
 const isTyped: Ref<boolean> = ref(false)
 
-const screenColors = ["system", "light", "dark", "sepia"]
-
 // 경과시간 계산 반복하는 setTimeOut Id
 const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
 
@@ -143,29 +126,17 @@ onMounted(() => {
     targetText.value = target.quote
     targetPerson.value = target.person
     readyText()
-    // console.log(TypoStatus.NotInput)
-
-    // window.addEventListener("keydown", handleKeyDown)
-    // window.addEventListener("keyup", handleKeyUp)
 })
 
-// onBeforeUnmount(() => {
-//     window.removeEventListener("keydown", handleKeyDown)
-//     window.removeEventListener("keyup", handleKeyUp)
-// })
-
 //타입캐스팅
-const keydownEventHandler = (e: KeyboardEvent) => {
+const keyupEventHandler = (e: KeyboardEvent) => {
+    console.log("백스페")
     startTyping((e.currentTarget as HTMLInputElement).value)
 }
 
 const preventPaste = (e: ClipboardEvent) => {
     e.preventDefault()
 }
-
-// const onChangeEventHandler = (e: Event) => {
-//     console.log("b", (e.currentTarget as HTMLInputElement).value)
-// }
 
 const startTyping = (text: string) => {
     parsingText.value = text
@@ -178,9 +149,9 @@ const startTyping = (text: string) => {
     }
     // startTime 있으면 속도, 오타만 검사
     currentTyping()
-    checkTypo()
     accuracy()
     progress()
+    targetLanguage.value === Language.korean ? beforeCheckTypo : checkTypo
 }
 
 // 마지막으로 타이핑한 시간 기준으로 경과시간을 계산
@@ -192,18 +163,18 @@ const currentTyping = () => {
     calcTypingSpeed(elapsedTime.value)
 }
 
+const beforeCheckTypo = (e: CompositionEvent) => {
+    if (e.type === "compositionupdate" && "compositionstart") {
+        return
+    } else {
+        checkTypo()
+    }
+}
+
 // typoArray에서 true인 i는 오타를 의미
 const checkTypo = () => {
     typoStatus.value = {}
 
-    /*
-    if (typedText.value.length <= i)
-        if (typedText.value[i] && typedText.value[i] !== targetText.value[i]) {
-            typoStatus.value[i] = TypoStatus.Error
-        } else {
-            typoStatus.value[i] = TypoStatus.Correct
-        } */
-    // console.log(typedText.value)
     for (let i = 0; i < parsingText.value.length; i++) {
         if (targetText.value[i] == undefined) continue
         if (targetText.value[i] == parsingText.value[i]) {
@@ -229,10 +200,6 @@ const progress = () => {
         parsingText.value.split("").length,
         targetText.value.split("").length,
     )
-    // Math.round(
-    //     (typedText.value.split("").length / targetText.value.split("").length) *
-    //         100,
-    // )
 }
 // 현재 시간 기준으로 경과시간 및 타이핑 속도 계산
 const keepCheckElapsedTime = () => {
@@ -285,30 +252,36 @@ const resetInfo = () => {
     typingProgress.value = 0
 }
 
-// 한글과 영어 속도 계산을 다르게 처리
-// 함수빼기
 const calcTypingSpeed = (takenTime: number) => {
+    if (takenTime === 0) return
     const totalWords: string = parsingText.value.trim()
     const splitByWords: number =
         totalWords === "" ? 0 : totalWords.split(" ").length
 
-    if (targetText.value.match(/^[a-zA-Z]+$/)) {
-        if (splitByWords !== 0) {
-            wpm.value = Math.round((splitByWords / takenTime) * 60)
+    switch (targetLanguage.value) {
+        case Language.english: {
+            if (splitByWords !== 0) {
+                wpm.value = Math.round((splitByWords / takenTime) * 60)
+            }
+            if (totalWords.length !== 0) {
+                cpm.value = Math.round((totalWords.length / takenTime) * 60)
+            }
         }
-        if (totalWords.length !== 0) {
-            cpm.value = Math.round((totalWords.length / takenTime) * 60)
-        }
-    } else {
-        const disassembleText: string[] = hangul.disassemble(parsingText.value)
-        if (splitByWords !== 0) {
-            wpm.value = Math.round((splitByWords / takenTime) * 60)
-        }
-        if (disassembleText.length !== 0) {
-            cpm.value = Math.round((disassembleText.length / takenTime) * 60)
+
+        case Language.korean: {
+            const disassembleText: string[] = hangul.disassemble(
+                parsingText.value,
+            )
+            if (splitByWords !== 0) {
+                wpm.value = Math.round((splitByWords / takenTime) * 60)
+            }
+            if (disassembleText.length !== 0) {
+                cpm.value = Math.round(
+                    (disassembleText.length / takenTime) * 60,
+                )
+            }
         }
     }
-    // 계산 공식에 문제 있는 것 같음. 속도가 너무 빠르게 나오는?
 }
 
 const toggleLanguage = (lang: string) => {
