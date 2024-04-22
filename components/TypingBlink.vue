@@ -1,52 +1,12 @@
 <template>
-    <div :class="$style.R4">
+    <div
+        v-for="(row, rowIndex) in keyArray"
+        :key="'row_' + rowIndex"
+        :class="$style['R' + (keyArray.length - 1 - rowIndex)]"
+    >
         <div
-            v-for="(key, index) in keyArray[4]"
-            :key="'key' + index"
-            :class="[
-                getPressedKeyClass(key),
-                $style.key,
-                { [$style.blink]: pressedKey === key },
-            ]"
-        ></div>
-    </div>
-    <div :class="$style.R3">
-        <div
-            v-for="(key, index) in keyArray[3]"
-            :key="'key' + index"
-            :class="[
-                getPressedKeyClass(key),
-                $style.key,
-                { [$style.blink]: pressedKey === key },
-            ]"
-        ></div>
-    </div>
-    <div :class="$style.R2">
-        <div
-            v-for="(key, index) in keyArray[2]"
-            :key="'key' + index"
-            :class="[
-                getPressedKeyClass(key),
-                $style.key,
-                { [$style.blink]: pressedKey === key },
-            ]"
-        ></div>
-    </div>
-    <div :class="$style.R1">
-        <div
-            v-for="(key, index) in keyArray[1]"
-            :key="'key' + index"
-            :class="[
-                getPressedKeyClass(key),
-                $style.key,
-                { [$style.blink]: pressedKey === key },
-            ]"
-        ></div>
-    </div>
-    <div :class="$style.R0">
-        <div
-            v-for="(key, index) in keyArray[0]"
-            :key="'key_' + index"
+            v-for="(key, keyIndex) in row"
+            :key="'key_' + keyIndex"
             :class="[
                 getPressedKeyClass(key),
                 $style.key,
