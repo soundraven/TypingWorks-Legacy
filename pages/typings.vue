@@ -3,25 +3,17 @@
         <div :class="$style.typing">
             <div :class="[$style.icon, $style.gridItem]">로고위치</div>
             <div :class="[$style.language, $style.gridItem]">
-                <div :class="$style.langToggle">
-                    <div
-                        :class="[
-                            $style.langBtn,
-                            getActiveClass(Language.Korean),
-                        ]"
-                        @click="toggleLanguage(Language.Korean)"
-                    >
-                        Ko
-                    </div>
-                    <div
-                        :class="[
-                            $style.langBtn,
-                            getActiveClass(Language.English),
-                        ]"
-                        @click="toggleLanguage(Language.English)"
-                    >
-                        En
-                    </div>
+                <div
+                    :class="[$style.langBtn, getActiveClass(Language.Korean)]"
+                    @click="toggleLanguage(Language.Korean)"
+                >
+                    Ko
+                </div>
+                <div
+                    :class="[$style.langBtn, getActiveClass(Language.English)]"
+                    @click="toggleLanguage(Language.English)"
+                >
+                    En
                 </div>
             </div>
             <div :class="[$style.screenMode, $style.gridItem]">
@@ -39,7 +31,9 @@
             <div :class="[$style.progress, $style.gridItem]">
                 진행도: {{ typingProgress }}
             </div>
-            <div :class="[$style.count, $style.gridItem]">카운트</div>
+            <div :class="[$style.count, $style.gridItem]">
+                count: {{ typingCount }}
+            </div>
             <div :class="[$style.keyTheme, $style.gridItem]">키보드테마</div>
             <div :class="[$style.person, $style.gridItem]">
                 {{ targetPerson }}
@@ -97,6 +91,7 @@ const splitedTargetText: Ref<string[]> = ref([])
 // 유저가 타이핑한 문장
 const typedText: Ref<string> = ref("")
 const parsingText: Ref<string> = ref("")
+const typingCount: Ref<number> = ref(0)
 
 // 쪼갠 문장의 길이와 동일한 새 배열 생성, 각 요소는 false
 const typoArray: Ref<boolean[]> = ref([])
@@ -247,6 +242,8 @@ const stopTypingSpeedCalc = () => {
 }
 
 const endTyping = () => {
+    typingCount.value += +1
+
     typoStatus.value = {}
     stopTypingSpeedCalc()
 
@@ -395,7 +392,7 @@ const getActiveClass = (lang: string): string => {
         gap: 10px;
 
         background-color: var(--bg-secondary);
-        border: var(--border-color);
+        border: 2px solid var(--border-color);
         border-radius: 10px;
         box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
 
@@ -410,9 +407,9 @@ const getActiveClass = (lang: string): string => {
 
             background-color: var(--bg);
 
-            border: rgb(var(--color-gray-200) / 1);
+            border: 2px solid var(--border-color);
             border-radius: 10px;
-            box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.2);
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
         }
 
         > .icon {
@@ -420,34 +417,40 @@ const getActiveClass = (lang: string): string => {
         }
 
         > .language {
+            height: 100%;
+
             grid-area: l;
 
-            > .langToggle {
-                > .langBtn {
-                    width: 80px;
-                    height: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
 
-                    text-align: center;
-                    line-height: 40px;
+            > .langBtn {
+                width: 80px;
+                height: 40px;
 
-                    background-color: var(--bg-secondary);
+                text-align: center;
+                line-height: 40px;
 
-                    border: 2px solid var(--border-color);
-                    border-radius: 7px;
-                    box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.2);
+                background-color: var(--bg-secondary);
 
-                    transition: all 0.4s;
-                }
+                border: 2px solid var(--border-color);
+                border-radius: 7px;
+                box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.2);
 
-                > .active {
-                    background-color: var(--color-primary);
-                }
+                transition: all 0.4s;
+            }
+
+            > .active {
+                background-color: var(--color-primary);
             }
         }
 
         > .screenMode {
             width: 100%;
             height: 100%;
+
             grid-area: m;
 
             background-color: var(--bg);
@@ -541,7 +544,7 @@ const getActiveClass = (lang: string): string => {
                     outline: none;
 
                     &::placeholder {
-                        color: #ccc; /* Change placeholder text color to gray */
+                        color: #ccc;
                     }
                 }
             }
