@@ -62,7 +62,7 @@
                         @paste="preventPaste"
                     />
                 </div>
-                <div :class="$style.nextText">다음으로 나올 문장</div>
+                <div :class="$style.nextText">{{ nextText }}</div>
             </div>
         </div>
     </div>
@@ -86,6 +86,7 @@ const runtime = useRuntimeConfig()
 //v-memo 확인해보기
 const targetPerson: Ref<string> = ref("")
 const targetText: Ref<string> = ref("")
+const nextText: Ref<string> = ref("")
 const targetLanguage: Ref<Language> = ref(Language.Korean)
 const splitedTargetText: Ref<string[]> = ref([])
 // 유저가 타이핑한 문장
@@ -120,9 +121,10 @@ const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
 onMounted(() => {
     if (process.server) return
     // runtime.public.API
-    const target: Quote = getTargetText()
-    targetText.value = target.quote
-    targetPerson.value = target.person
+    const [currentQuote, nextQuote] = getTargetText()
+    targetText.value = currentQuote.quote
+    targetPerson.value = currentQuote.person
+    nextText.value = nextQuote.quote
     readyText()
 
     window.addEventListener(
@@ -253,9 +255,10 @@ const endTyping = () => {
 
     calcTypingSpeed(totalTime.value)
 
-    const target: Quote = getTargetText()
+    const [target, nextTarget] = getTargetText()
     targetText.value = target.quote
     targetPerson.value = target.person
+    nextText.value = nextTarget.quote
 
     readyText()
     resetInfo()
@@ -301,6 +304,8 @@ const calcTypingSpeed = (takenTime: number) => {
                 )
             }
         }
+        default:
+            console.log("targetLanguage.value could not be found.")
     }
 }
 
@@ -316,9 +321,10 @@ const toggleLanguage = (lang: string) => {
             console.log("targetLanguage.value could not be found.")
     }
 
-    const target: Quote = getTargetText()
-    targetText.value = target.quote
-    targetPerson.value = target.person
+    const [currentQuote, nextQuote] = getTargetText()
+    targetText.value = currentQuote.quote
+    targetPerson.value = currentQuote.person
+    nextText.value = nextQuote.quote
 
     readyText()
     resetInfo()
@@ -330,14 +336,27 @@ const readyText = () => {
     typoArray.value = new Array(splitedTargetText.value.length).fill(false)
 }
 //삼항연산자 쓰지말고 스위치 쓰기
-const getTargetText = (): Quote => {
+const getTargetText = (): Quote[] => {
     let targetDatas: Quote[] = []
-    targetLanguage.value === Language.Korean
-        ? (targetDatas = KrQuotes)
-        : (targetDatas = EnQuotes)
+
+    switch (targetLanguage.value) {
+        case Language.Korean:
+            targetDatas = KrQuotes
+            break
+        case Language.English:
+            targetDatas = EnQuotes
+            break
+        default:
+            console.log("targetLanguage.value could not be found.")
+    }
 
     const randomIndex: number = Math.floor(Math.random() * targetDatas.length)
-    return targetDatas[randomIndex]
+    const nextTextIndex: number = Math.floor(Math.random() * targetDatas.length)
+
+    return [
+        targetDatas[randomIndex],
+        targetDatas[(randomIndex + 1) % targetDatas.length],
+    ]
 }
 //비교할거면 다 === 아니면 다 == 통일좀
 const getTypoClass = (index: number): string => {
@@ -527,6 +546,10 @@ const getActiveClass = (lang: string): string => {
 
                 > .success {
                     color: var(--color-primary);
+
+                    // &:last-child {
+                    //     background-color: red;
+                    // }
                 }
             }
 
@@ -541,11 +564,11 @@ const getActiveClass = (lang: string): string => {
                     color: black;
 
                     border: none;
-                    border-bottom: 2px solid #ccc;
+                    border-bottom: 2px solid var(--border-color);
                     outline: none;
 
                     &::placeholder {
-                        color: #ccc;
+                        color: var(--border-color);
                     }
                 }
             }
@@ -553,6 +576,7 @@ const getActiveClass = (lang: string): string => {
             > .nextText {
                 width: 100%;
                 text-align: left;
+                color: var(--border-color);
             }
         }
 
