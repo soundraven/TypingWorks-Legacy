@@ -381,9 +381,9 @@ const getActiveClass = (lang: string): string => {
         display: grid;
         grid-template: repeat(8, 1fr) / repeat(10, 1fr);
         grid-template-areas:
-            "i i i . . l m b b b"
-            "i i i . . l m b b b"
-            "i i i s s w c n kt kt"
+            "i i i n . l m b b b"
+            "i i i kt kt l m b b b"
+            "i i i s s w c b b b"
             "i i i s s a p t t t"
             "x x x x x x x x x x"
             "x x x x x x x x x x"
@@ -467,7 +467,8 @@ const getActiveClass = (lang: string): string => {
             justify-content: center;
             align-items: center;
 
-            padding: 5px;
+            padding: 12px;
+            padding-block: 30px;
         }
 
         > .sentence {
