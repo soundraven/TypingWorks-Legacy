@@ -1,0 +1,284 @@
+[
+    {
+        "person": "Confucius",
+        "quote": "It does not matter how slowly you go as long as you do not stop."
+    },
+    {
+        "person": "Nelson Mandela",
+        "quote": "Education is the most powerful weapon which you can use to change the world."
+    },
+    {
+        "person": "Gandhi",
+        "quote": "Be the change that you wish to see in the world."
+    },
+    {
+        "person": "Albert Einstein",
+        "quote": "Imagination is more important than knowledge."
+    },
+    {
+        "person": "William Shakespeare",
+        "quote": "All the world's a stage, and all the men and women merely players."
+    },
+    {
+        "person": "Winston Churchill",
+        "quote": "Success is not final, failure is not fatal: It is the courage to continue that counts."
+    },
+    {
+        "person": "Buddha",
+        "quote": "The mind is everything. What you think you become."
+    },
+    {
+        "person": "Abraham Lincoln",
+        "quote": "In the end, it's not the years in your life that count. It's the life in your years."
+    },
+    {
+        "person": "Mother Teresa",
+        "quote": "Not all of us can do great things. But we can do small things with great love."
+    },
+    {
+        "person": "Martin Luther King Jr.",
+        "quote": "Darkness cannot drive out darkness: only light can do that. Hate cannot drive out hate: only love can do that."
+    },
+    {
+        "person": "Coco Chanel",
+        "quote": "The most courageous act is still to think for yourself. Aloud."
+    },
+
+    {
+        "person": "Oscar Wilde",
+        "quote": "Be yourself; everyone else is already taken."
+    },
+    {
+        "person": "Rumi",
+        "quote": "The wound is the place where the Light enters you."
+    },
+    {
+        "person": "Dalai Lama",
+        "quote": "Happiness is not something ready made. It comes from your own actions."
+    },
+
+    {
+        "person": "Helen Keller",
+        "quote": "The best and most beautiful things in the world cannot be seen or even touched - they must be felt with the heart."
+    },
+    {
+        "person": "Vincent Van Gogh",
+        "quote": "I would rather die of passion than of boredom."
+    },
+    {
+        "person": "Walt Disney",
+        "quote": "All our dreams can come true, if we have the courage to pursue them."
+    },
+    {
+        "person": "Aristotle",
+        "quote": "It is during our darkest moments that we must focus to see the light."
+    },
+    {
+        "person": "Leo Tolstoy",
+        "quote": "Everyone thinks of changing the world, but no one thinks of changing himself."
+    },
+    {
+        "person": "Anne Frank",
+        "quote": "How wonderful it is that nobody need wait a single moment before starting to improve the world."
+    },
+    {
+        "person": "J.K. Rowling",
+        "quote": "It is our choices, Harry, that show what we truly are, far more than our abilities."
+    },
+    {
+        "person": "Ralph Waldo Emerson",
+        "quote": "Do not go where the path may lead, go instead where there is no path and leave a trail."
+    },
+    {
+        "person": "Benjamin Franklin",
+        "quote": "Tell me and I forget. Teach me and I remember. Involve me and I learn."
+    },
+    {
+        "person": "Henry David Thoreau",
+        "quote": "Go confidently in the direction of your dreams! Live the life you've imagined."
+    },
+    {
+        "person": "John Lennon",
+        "quote": "Life is what happens when you're busy making other plans."
+    },
+    {
+        "person": "Bob Marley",
+        "quote": "Don't worry about a thing, 'cause every little thing gonna be all right."
+    },
+    {
+        "person": "Goethe",
+        "quote": "Work eliminates the three great evils: boredom, immorality, and poverty."
+    },
+    {
+        "person": "Albert Einstein",
+        "quote": "In the middle of difficulty lies opportunity."
+    },
+    {
+        "person": "Franklin D. Roosevelt",
+        "quote": "The only thing we have to fear is fear itself."
+    },
+    {
+        "person": "Mahatma Gandhi",
+        "quote": "Be the change that you wish to see in the world."
+    },
+    {
+        "person": "Ralph Waldo Emerson",
+        "quote": "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment."
+    },
+    {
+        "person": "Lao Tzu",
+        "quote": "The journey of a thousand miles begins with a single step."
+    },
+    {
+        "person": "Eleanor Roosevelt",
+        "quote": "It is better to light a candle than curse the darkness."
+    },
+    {
+        "person": "Martin Luther King Jr.",
+        "quote": "In the end, we will remember not the words of our enemies, but the silence of our friends."
+    },
+    {
+        "person": "John Lennon",
+        "quote": "Life is what happens when you're busy making other plans."
+    },
+    {
+        "person": "Socrates",
+        "quote": "The only true wisdom is in knowing you know nothing."
+    },
+    {
+        "person": "Virgil",
+        "quote": "Fortune favors the bold."
+    },
+    {
+        "person": "Nelson Mandela",
+        "quote": "It always seems impossible until it's done."
+    },
+    {
+        "person": "Wayne Gretzky",
+        "quote": "You miss 100% of the shots you don't take."
+    },
+    {
+        "person": "Mahatma Gandhi",
+        "quote": "Where there is love there is life."
+    },
+    {
+        "person": "Peter Drucker",
+        "quote": "The best way to predict the future is to create it."
+    },
+    {
+        "person": "Aristotle",
+        "quote": "Happiness depends upon ourselves."
+    },
+    {
+        "person": "George Eliot",
+        "quote": "A journey of a thousand miles begins with a single step."
+    },
+    {
+        "person": "Oscar Wilde",
+        "quote": "To live is the rarest thing in the world. Most people exist, that is all."
+    },
+    {
+        "person": "Franklin D. Roosevelt",
+        "quote": "The only limit to our realization of tomorrow will be our doubts of today."
+    },
+    {
+        "person": "Vivian Greene",
+        "quote": "Life is not about waiting for the storm to pass but learning to dance in the rain."
+    },
+    {
+        "person": "Steve Jobs",
+        "quote": "The only way to do great work is to love what you do."
+    },
+    {
+        "person": "Winston Churchill",
+        "quote": "Success is not final, failure is not fatal: It is the courage to continue that counts."
+    },
+    {
+        "person": "Buddha",
+        "quote": "What we think, we become."
+    },
+    {
+        "person": "Sun Tzu",
+        "quote": "In the midst of chaos, there is also opportunity."
+    },
+    {
+        "person": "Theodore Roosevelt",
+        "quote": "Believe you can and you're halfway there."
+    },
+    {
+        "person": "Eleanor Roosevelt",
+        "quote": "The future belongs to those who believe in the beauty of their dreams."
+    },
+    {
+        "person": "Charles R. Swindoll",
+        "quote": "Life is 10% what happens to us and 90% how we react to it."
+    },
+    {
+        "person": "René Descartes",
+        "quote": "I think, therefore I exist."
+    },
+    {
+        "person": "René Descartes",
+        "quote": "Cogito, ergo sum."
+    },
+    {
+        "person": "René Descartes",
+        "quote": "Je pense, donc je suis."
+    },
+    {
+        "person": "Guus Hiddink",
+        "quote": "I'm still hungry."
+    },
+    {
+        "person": "Max Stirner",
+        "quote": "I do not originate from any cause."
+    },
+    {
+        "person": "Malcolm X",
+        "quote": "I don't see any American Dream, I just see the American Nightmare."
+    },
+    {
+        "person": "Mahatma Gandhi",
+        "quote": "I truly love and respect Jesus Christ, but all those who claim to be his believers speak and act contrary to Jesus' teachings."
+    },
+    {
+        "person": "Baruch Spinoza",
+        "quote": "I did not mock, grieve, or despise human actions, but only sought to understand them."
+    },
+    {
+        "person": "Albert Einstein",
+        "quote": "I cannot even imagine a God who rewards and punishes his creations, or who has a will that we can understand."
+    },
+    {
+        "person": "Whey",
+        "quote": "I have heard of making the people comfortable against the enemy, but I have not heard of moving the people to avoid the enemy."
+    },
+    {
+        "person": "Albert Einstein",
+        "quote": "I don't know what weapons we will fight with in World War III. But World War 4 will be fought with sticks and stones."
+    },
+    {
+        "person": "Soviet soldiers",
+        "quote": "I am dying but I am not surrendering! Hello, my country. July 20, 1941"
+    },
+    {
+        "person": "Chiang Kai-shek",
+        "quote": "I am China. China can't achieve anything without me."
+    },
+    {
+        "person": "Thomas Jefferson",
+        "quote": "I would rather have dangerous freedom than live as a peaceful slave."
+    },
+    {
+        "person": "Isaac Newton",
+        "quote": "I can calculate the movements of heavenly bodies, but I cannot calculate the madness of people."
+    },
+    {
+        "person": "Socrates",
+        "quote": "As for me, I only know that I know nothing."
+    },
+    {
+        "person": "Yuri Gagarin",
+        "quote": "Let's go!"
+    }
+]

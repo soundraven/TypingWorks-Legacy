@@ -76,8 +76,8 @@
 
 <script setup lang="ts">
 import { disassemble } from "hangul-js"
-import EnQuotes from "@/assets/LifeQuotesEN.json"
-import KrQuotes from "@/assets/LifeQuotesKR.json"
+import EnQuotes from "@/assets/quotes/quotesEn.json"
+import KrQuotes from "@/assets/quotes/quotesKo.json"
 import { TypoStatus, Language, type Quote } from "~/structure/quotes"
 
 //겹칠때 AS 쓸수있다

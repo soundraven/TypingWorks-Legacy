@@ -65,9 +65,6 @@ const pressedKey: Ref<string> = ref("")
 
 onMounted(() => {
     if (process.server) return
-    // runtime.public.API
-    // console.log(TypoStatus.NotInput)
-
     window.addEventListener("keydown", handleKeyDown)
     window.addEventListener("keyup", handleKeyUp)
 })
@@ -180,11 +177,6 @@ $u: 18px;
             background-color: grey;
             transition-duration: 0s;
         }
-    }
-
-    > .blink {
-        // transition: ease-out;
-        // transition-duration: 0.5s;
     }
 }
 </style>
