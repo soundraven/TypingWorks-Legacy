@@ -86,6 +86,7 @@ const runtime = useRuntimeConfig()
 //v-memo 확인해보기
 const targetPerson: Ref<string> = ref("")
 const targetText: Ref<string> = ref("")
+const nextPerson: Ref<string> = ref("")
 const nextText: Ref<string> = ref("")
 const targetLanguage: Ref<Language> = ref(Language.Korean)
 const splitedTargetText: Ref<string[]> = ref([])
@@ -256,9 +257,10 @@ const endTyping = () => {
     calcTypingSpeed(totalTime.value)
 
     const [target, nextTarget] = getTargetText()
-    targetText.value = target.quote
-    targetPerson.value = target.person
+    targetText.value = nextText.value
+    targetPerson.value = nextPerson.value
     nextText.value = nextTarget.quote
+    nextPerson.value = nextTarget.person
 
     readyText()
     resetInfo()
@@ -335,7 +337,7 @@ const readyText = () => {
     splitedTargetText.value = targetText.value.split("")
     typoArray.value = new Array(splitedTargetText.value.length).fill(false)
 }
-//삼항연산자 쓰지말고 스위치 쓰기
+
 const getTargetText = (): Quote[] => {
     let targetDatas: Quote[] = []
 
@@ -351,7 +353,6 @@ const getTargetText = (): Quote[] => {
     }
 
     const randomIndex: number = Math.floor(Math.random() * targetDatas.length)
-    const nextTextIndex: number = Math.floor(Math.random() * targetDatas.length)
 
     return [
         targetDatas[randomIndex],
