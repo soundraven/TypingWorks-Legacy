@@ -64,7 +64,7 @@ $u: 18px;
         width: $u;
         height: $u;
 
-        background-color: white;
+        background-color: var(--alpah-row);
 
         border: 1px solid rgb(58, 58, 60, 0.09);
         border-radius: 5px;
@@ -74,7 +74,7 @@ $u: 18px;
     }
 
     > .Escape {
-        background-color: pink;
+        background-color: var(--accent-esc);
     }
 
     > .ControlLeft,
@@ -85,47 +85,47 @@ $u: 18px;
     .Fn,
     .ControlRight {
         width: $u * 1.25;
-        background-color: #e1e1e1;
+        background-color: var(--modi-row);
     }
 
     > .Tab,
     .Backslash {
         width: $u * 1.5;
-        background-color: #e1e1e1;
+        background-color: var(--modi-row);
     }
 
     > .Backslash {
-        background-color: white;
+        background-color: var(--alpah-row);
     }
 
     > .CapsLock {
         width: $u * 1.75;
-        background-color: #e1e1e1;
+        background-color: var(--modi-row);
     }
 
     > .Backspace {
         width: $u * 2;
-        background-color: #e1e1e1;
+        background-color: var(--modi-row);
     }
 
     > .ShiftLeft,
     .Enter {
         width: $u * 2.25;
-        background-color: #e1e1e1;
+        background-color: var(--modi-row);
     }
 
     > .Enter {
-        background-color: #a2f5e6;
+        background-color: var(--accent-enter);
     }
 
     > .ShiftRight {
         width: $u * 2.75;
-        background-color: #e1e1e1;
+        background-color: var(--modi-row);
     }
 
     > .Space {
         width: $u * 6.25;
-        background-color: white;
+        background-color: var(--alpah-row);
     }
 
     > .key {
@@ -134,7 +134,7 @@ $u: 18px;
         transition-duration: 0.5s;
 
         &.blink {
-            background-color: grey;
+            background-color: var(--color-primary);
             transition-duration: 0s;
         }
     }

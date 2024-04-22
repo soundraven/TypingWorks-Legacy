@@ -12,6 +12,10 @@
     --bg: #fff;
     --bg-secondary: #f3f5f4;
     --border-color: #ddd;
+    --alpah-row: #ffffff;
+    --modi-row: #e1e1e1;
+    --accent-esc: #ffc0cb;
+    --accent-enter: #a2f5e6;
 }
 
 .dark-mode {
@@ -20,7 +24,11 @@
     --color-secondary: #fdf9f3;
     --bg: #091a28;
     --bg-secondary: #071521;
-    --border-color: #0d2538;
+    --border-color: rgb(51, 50, 40);
+    --alpah-row: #696969;
+    --modi-row: #3b3b3b;
+    --accent-esc: red;
+    --accent-enter: #a2f5e6;
 }
 
 .sepia-mode {
@@ -30,6 +38,10 @@
     --bg: #f1e7d0;
     --bg-secondary: #eae0c9;
     --border-color: #ded0bf;
+    --alpah-row: #f7f2ea;
+    --modi-row: #e6d2b5;
+    --accent-esc: #bc251e;
+    --accent-enter: #222d5a;
 }
 
 body {

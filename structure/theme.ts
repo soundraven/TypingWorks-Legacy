@@ -4,3 +4,8 @@ export enum ThemeColor {
     Sepia = "sepia",
     System = "system",
 }
+
+export enum KeyboardTheme {
+    ModernDolch = 0,
+    Dolch = 1,
+}

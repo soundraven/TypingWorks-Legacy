@@ -394,7 +394,7 @@ const getActiveClass = (lang: string): string => {
         background-color: var(--bg-secondary);
         border: 2px solid var(--border-color);
         border-radius: 10px;
-        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
 
         margin-inline: auto;
         padding: 20px;
@@ -409,7 +409,7 @@ const getActiveClass = (lang: string): string => {
 
             border: 2px solid var(--border-color);
             border-radius: 10px;
-            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
         }
 
         > .icon {
