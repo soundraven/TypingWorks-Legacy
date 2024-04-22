@@ -7,18 +7,18 @@
                     <div
                         :class="[
                             $style.langBtn,
-                            getActiveClass(Language.korean),
+                            getActiveClass(Language.Korean),
                         ]"
-                        @click="toggleLanguage(Language.korean)"
+                        @click="toggleLanguage(Language.Korean)"
                     >
                         Ko
                     </div>
                     <div
                         :class="[
                             $style.langBtn,
-                            getActiveClass(Language.english),
+                            getActiveClass(Language.English),
                         ]"
-                        @click="toggleLanguage(Language.english)"
+                        @click="toggleLanguage(Language.English)"
                     >
                         En
                     </div>
@@ -88,12 +88,11 @@ const $style = useCssModule()
 const colorMode = useColorMode()
 const runtime = useRuntimeConfig()
 //enum으로관리하기
-const screenColors = ["light", "dark", "sepia", "system"]
 
 //v-memo 확인해보기
 const targetPerson: Ref<string> = ref("")
 const targetText: Ref<string> = ref("")
-const targetLanguage: Ref<Language> = ref(Language.korean)
+const targetLanguage: Ref<Language> = ref(Language.Korean)
 const splitedTargetText: Ref<string[]> = ref([])
 // 유저가 타이핑한 문장
 const typedText: Ref<string> = ref("")
@@ -169,7 +168,7 @@ const startTyping = (
 
     // checkTypo()
     if (
-        targetLanguage.value != Language.korean ||
+        targetLanguage.value != Language.Korean ||
         e?.key.toLowerCase() == "space" ||
         e?.key.toLowerCase() == "backspace"
     ) {
@@ -285,7 +284,7 @@ const calcTypingSpeed = (takenTime: number) => {
         totalWords === "" ? 0 : totalWords.split(" ").length
 
     switch (targetLanguage.value) {
-        case Language.english: {
+        case Language.English: {
             if (splitByWords !== 0) {
                 wpm.value = Math.round((splitByWords / takenTime) * 60)
             }
@@ -294,7 +293,7 @@ const calcTypingSpeed = (takenTime: number) => {
             }
         }
 
-        case Language.korean: {
+        case Language.Korean: {
             const disassembleText: string[] = disassemble(parsingText.value)
             if (splitByWords !== 0) {
                 wpm.value = Math.round((splitByWords / takenTime) * 60)
@@ -310,11 +309,11 @@ const calcTypingSpeed = (takenTime: number) => {
 
 const toggleLanguage = (lang: string) => {
     switch (lang) {
-        case Language.korean:
-            targetLanguage.value = Language.korean
+        case Language.Korean:
+            targetLanguage.value = Language.Korean
             break
-        case Language.english:
-            targetLanguage.value = Language.english
+        case Language.English:
+            targetLanguage.value = Language.English
             break
         default:
             console.log("targetLanguage.value could not be found.")
@@ -336,7 +335,7 @@ const readyText = () => {
 //삼항연산자 쓰지말고 스위치 쓰기
 const getTargetText = (): Quote => {
     let targetDatas: Quote[] = []
-    targetLanguage.value === Language.korean
+    targetLanguage.value === Language.Korean
         ? (targetDatas = KrQuotes)
         : (targetDatas = EnQuotes)
 

@@ -12,14 +12,14 @@
 <style lang="scss" module>
 .index {
     width: 100%;
-    height: 50px;
-    border-bottom: 1px solid red;
+    height: 60px;
+    border-bottom: 3px solid var(--color-primary);
 
     > .header {
         width: 300px;
-        height: 50px;
-        border: 1px solid blue;
-        font-size: 30px;
+        height: 100%;
+        font-size: 25px;
+        line-height: 60px;
         margin-inline: auto;
     }
 }

@@ -9,8 +9,7 @@ export enum TypoStatus {
     Error = 2,
 }
 
-//enum첫글자대문자
 export enum Language {
-    korean = "ko",
-    english = "en",
+    Korean = "ko",
+    English = "en",
 }

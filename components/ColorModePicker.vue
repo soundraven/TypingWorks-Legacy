@@ -1,18 +1,28 @@
 <template>
     <div :class="$style.index">
         <IconLight
-            @click="$colorMode.preference = 'light'"
-            :class="getActiveClass('light')"
+            @click="$colorMode.preference = ThemeColor.Light"
+            :class="getActiveClass(ThemeColor.Light)"
         />
-        <IconDark @click="$colorMode.preference = 'dark'" />
-        <IconSepia @click="$colorMode.preference = 'sepia'" />
-        <IconSystem @click="$colorMode.preference = 'system'" />
+        <IconDark
+            @click="$colorMode.preference = ThemeColor.Dark"
+            :class="getActiveClass(ThemeColor.Dark)"
+        />
+        <IconSepia
+            @click="$colorMode.preference = ThemeColor.Sepia"
+            :class="getActiveClass(ThemeColor.Sepia)"
+        />
+        <IconSystem
+            @click="$colorMode.preference = ThemeColor.System"
+            :class="getActiveClass(ThemeColor.System)"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
 const $style = useCssModule()
 const colorMode = useColorMode()
+import { ThemeColor } from "~/structure/theme"
 
 const getActiveClass = (color: string): string => {
     if (colorMode.preference == color) return "selected"
