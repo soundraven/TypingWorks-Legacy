@@ -2,19 +2,19 @@
     <div :class="$style.index">
         <IconLight
             @click="$colorMode.preference = ThemeColor.Light"
-            :class="getActiveClass(ThemeColor.Light)"
+            :class="[getActiveClass(ThemeColor.Light), $style.icon]"
         />
         <IconDark
             @click="$colorMode.preference = ThemeColor.Dark"
-            :class="getActiveClass(ThemeColor.Dark)"
+            :class="[getActiveClass(ThemeColor.Dark), $style.icon]"
         />
         <IconSepia
             @click="$colorMode.preference = ThemeColor.Sepia"
-            :class="getActiveClass(ThemeColor.Sepia)"
+            :class="[getActiveClass(ThemeColor.Sepia), $style.icon]"
         />
         <IconSystem
             @click="$colorMode.preference = ThemeColor.System"
-            :class="getActiveClass(ThemeColor.System)"
+            :class="[getActiveClass(ThemeColor.System), $style.icon]"
         />
     </div>
 </template>

@@ -34,7 +34,9 @@
             <div :class="[$style.count, $style.gridItem]">
                 count: {{ typingCount }}
             </div>
-            <div :class="[$style.keyTheme, $style.gridItem]">키보드테마</div>
+            <div :class="[$style.keyTheme, $style.gridItem]">
+                {{ getElapsedTime() }}
+            </div>
             <div :class="[$style.person, $style.gridItem]">
                 {{ targetPerson }}
             </div>
@@ -50,15 +52,13 @@
                 </div>
                 <div :class="$style.inputs">
                     <input
-                        v-model="typedText"
+                        v-on:input="updateTypedText($event)"
+                        v-bind:value="typedText"
                         type="text"
                         autofocus
                         placeholder="위에 보이는 문장을 따라 타이핑해보세요."
                         @keyup="keyupEventHandler"
                         @keydown.enter.prevent="endTyping"
-                        @compositionstart="beforeCheckTypo"
-                        @compositionupdate="beforeCheckTypo"
-                        @compositionend="beforeCheckTypo"
                         @paste="preventPaste"
                     />
                 </div>
@@ -70,9 +70,9 @@
 
 <script setup lang="ts">
 import { disassemble } from "hangul-js"
+import { TypoStatus, Language, type Quote } from "~/structure/quotes"
 import EnQuotes from "@/assets/quotes/quotesEn.json"
 import KrQuotes from "@/assets/quotes/quotesKo.json"
-import { TypoStatus, Language, type Quote } from "~/structure/quotes"
 
 //겹칠때 AS 쓸수있다
 import { throttle as LodashThrottle } from "lodash"
@@ -81,7 +81,6 @@ import { throttle as LodashThrottle } from "lodash"
 const $style = useCssModule()
 const colorMode = useColorMode()
 const runtime = useRuntimeConfig()
-//enum으로관리하기
 
 //v-memo 확인해보기
 const targetPerson: Ref<string> = ref("")
@@ -97,13 +96,11 @@ const typingCount: Ref<number> = ref(0)
 
 // 쪼갠 문장의 길이와 동일한 새 배열 생성, 각 요소는 false
 const typoArray: Ref<boolean[]> = ref([])
-
 // 문장 입력 상태 혹은 틀림/맞음 체크
 const typoStatus: Ref<{ [k: number]: TypoStatus }> = ref({})
 
 const typingAccuracy: Ref<number> = ref(0)
 const typingProgress: Ref<number> = ref(0)
-
 const wpm: Ref<number> = ref(0)
 const cpm: Ref<number> = ref(0)
 
@@ -113,8 +110,6 @@ const lastTypingTime: Ref<number> = ref(0)
 const elapsedTime: Ref<number> = ref(0)
 const endTime: Ref<number> = ref(0)
 const totalTime: Ref<number> = ref(0)
-
-const isTyped: Ref<boolean> = ref(false)
 
 // 경과시간 계산 반복하는 setTimeOut Id
 const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
@@ -127,19 +122,12 @@ onMounted(() => {
     targetPerson.value = currentQuote.person
     nextText.value = nextQuote.quote
     readyText()
-
-    window.addEventListener(
-        "scroll",
-        LodashThrottle((e) => {
-            console.log(window.scrollY)
-        }, 500),
-    )
-
-    console.log(runtime.public.API)
 })
 
 //타입캐스팅
 const keyupEventHandler = (e: KeyboardEvent) => {
+    if (e.code === "Enter") return
+
     startTyping((e.currentTarget as HTMLInputElement).value, e)
 }
 
@@ -147,10 +135,15 @@ const preventPaste = (e: ClipboardEvent) => {
     e.preventDefault()
 }
 
+const updateTypedText = (e) => {
+    typedText.value = (e.target as HTMLInputElement).value
+}
+
 const startTyping = (
     text: string,
     e: KeyboardEvent | undefined = undefined,
 ) => {
+    console.log(typedText.value)
     parsingText.value = text
 
     // 시작시 startTime 체크
@@ -164,7 +157,6 @@ const startTyping = (
     accuracy()
     progress()
 
-    // checkTypo()
     if (
         targetLanguage.value != Language.Korean ||
         e?.key.toLowerCase() == "space" ||
@@ -172,12 +164,6 @@ const startTyping = (
     ) {
         checkTypo()
     }
-
-    // if (targetLanguage.value === Language.korean) {
-
-    // } else {
-    //     checkTypo()
-    // }
 }
 
 // 마지막으로 타이핑한 시간 기준으로 경과시간을 계산
@@ -204,7 +190,6 @@ const checkTypo = () => {
         if (targetText.value[i] == parsingText.value[i]) {
             typoStatus.value[i] = TypoStatus.Correct
         } else {
-            console.log(parsingText.value[i])
             typoStatus.value[i] = TypoStatus.Error
         }
     }
@@ -227,17 +212,18 @@ const progress = () => {
     )
 }
 // 현재 시간 기준으로 경과시간 및 타이핑 속도 계산
-const keepCheckElapsedTime = () => {
-    const date = new Date()
-    const currentTime: number = date.getTime()
-    elapsedTime.value = (currentTime - startTime.value) / 1000
-    calcTypingSpeed(elapsedTime.value)
-}
 
 // setTimeout 이용해 0.1초마다 속도 계산
 //requestanimationframe 사용해서 주사율 기준으로 가능
 const startTypingSpeedCalc = () => {
     elapsedTimerId.value = setInterval(keepCheckElapsedTime, 100)
+}
+
+const keepCheckElapsedTime = () => {
+    const date = new Date()
+    const currentTime: number = date.getTime()
+    elapsedTime.value = (currentTime - startTime.value) / 1000
+    calcTypingSpeed(elapsedTime.value)
 }
 
 const stopTypingSpeedCalc = () => {
@@ -267,8 +253,6 @@ const endTyping = () => {
 }
 
 const resetInfo = () => {
-    stopTypingSpeedCalc()
-
     typedText.value = ""
     parsingText.value = ""
     startTime.value = 0
@@ -306,8 +290,6 @@ const calcTypingSpeed = (takenTime: number) => {
                 )
             }
         }
-        default:
-            console.log("targetLanguage.value could not be found.")
     }
 }
 
@@ -319,8 +301,6 @@ const toggleLanguage = (lang: string) => {
         case Language.English:
             targetLanguage.value = Language.English
             break
-        default:
-            console.log("targetLanguage.value could not be found.")
     }
 
     const [currentQuote, nextQuote] = getTargetText()
@@ -348,8 +328,6 @@ const getTargetText = (): Quote[] => {
         case Language.English:
             targetDatas = EnQuotes
             break
-        default:
-            console.log("targetLanguage.value could not be found.")
     }
 
     const randomIndex: number = Math.floor(Math.random() * targetDatas.length)
@@ -359,11 +337,19 @@ const getTargetText = (): Quote[] => {
         targetDatas[(randomIndex + 1) % targetDatas.length],
     ]
 }
-//비교할거면 다 === 아니면 다 == 통일좀
+
 const getTypoClass = (index: number): string => {
-    if (typoStatus.value[index] == null) return ""
-    if (typoStatus.value[index] == TypoStatus.Error) return $style.typo
-    return $style.success
+    const lastIndex = Object.keys(typoStatus.value).length - 1
+
+    if (typoStatus.value[index] === TypoStatus.NotInput) return ""
+    if (typoStatus.value[index] === TypoStatus.Error) return $style.typo
+    if (typoStatus.value[index] === TypoStatus.Correct) {
+        if (parseInt(Object.keys(typoStatus.value)[lastIndex]) === index) {
+            return `${$style.success} ${$style.lastSuccess}`
+        }
+        return $style.success
+    }
+    return ""
 }
 
 const getElapsedTime = (): string => {
@@ -532,10 +518,12 @@ const getActiveClass = (lang: string): string => {
             padding: 30px;
 
             > .text {
+                height: 30px;
                 font-size: 20px;
                 margin-right: auto;
 
                 > span {
+                    height: 100%;
                     transition-property: color;
                     transition-duration: 0.2s;
                     transition-timing-function: ease-out;
@@ -543,14 +531,15 @@ const getActiveClass = (lang: string): string => {
 
                 > .typo {
                     color: red;
+                    background-color: aqua;
                 }
 
                 > .success {
                     color: var(--color-primary);
+                }
 
-                    // &:last-child {
-                    //     background-color: red;
-                    // }
+                > .lastSuccess {
+                    border-right: 1px solid var(--color-secondary);
                 }
             }
 
@@ -579,16 +568,13 @@ const getActiveClass = (lang: string): string => {
                 text-align: left;
                 color: var(--border-color);
             }
-        }
 
-        > .person {
-            color: #ccc;
-            font-size: 18px;
-            font-style: italic;
+            > .person {
+                color: #ccc;
+                font-size: 18px;
+                font-style: italic;
+            }
         }
     }
-}
-.Space {
-    width: 120px;
 }
 </style>
