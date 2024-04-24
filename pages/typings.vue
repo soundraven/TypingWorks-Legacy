@@ -143,7 +143,6 @@ const startTyping = (
     text: string,
     e: KeyboardEvent | undefined = undefined,
 ) => {
-    console.log(typedText.value)
     parsingText.value = text
 
     // 시작시 startTime 체크
@@ -152,10 +151,12 @@ const startTyping = (
         startTime.value = date.getTime()
         startTypingSpeedCalc()
     }
+
     // startTime 있으면 속도, 오타만 검사
     currentTyping()
     accuracy()
     progress()
+    checkTypo()
 
     if (
         targetLanguage.value != Language.Korean ||
@@ -173,19 +174,12 @@ const currentTyping = () => {
     elapsedTime.value = (lastTypingTime.value - startTime.value) / 1000
 }
 
-const beforeCheckTypo = (e: CompositionEvent) => {
-    if (e.type === "compositionupdate" || e.type === "compositionstart") {
-        return
-    } else {
-        checkTypo()
-    }
-}
-
 // typoArray에서 true인 i는 오타를 의미
 const checkTypo = () => {
     typoStatus.value = {}
 
-    for (let i = 0; i < parsingText.value.length; i++) {
+    //조합문자 조합중 오타로 체크되는것 해결을 위해 i + 1로 수정
+    for (let i = 0; i + 1 < parsingText.value.length; i++) {
         if (targetText.value[i] == undefined) continue
         if (targetText.value[i] == parsingText.value[i]) {
             typoStatus.value[i] = TypoStatus.Correct
