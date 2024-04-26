@@ -2,7 +2,7 @@
     <div :class="$style.index">
         <div :class="$style.typing">
             <div :class="[$style.icon, $style.gridItem]">로고위치</div>
-            <div :class="[$style.language, $style.gridItem]">
+            <div :class="[$style.language, $style.gridItem]" v-auto-animate>
                 <div
                     :class="[$style.langBtn, getActiveClass(Language.Korean)]"
                     @click="toggleLanguage(Language.Korean)"
@@ -73,6 +73,7 @@ import { disassemble } from "hangul-js"
 import { TypoStatus, Language, type Quote } from "~/structure/quotes"
 import EnQuotes from "@/assets/quotes/quotesEn.json"
 import KrQuotes from "@/assets/quotes/quotesKo.json"
+import { vAutoAnimate } from "@formkit/auto-animate"
 
 //겹칠때 AS 쓸수있다
 import { throttle as LodashThrottle } from "lodash"

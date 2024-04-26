@@ -1,14 +1,16 @@
-<template>
-    <div>예제</div>
-    <IconLight @click="$colorMode.preference = 'light'" />
-    <IconDark @click="$colorMode.preference = 'dark'" />
-
-    <IconSepia @click="$colorMode.preference = 'sepia'" />
-    <IconSystem @click="$colorMode.preference = 'system'" />
-</template>
-
 <script setup>
-const colorMode = useColorMode()
+import { ref } from "vue"
+const items = ref(["d", "f", "g", "h", "j"])
+function removeItem(toRemove) {
+    items.value = items.value.filter((item) => item !== toRemove)
+}
 </script>
 
-<style></style>
+<template>
+    <h5>Click emojis to remove them.</h5>
+    <ul v-auto-animate>
+        <li v-for="item in items" :key="item" @click="removeItem(item)">
+            {{ item }}
+        </li>
+    </ul>
+</template>

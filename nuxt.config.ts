@@ -44,6 +44,7 @@ export default defineNuxtConfig({
         "@vueuse/nuxt", // https://vueuse.org/guide/#nuxt
         "@pinia/nuxt", // https://pinia.vuejs.org/ssr/nuxt.html
         "@nuxtjs/color-mode", // https://color-mode.nuxtjs.org/
+        "@formkit/auto-animate/nuxt", // https://auto-animate.formkit.com/#usage-vue
     ],
     colorMode: {
         preference: "system", // default value of $colorMode.preference
