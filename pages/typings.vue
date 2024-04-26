@@ -3,7 +3,7 @@
         <div :class="$style.typing">
             <div :class="[$style.icon, $style.gridItem]">로고위치</div>
             <div :class="[$style.language, $style.gridItem]" v-auto-animate>
-                <div
+                <!-- <div
                     :class="[$style.langBtn, getActiveClass(Language.Korean)]"
                     @click="toggleLanguage(Language.Korean)"
                 >
@@ -14,6 +14,14 @@
                     @click="toggleLanguage(Language.English)"
                 >
                     En
+                </div> -->
+                <div
+                    v-for="btn in toggleLangBtn"
+                    :key="btn"
+                    :class="[$style.langBtn, getActiveClass(btn)]"
+                    @click="toggleLanguage(btn)"
+                >
+                    {{ btn }}
                 </div>
             </div>
             <div :class="[$style.screenMode, $style.gridItem]">
@@ -80,8 +88,8 @@ import { throttle as LodashThrottle } from "lodash"
 
 // import type Quote from "~"
 const $style = useCssModule()
-const colorMode = useColorMode()
 const runtime = useRuntimeConfig()
+import autoAnimate from "@formkit/auto-animate"
 
 //v-memo 확인해보기
 const targetPerson: Ref<string> = ref("")
@@ -111,6 +119,8 @@ const lastTypingTime: Ref<number> = ref(0)
 const elapsedTime: Ref<number> = ref(0)
 const endTime: Ref<number> = ref(0)
 const totalTime: Ref<number> = ref(0)
+
+let toggleLangBtn: Language[] = [Language.Korean, Language.English]
 
 // 경과시간 계산 반복하는 setTimeOut Id
 const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
@@ -288,7 +298,29 @@ const calcTypingSpeed = (takenTime: number) => {
     }
 }
 
-const toggleLanguage = (lang: string) => {
+// const toggleLanguage = (lang: string) => {
+//     switch (lang) {
+//         case Language.Korean:
+//             targetLanguage.value = Language.Korean
+//             break
+//         case Language.English:
+//             targetLanguage.value = Language.English
+//             break
+//     }
+
+//     const [currentQuote, nextQuote] = getTargetText()
+//     targetText.value = currentQuote.quote
+//     targetPerson.value = currentQuote.person
+//     nextText.value = nextQuote.quote
+
+//     readyText()
+//     resetInfo()
+// }
+const toggleLanguage = (lang: Language) => {
+    if (lang !== targetLanguage.value) {
+        toggleLangBtn.reverse()
+    }
+
     switch (lang) {
         case Language.Korean:
             targetLanguage.value = Language.Korean
@@ -354,7 +386,7 @@ const getElapsedTime = (): string => {
     return `${min}분 ${sec}초`
 }
 
-const getActiveClass = (lang: string): string => {
+const getActiveClass = (lang: Language): string => {
     if (lang === targetLanguage.value) {
         return $style.active
     } else {
@@ -440,7 +472,7 @@ const getActiveClass = (lang: string): string => {
                 border-radius: 7px;
                 box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.2);
 
-                transition: all 0.4s;
+                // transition: all 0.4s;
             }
 
             > .active {
