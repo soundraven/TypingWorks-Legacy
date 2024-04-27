@@ -72,8 +72,6 @@ import KrQuotes from "@/assets/quotes/quotesKo.json"
 import { vAutoAnimate } from "@formkit/auto-animate"
 
 const $style = useCssModule()
-const runtime = useRuntimeConfig()
-import autoAnimate from "@formkit/auto-animate"
 
 //v-memo 확인해보기
 const targetPerson: Ref<string> = ref("")
@@ -88,10 +86,8 @@ const typedText: Ref<string> = ref("")
 const parsingText: Ref<string> = ref("")
 const typingCount: Ref<number> = ref(0)
 
-// 쪼갠 문장의 길이와 동일한 새 배열 생성, 각 요소는 false.
-const typoArray: Ref<boolean[]> = ref([])
 // 문장 입력 상태 혹은 틀림/맞음 체크
-const typoStatus: Ref<{ [k: number]: TypoStatus }> = ref({})
+const typoStatus: Ref<TypoStatus[]> = ref([])
 
 const typingAccuracy: Ref<number> = ref(0)
 const typingProgress: Ref<number> = ref(0)
@@ -101,7 +97,7 @@ const cpm: Ref<number> = ref(0)
 const startTime: Ref<number> = ref(0)
 const lastTypingTime: Ref<number> = ref(0)
 // 현재 경과시간만 초로 나오고 나머지는 타임스탬프 형식
-const elapsedTime: Ref<number> = ref(0)
+const elapsedTime: Ref<number> = ref(0) //추후 인풋창 비워지는거 감지해서 시간 초기화 및 함수 정지
 const endTime: Ref<number> = ref(0)
 const totalTime: Ref<number> = ref(0)
 
@@ -113,11 +109,14 @@ const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
 onMounted(() => {
     if (process.server) return
     // runtime.public.API
-    const [currentQuote, nextQuote] = getTargetText()
+    const [currentQuote, nextQuote]: Quote[] = getTargetText()
+
     targetText.value = currentQuote.quote
     targetPerson.value = currentQuote.person
     nextText.value = nextQuote.quote
-    readyText()
+
+    splitText()
+    updateTypoStatus()
 })
 
 //타입캐스팅
@@ -145,35 +144,25 @@ const startTyping = (
     if (startTime.value === 0) {
         const date = new Date()
         startTime.value = date.getTime()
+
         startTypingSpeedCalc()
     }
 
-    // startTime 있으면 속도, 오타만 검사
-    currentTyping()
-    accuracy()
-    progress()
+    calcElapsedTime()
+    calcAccuracy()
+    calcProgress()
     checkTypo()
-
-    if (
-        targetLanguage.value != Language.Korean ||
-        e?.key.toLowerCase() == "space" ||
-        e?.key.toLowerCase() == "backspace"
-    ) {
-        checkTypo()
-    }
 }
 
 // 마지막으로 타이핑한 시간 기준으로 경과시간을 계산
-const currentTyping = () => {
+const calcElapsedTime = () => {
     const date = new Date()
+
     lastTypingTime.value = date.getTime()
     elapsedTime.value = (lastTypingTime.value - startTime.value) / 1000
 }
 
-// typoArray에서 true인 i는 오타를 의미
 const checkTypo = () => {
-    typoStatus.value = {}
-
     //조합문자 조합중 오타로 체크되는것 해결을 위해 i + 1로 수정
     for (let i = 0; i + 1 < parsingText.value.length; i++) {
         if (targetText.value[i] == undefined) continue
@@ -186,25 +175,26 @@ const checkTypo = () => {
 }
 
 // 입력 텍스트의 정확도 계산
-const accuracy = () => {
-    const typoCount = typoArray.value.filter(
-        (value: boolean) => value === true,
+const calcAccuracy = () => {
+    const typoCount: number = typoStatus.value.filter(
+        (value: TypoStatus) => value === TypoStatus.Error,
     ).length
-    typingAccuracy.value = Math.round(
-        ((typoArray.value.length - typoCount) / typoArray.value.length) * 100,
+
+    typingAccuracy.value = getPercentage(
+        typoStatus.value.length - typoCount,
+        typoStatus.value.length,
     )
 }
 
-const progress = () => {
+const calcProgress = () => {
+    //진행도 최대 105까지 나오는 현상 수정해보기
+    console.log(parsingText.value)
     typingProgress.value = getPercentage(
         parsingText.value.split("").length,
         targetText.value.split("").length,
     )
 }
-// 현재 시간 기준으로 경과시간 및 타이핑 속도 계산
 
-// setTimeout 이용해 0.1초마다 속도 계산
-//requestanimationframe 사용해서 주사율 기준으로 가능
 const startTypingSpeedCalc = () => {
     elapsedTimerId.value = setInterval(keepCheckElapsedTime, 100)
 }
@@ -212,7 +202,9 @@ const startTypingSpeedCalc = () => {
 const keepCheckElapsedTime = () => {
     const date = new Date()
     const currentTime: number = date.getTime()
+
     elapsedTime.value = (currentTime - startTime.value) / 1000
+
     calcTypingSpeed(elapsedTime.value)
 }
 
@@ -223,7 +215,7 @@ const stopTypingSpeedCalc = () => {
 const endTyping = () => {
     typingCount.value += +1
 
-    typoStatus.value = {}
+    typoStatus.value = []
     stopTypingSpeedCalc()
 
     const date = new Date()
@@ -238,7 +230,8 @@ const endTyping = () => {
     nextText.value = nextTarget.quote
     nextPerson.value = nextTarget.person
 
-    readyText()
+    splitText()
+    updateTypoStatus()
     resetInfo()
 }
 
@@ -296,14 +289,19 @@ const toggleLanguage = (lang: Language) => {
     targetPerson.value = currentQuote.person
     nextText.value = nextQuote.quote
 
-    readyText()
+    splitText()
     resetInfo()
 }
 
 // 오타 확인을 위해 문장 글자단위로 분해
-const readyText = () => {
+const splitText = () => {
     splitedTargetText.value = targetText.value.split("")
-    typoArray.value = new Array(splitedTargetText.value.length).fill(false)
+}
+
+const updateTypoStatus = () => {
+    typoStatus.value = new Array(splitedTargetText.value.length).fill(
+        TypoStatus.NotInput,
+    )
 }
 
 const getTargetText = (): Quote[] => {
