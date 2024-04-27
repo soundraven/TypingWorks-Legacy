@@ -3,18 +3,6 @@
         <div :class="$style.typing">
             <div :class="[$style.icon, $style.gridItem]">로고위치</div>
             <div :class="[$style.language, $style.gridItem]" v-auto-animate>
-                <!-- <div
-                    :class="[$style.langBtn, getActiveClass(Language.Korean)]"
-                    @click="toggleLanguage(Language.Korean)"
-                >
-                    Ko
-                </div>
-                <div
-                    :class="[$style.langBtn, getActiveClass(Language.English)]"
-                    @click="toggleLanguage(Language.English)"
-                >
-                    En
-                </div> -->
                 <div
                     v-for="btn in toggleLangBtn"
                     :key="btn"
@@ -83,10 +71,6 @@ import EnQuotes from "@/assets/quotes/quotesEn.json"
 import KrQuotes from "@/assets/quotes/quotesKo.json"
 import { vAutoAnimate } from "@formkit/auto-animate"
 
-//겹칠때 AS 쓸수있다
-import { throttle as LodashThrottle } from "lodash"
-
-// import type Quote from "~"
 const $style = useCssModule()
 const runtime = useRuntimeConfig()
 import autoAnimate from "@formkit/auto-animate"
@@ -98,12 +82,13 @@ const nextPerson: Ref<string> = ref("")
 const nextText: Ref<string> = ref("")
 const targetLanguage: Ref<Language> = ref(Language.Korean)
 const splitedTargetText: Ref<string[]> = ref([])
+
 // 유저가 타이핑한 문장
 const typedText: Ref<string> = ref("")
 const parsingText: Ref<string> = ref("")
 const typingCount: Ref<number> = ref(0)
 
-// 쪼갠 문장의 길이와 동일한 새 배열 생성, 각 요소는 false
+// 쪼갠 문장의 길이와 동일한 새 배열 생성, 각 요소는 false.
 const typoArray: Ref<boolean[]> = ref([])
 // 문장 입력 상태 혹은 틀림/맞음 체크
 const typoStatus: Ref<{ [k: number]: TypoStatus }> = ref({})
@@ -270,52 +255,26 @@ const resetInfo = () => {
 
 const calcTypingSpeed = (takenTime: number) => {
     if (takenTime === 0) return
+
     const totalWords: string = parsingText.value.trim()
     const splitByWords: number =
         totalWords === "" ? 0 : totalWords.split(" ").length
 
     switch (targetLanguage.value) {
         case Language.English: {
-            if (splitByWords !== 0) {
-                wpm.value = Math.round((splitByWords / takenTime) * 60)
-            }
-            if (totalWords.length !== 0) {
-                cpm.value = Math.round((totalWords.length / takenTime) * 60)
-            }
+            wpm.value = calcSpeed(splitByWords, takenTime)
+            cpm.value = calcSpeed(totalWords.length, takenTime)
         }
 
         case Language.Korean: {
             const disassembleText: string[] = disassemble(parsingText.value)
-            if (splitByWords !== 0) {
-                wpm.value = Math.round((splitByWords / takenTime) * 60)
-            }
-            if (disassembleText.length !== 0) {
-                cpm.value = Math.round(
-                    (disassembleText.length / takenTime) * 60,
-                )
-            }
+
+            wpm.value = calcSpeed(splitByWords, takenTime)
+            cpm.value = calcSpeed(disassembleText.length, takenTime)
         }
     }
 }
 
-// const toggleLanguage = (lang: string) => {
-//     switch (lang) {
-//         case Language.Korean:
-//             targetLanguage.value = Language.Korean
-//             break
-//         case Language.English:
-//             targetLanguage.value = Language.English
-//             break
-//     }
-
-//     const [currentQuote, nextQuote] = getTargetText()
-//     targetText.value = currentQuote.quote
-//     targetPerson.value = currentQuote.person
-//     nextText.value = nextQuote.quote
-
-//     readyText()
-//     resetInfo()
-// }
 const toggleLanguage = (lang: Language) => {
     if (lang !== targetLanguage.value) {
         toggleLangBtn.reverse()
