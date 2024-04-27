@@ -41,3 +41,53 @@ const getActiveClass = (color: string): string => {
     align-items: center;
 }
 </style>
+
+<!-- <template>
+    <div :class="$style.index">
+        <component
+            v-for="themeColor in themeColors"
+            :key="themeColor"
+            :is="`Icon${themeColor}`"
+            @click="$colorMode.preference = themeColor.toLowerCase()"
+            :class="[
+                getActiveClass(themeColor.toLowerCase()),
+                $style.themeColor,
+            ]"
+        />
+    </div>
+</template>
+
+<script setup lang="ts">
+import { ThemeColor } from "~/structure/theme"
+import IconLight from "#components"
+
+const $style = useCssModule()
+const colorMode = useColorMode()
+
+// const themeColors = [
+//     ThemeColor.Light,
+//     ThemeColor.Dark,
+//     ThemeColor.Sepia,
+//     ThemeColor.System,
+// ]
+
+const themeColors = ["Light", "Dark", "Sepia", "System"]
+const getActiveClass = (color: string): string => {
+    return colorMode.preference === color ? "selected" : ""
+}
+</script>
+
+<style lang="scss" module>
+.index {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+
+    .icon {
+        width: 40px;
+    }
+}
+</style> -->

@@ -323,9 +323,11 @@ const toggleLanguage = (lang: Language) => {
 
     switch (lang) {
         case Language.Korean:
+            if (lang === targetLanguage.value) return
             targetLanguage.value = Language.Korean
             break
         case Language.English:
+            if (lang === targetLanguage.value) return
             targetLanguage.value = Language.English
             break
     }
@@ -472,7 +474,15 @@ const getActiveClass = (lang: Language): string => {
                 border-radius: 7px;
                 box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.2);
 
-                // transition: all 0.4s;
+                cursor: pointer;
+
+                &:active {
+                    width: 50px;
+                    height: 25px;
+                    line-height: 25px;
+
+                    transition: all 0.2s;
+                }
             }
 
             > .active {
