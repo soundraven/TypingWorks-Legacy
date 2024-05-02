@@ -27,9 +27,10 @@
             <div :class="[$style.progress, $style.gridItem]">
                 진행도: {{ typingProgress }}
             </div>
-            <div :class="[$style.count, $style.gridItem]">
+            <div :class="[$style.typingCount, $style.gridItem]">
                 count: {{ typingCount }}
             </div>
+            <div :class="[$style.countLimit, $style.gridItem]">5회</div>
             <div :class="[$style.keyTheme, $style.gridItem]">
                 {{ getElapsedTime() }}
             </div>
@@ -152,6 +153,13 @@ const startTyping = (
     calcAccuracy()
     calcProgress()
     checkTypo()
+
+    if (
+        e?.key.toLowerCase() == "space" ||
+        e?.key.toLowerCase() == "backspace"
+    ) {
+        checkTypo()
+    }
 }
 
 // 마지막으로 타이핑한 시간 기준으로 경과시간을 계산
@@ -244,6 +252,7 @@ const resetInfo = () => {
     cpm.value = 0
     typingAccuracy.value = 0
     typingProgress.value = 0
+    typingCount.value = 0
 }
 
 const calcTypingSpeed = (takenTime: number) => {
@@ -373,7 +382,7 @@ const getActiveClass = (lang: Language): string => {
         display: grid;
         grid-template: repeat(8, 1fr) / repeat(10, 1fr);
         grid-template-areas:
-            "i i i n . l m b b b"
+            "i i i n nl l m b b b"
             "i i i kt kt l m b b b"
             "i i i s s w c b b b"
             "i i i s s a p t t t"
@@ -422,6 +431,8 @@ const getActiveClass = (lang: Language): string => {
                 width: 80px;
                 height: 40px;
 
+                position: relative;
+
                 text-align: center;
                 line-height: 40px;
 
@@ -431,7 +442,10 @@ const getActiveClass = (lang: Language): string => {
                 border-radius: 7px;
                 box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.2);
 
-                cursor: pointer;
+                &:hover {
+                    cursor: pointer;
+                    top: -3px;
+                }
 
                 &:active {
                     width: 50px;
@@ -495,8 +509,12 @@ const getActiveClass = (lang: Language): string => {
             grid-area: t;
         }
 
-        > .count {
+        > .typingCount {
             grid-area: n;
+        }
+
+        > .countLimit {
+            grid-area: nl;
         }
 
         > .keyTheme {
