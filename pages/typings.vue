@@ -30,7 +30,30 @@
             <div :class="[$style.typingCount, $style.gridItem]">
                 count: {{ typingCount }}
             </div>
-            <div :class="[$style.countLimit, $style.gridItem]">5회</div>
+            <div :class="[$style.countLimit, $style.gridItem]">
+                <div
+                    :class="$style.arrowBox"
+                    @click="editGoalCount(Direction.Reduce)"
+                >
+                    <Icon
+                        name="ic:baseline-arrow-circle-left"
+                        :class="$style.arrow"
+                    />
+                </div>
+                <div :class="[$style.arrowBox, $style.count]">
+                    {{ goalCount }}회
+                </div>
+                <div
+                    :class="$style.arrowBox"
+                    @click="editGoalCount(Direction.Raise)"
+                >
+                    <Icon
+                        name="ic:baseline-arrow-circle-right"
+                        :class="$style.arrow"
+                    />
+                </div>
+            </div>
+
             <div :class="[$style.keyTheme, $style.gridItem]">
                 {{ getElapsedTime() }}
             </div>
@@ -67,10 +90,11 @@
 
 <script setup lang="ts">
 import { disassemble } from "hangul-js"
-import { TypoStatus, Language, type Quote } from "~/structure/quotes"
+import { TypoStatus, Language, Direction, type Quote } from "~/structure/quotes"
 import EnQuotes from "@/assets/quotes/quotesEn.json"
 import KrQuotes from "@/assets/quotes/quotesKo.json"
 import { vAutoAnimate } from "@formkit/auto-animate"
+import { GAP } from "element-plus"
 
 const $style = useCssModule()
 
@@ -81,6 +105,10 @@ const nextPerson: Ref<string> = ref("")
 const nextText: Ref<string> = ref("")
 const targetLanguage: Ref<Language> = ref(Language.Korean)
 const splitedTargetText: Ref<string[]> = ref([])
+const goalCount: Ref<number> = ref(5)
+const oneCycle: number = 5
+const minCycle: number = 1
+const maxCycle: number = 15
 
 // 유저가 타이핑한 문장
 const typedText: Ref<string> = ref("")
@@ -119,6 +147,29 @@ onMounted(() => {
     splitText()
     updateTypoStatus()
 })
+
+const editGoalCount = (direction: Direction) => {
+    switch (direction) {
+        case Direction.Raise:
+            if (goalCount.value === maxCycle) {
+                goalCount.value = Infinity
+            } else if (goalCount.value === minCycle) {
+                goalCount.value = oneCycle
+            } else {
+                goalCount.value += oneCycle
+            }
+            break
+        case Direction.Reduce:
+            if (goalCount.value === Infinity) {
+                goalCount.value = maxCycle
+            } else if (goalCount.value > oneCycle) {
+                goalCount.value -= oneCycle
+            } else {
+                goalCount.value = minCycle
+            }
+            break
+    }
+}
 
 //타입캐스팅
 const keyupEventHandler = (e: KeyboardEvent) => {
@@ -515,6 +566,46 @@ const getActiveClass = (lang: Language): string => {
 
         > .countLimit {
             grid-area: nl;
+
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+
+            > .arrowBox {
+                width: 30px;
+                height: 30px;
+
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                > .arrow {
+                    width: 27px;
+                    height: 27px;
+
+                    color: var(--color-secondary);
+
+                    transition-duration: 0.3s;
+
+                    &:hover {
+                        cursor: pointer;
+                    }
+
+                    &:active {
+                        width: 20px;
+                        height: 20px;
+
+                        color: var(--color-primary);
+                        transition-duration: 0s;
+                    }
+                }
+            }
+
+            > .count {
+                width: 40px;
+                height: 40px;
+            }
         }
 
         > .keyTheme {
