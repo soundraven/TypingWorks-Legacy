@@ -40,9 +40,13 @@
                         :class="$style.arrow"
                     />
                 </div>
-                <div :class="[$style.arrowBox, $style.count]">
+                <div
+                    :class="[$style.arrowBox, $style.count]"
+                    v-if="goalCount !== Infinity"
+                >
                     {{ goalCount }}회
                 </div>
+                <div :class="[$style.arrowBox, $style.infinity]" v-else>∞</div>
                 <div
                     :class="$style.arrowBox"
                     @click="editGoalCount(Direction.Raise)"
@@ -585,6 +589,7 @@ const getActiveClass = (lang: Language): string => {
                     height: 27px;
 
                     color: var(--color-secondary);
+                    line-height: 27px;
 
                     transition-duration: 0.3s;
 
@@ -605,6 +610,10 @@ const getActiveClass = (lang: Language): string => {
             > .count {
                 width: 40px;
                 height: 40px;
+            }
+
+            > .infinity {
+                font-size: 27px;
             }
         }
 
