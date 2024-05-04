@@ -2,7 +2,12 @@
     <div :class="$style.index">
         <div :class="$style.typing">
             <div :class="[$style.icon, $style.gridItem]">
-                {{ store.typedQuote }}
+                <div
+                    v-for="(quote, index) in store.typedQuote"
+                    :key="'quote_' + index"
+                >
+                    {{ quote }}
+                </div>
             </div>
             <div :class="[$style.language, $style.gridItem]" v-auto-animate>
                 <div
