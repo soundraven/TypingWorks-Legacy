@@ -69,7 +69,7 @@
                     <span
                         v-for="(char, index) in splitedTargetText"
                         :key="index"
-                        :class="[getTypoClass(index)]"
+                        :class="[getTypoClass(index), getLastTyped(index)]"
                     >
                         {{ char }}
                     </span>
@@ -256,25 +256,22 @@ const handleDeletion = (e: Event) => {
         for (let i = 0; i < typoStatus.value.length; i++) {
             if (typoStatus.value[i] !== checkTypoArray.value[i]) {
                 typoStatus.value[i] = checkTypoArray.value[i]
-                console.log(typoStatus.value)
-                console.log(checkTypoArray.value)
             }
         }
     }
 }
 
 const checkTypo = () => {
-    //오타 관리 배열에 TypoStatus를 채워주는 역할
     const splitedParsingText: string[] = parsingText.value.split("")
 
     for (let i = 0; i + 1 < parsingText.value.length; i++) {
+        //오타 관리 배열에 TypoStatus 채우기
         if (splitedParsingText[i] === undefined) {
             typoStatus.value[i] = TypoStatus.NotInput
-            console.log(splitedParsingText[i])
         }
 
         if (targetText.value[i] === splitedParsingText[i]) {
-            typoStatus.value[i] = TypoStatus.Correct //typoStatus는 실제 오타 체크용
+            typoStatus.value[i] = TypoStatus.Correct //한박자 늦게 따라오는 오타 체크 배열 - 조합문자 이슈
         } else {
             typoStatus.value[i] = TypoStatus.Error
         }
@@ -283,26 +280,16 @@ const checkTypo = () => {
     for (let i = 0; i < parsingText.value.length; i++) {
         if (targetText.value[i] === undefined) continue
         if (targetText.value[i] === splitedParsingText[i]) {
-            checkTypoArray.value[i] = TypoStatus.Correct //CheckTypoArray는 눈에 보이는거용
+            checkTypoArray.value[i] = TypoStatus.Correct //입력받는대로 따라오는 오타 체크 배열
         } else {
             checkTypoArray.value[i] = TypoStatus.Error
         }
     }
-
-    console.log(typoStatus.value)
-    console.log(checkTypoArray.value)
 }
 
 const getTypoClass = (index: number): string => {
-    //클래스 부여를 위한 함수
-
-    // checkTypoArray.value = new Array(parsingText.value.length).fill(
-    //     TypoStatus.NotInput,
-    // )
-
     const splitedParsingText: string[] = parsingText.value.split("")
-    const lastIndex: number = splitedParsingText.length - 1
-
+    //오타와 정타에 클래스 부여
     for (let i = 0; i + 1 < parsingText.value.length; i++) {
         if (typoStatus.value[index] === TypoStatus.NotInput) return ""
         if (typoStatus.value[index] === TypoStatus.Error) return $style.typo
@@ -310,44 +297,40 @@ const getTypoClass = (index: number): string => {
             return $style.success
     }
 
-    for (let i = 0; i + 1 < splitedParsingText.length; i++) {
-        if (checkTypoArray.value[index] === TypoStatus.Correct)
-            return $style.success
+    // for (let i = 0; i < splitedParsingText.length; i++) {
+    //     if (checkTypoArray.value[index] === TypoStatus.Correct)
+    //         return $style.success
+    // }
+}
+
+const getLastTyped = (index: number): string => {
+    const splitedParsingText: string[] = parsingText.value.split("")
+    const lastIndex: number = splitedParsingText.length - 1
+
+    const hangulRange = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/ // 한글 자음 모음과 조합 문자의 유니코드 범위
+    const combiningRange = /[\u0300-\u036F]/
+
+    if (
+        (lastIndex === index &&
+            // 마지막 입력이 한글이나 조합 문자일 경우 클래스를 적용하지 않음
+            hangulRange.test(parsingText.value[lastIndex])) ||
+        combiningRange.test(parsingText.value[lastIndex])
+    ) {
+        return $style.lastTyped
     }
 
-    if (lastIndex === index) {
-        if (
-            typoStatus.value[index] === TypoStatus.Error ||
-            TypoStatus.Correct
-        ) {
-            return $style.lastTyped
+    //그렇지 않은 경우 한 박자 빠르게 클래스를 적용(특수문자, 띄어쓰기 등)
+    for (let i = 0; i < parsingText.value.length; i++) {
+        if (lastIndex === index) {
+            switch (checkTypoArray.value[index]) {
+                case TypoStatus.Correct:
+                    return [$style.success, $style.lastTyped]
+                case TypoStatus.Error:
+                    return [$style.typo, $style.lastTyped]
+            }
         }
     }
 }
-// const getTypoClass = (i: number): string => {
-//     const splitedParsingText: string[] = parsingText.value.split("")
-//     const lastIndex: number = splitedParsingText.length - 1
-//     //클래스 부여만을 위한 배열을 하나 새로 만들까?
-
-//     if (lastIndex === i) {
-//         if (typoStatus.value[i] === TypoStatus.Error || TypoStatus.Correct) {
-//             return $style.lastTyped
-//         }
-//     }
-// }
-
-// const getLastTyped = (i: number): string => {
-//     const splitedParsingText: string[] = parsingText.value.split("")
-//     const lastIndex: number = splitedParsingText.length - 1
-
-//     if (lastIndex > 0) {
-//         if (typoStatus.value[i] === TypoStatus.Error) {
-//             return $style.typo, $style.lastTyped
-//         } else if (typoStatus.value[i] === TypoStatus.Correct) {
-//             return $style.success, $style.lastTyped
-//         }
-//     } else return ""
-// }
 
 // 입력 텍스트의 정확도 계산
 const calcAccuracy = () => {
@@ -370,7 +353,7 @@ const calcProgress = () => {
 }
 
 const startTypingSpeedCalc = () => {
-    elapsedTimerId.value = setInterval(keepCheckElapsedTime, 100)
+    // elapsedTimerId.value = setInterval(keepCheckElapsedTime, 100) //콘솔창 계속 올라가는 이슈때문에 임시로 변경
 }
 
 const keepCheckElapsedTime = () => {
