@@ -1,8 +1,9 @@
 <template>
     <div :class="$style.index">
         <div :class="$style.typing">
-            <div :class="[$style.icon, $style.gridItem]">
+            <div :class="[$style.icon, $style.gridItem]" v-auto-animate>
                 <div
+                    :class="$style.list"
                     v-for="(quote, index) in store.typedQuote"
                     :key="'quote_' + index"
                 >
@@ -16,7 +17,7 @@
                     :class="[$style.langBtn, getActiveClass(btn)]"
                     @click="toggleLanguage(btn)"
                 >
-                    {{ btn }}
+                    <div>{{ btn }}</div>
                 </div>
             </div>
             <div :class="[$style.screenMode, $style.gridItem]">
@@ -149,6 +150,8 @@ let toggleLangBtn: Language[] = [Language.Korean, Language.English]
 
 // 경과시간 계산 반복하는 setTimeOut Id
 const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
+
+const listUp = ref()
 
 onMounted(() => {
     if (process.server) return
@@ -378,7 +381,7 @@ const stopTypingSpeedCalc = () => {
     clearInterval(elapsedTimerId.value)
 }
 
-const endTyping = () => {
+const endTyping = async () => {
     typingCount.value += +1
 
     typoStatus.value = []
@@ -390,7 +393,7 @@ const endTyping = () => {
 
     calcTypingSpeed(totalTime.value)
 
-    store.addList(targetText.value)
+    await summarizeSentence(targetText.value)
 
     const [target, nextTarget] = getTargetText()
     targetText.value = nextText.value
@@ -401,6 +404,17 @@ const endTyping = () => {
     splitText()
     updateTypoStatus()
     resetInfo()
+}
+
+const summarizeSentence = (sentence) => {
+    const maxLength = 20
+
+    if (sentence.length <= maxLength) {
+        store.addList(sentence)
+    } else {
+        const summarized = sentence.substring(0, maxLength) + "..."
+        store.addList(summarized)
+    }
 }
 
 const resetInfo = () => {
@@ -549,7 +563,25 @@ const getActiveClass = (lang: Language): string => {
         }
 
         > .icon {
+            height: 100%;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            justify-content: space-around;
             grid-area: i;
+            font-size: 16px;
+            overflow: hidden;
+
+            > .list {
+                width: 330px;
+                height: 20px;
+                line-height: 30px;
+                border: 2px solid var(--border-color);
+                border-radius: 10px;
+                box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+                margin: 10px;
+                padding: 5px;
+            }
         }
 
         > .language {
