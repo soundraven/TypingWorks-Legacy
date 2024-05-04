@@ -1,7 +1,9 @@
 <template>
     <div :class="$style.index">
         <div :class="$style.typing">
-            <div :class="[$style.icon, $style.gridItem]">로고위치</div>
+            <div :class="[$style.icon, $style.gridItem]">
+                {{ store.typedQuote }}
+            </div>
             <div :class="[$style.language, $style.gridItem]" v-auto-animate>
                 <div
                     v-for="btn in toggleLangBtn"
@@ -100,8 +102,10 @@ import EnQuotes from "@/assets/quotes/quotesEn.json"
 import KrQuotes from "@/assets/quotes/quotesKo.json"
 import { vAutoAnimate } from "@formkit/auto-animate"
 import { GAP } from "element-plus"
+import { useTypedQuote } from "@/store/typedQuote"
 
 const $style = useCssModule()
+const store = useTypedQuote()
 
 //v-memo 확인해보기
 const targetPerson: Ref<string> = ref("")
@@ -380,6 +384,8 @@ const endTyping = () => {
     totalTime.value = (endTime.value - startTime.value) / 1000
 
     calcTypingSpeed(totalTime.value)
+
+    store.addList(targetText.value)
 
     const [target, nextTarget] = getTargetText()
     targetText.value = nextText.value
