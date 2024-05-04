@@ -84,6 +84,7 @@
                         @keyup="keyupEventHandler"
                         @keydown.enter.prevent="endTyping"
                         @paste="preventPaste"
+                        @input="handleDeletion($event)"
                     />
                 </div>
                 <div :class="$style.nextText">{{ nextText }}</div>
@@ -121,6 +122,7 @@ const typingCount: Ref<number> = ref(0)
 
 // 문장 입력 상태 혹은 틀림/맞음 체크
 const typoStatus: Ref<TypoStatus[]> = ref([])
+const checkTypoArray: Ref<TypoStatus[]> = ref([])
 
 const typingAccuracy: Ref<number> = ref(0)
 const typingProgress: Ref<number> = ref(0)
@@ -195,7 +197,6 @@ const startTyping = (
     e: KeyboardEvent | undefined = undefined,
 ) => {
     parsingText.value = text
-
     // 시작시 startTime 체크
     if (startTime.value === 0) {
         const date = new Date()
@@ -225,17 +226,128 @@ const calcElapsedTime = () => {
     elapsedTime.value = (lastTypingTime.value - startTime.value) / 1000
 }
 
+// 오타 확인을 위해 문장 글자단위로 분해
+const splitText = () => {
+    splitedTargetText.value = targetText.value.split("")
+}
+
+const updateTypoStatus = () => {
+    typoStatus.value = new Array(splitedTargetText.value.length).fill(
+        TypoStatus.NotInput,
+    )
+}
+
+const handleDeletion = (e: Event) => {
+    const inputEvent = e as InputEvent
+    const splitedParsingText: string[] = parsingText.value.split("")
+
+    if (inputEvent.inputType === "deleteContentBackward") {
+        checkTypoArray.value = []
+
+        for (let i = 0; i < parsingText.value.length; i++) {
+            if (targetText.value[i] === undefined) continue
+            if (targetText.value[i] === splitedParsingText[i]) {
+                checkTypoArray.value[i] = TypoStatus.Correct //CheckTypoArray는 눈에 보이는거용
+            } else {
+                checkTypoArray.value[i] = TypoStatus.Error
+            }
+        }
+
+        for (let i = 0; i < typoStatus.value.length; i++) {
+            if (typoStatus.value[i] !== checkTypoArray.value[i]) {
+                typoStatus.value[i] = checkTypoArray.value[i]
+                console.log(typoStatus.value)
+                console.log(checkTypoArray.value)
+            }
+        }
+    }
+}
+
 const checkTypo = () => {
-    //조합문자 조합중 오타로 체크되는것 해결을 위해 i + 1로 수정
+    //오타 관리 배열에 TypoStatus를 채워주는 역할
+    const splitedParsingText: string[] = parsingText.value.split("")
+
     for (let i = 0; i + 1 < parsingText.value.length; i++) {
-        if (targetText.value[i] == undefined) continue
-        if (targetText.value[i] == parsingText.value[i]) {
-            typoStatus.value[i] = TypoStatus.Correct
+        if (splitedParsingText[i] === undefined) {
+            typoStatus.value[i] = TypoStatus.NotInput
+            console.log(splitedParsingText[i])
+        }
+
+        if (targetText.value[i] === splitedParsingText[i]) {
+            typoStatus.value[i] = TypoStatus.Correct //typoStatus는 실제 오타 체크용
         } else {
             typoStatus.value[i] = TypoStatus.Error
         }
     }
+
+    for (let i = 0; i < parsingText.value.length; i++) {
+        if (targetText.value[i] === undefined) continue
+        if (targetText.value[i] === splitedParsingText[i]) {
+            checkTypoArray.value[i] = TypoStatus.Correct //CheckTypoArray는 눈에 보이는거용
+        } else {
+            checkTypoArray.value[i] = TypoStatus.Error
+        }
+    }
+
+    console.log(typoStatus.value)
+    console.log(checkTypoArray.value)
 }
+
+const getTypoClass = (index: number): string => {
+    //클래스 부여를 위한 함수
+
+    // checkTypoArray.value = new Array(parsingText.value.length).fill(
+    //     TypoStatus.NotInput,
+    // )
+
+    const splitedParsingText: string[] = parsingText.value.split("")
+    const lastIndex: number = splitedParsingText.length - 1
+
+    for (let i = 0; i + 1 < parsingText.value.length; i++) {
+        if (typoStatus.value[index] === TypoStatus.NotInput) return ""
+        if (typoStatus.value[index] === TypoStatus.Error) return $style.typo
+        if (typoStatus.value[index] === TypoStatus.Correct)
+            return $style.success
+    }
+
+    for (let i = 0; i + 1 < splitedParsingText.length; i++) {
+        if (checkTypoArray.value[index] === TypoStatus.Correct)
+            return $style.success
+    }
+
+    if (lastIndex === index) {
+        if (
+            typoStatus.value[index] === TypoStatus.Error ||
+            TypoStatus.Correct
+        ) {
+            return $style.lastTyped
+        }
+    }
+}
+// const getTypoClass = (i: number): string => {
+//     const splitedParsingText: string[] = parsingText.value.split("")
+//     const lastIndex: number = splitedParsingText.length - 1
+//     //클래스 부여만을 위한 배열을 하나 새로 만들까?
+
+//     if (lastIndex === i) {
+//         if (typoStatus.value[i] === TypoStatus.Error || TypoStatus.Correct) {
+//             return $style.lastTyped
+//         }
+//     }
+// }
+
+// const getLastTyped = (i: number): string => {
+//     const splitedParsingText: string[] = parsingText.value.split("")
+//     const lastIndex: number = splitedParsingText.length - 1
+
+//     if (lastIndex > 0) {
+//         if (typoStatus.value[i] === TypoStatus.Error) {
+//             return $style.typo, $style.lastTyped
+//         } else if (typoStatus.value[i] === TypoStatus.Correct) {
+//             return $style.success, $style.lastTyped
+//         }
+//     } else return ""
+// }
 
 // 입력 텍스트의 정확도 계산
 const calcAccuracy = () => {
@@ -251,7 +363,6 @@ const calcAccuracy = () => {
 
 const calcProgress = () => {
     //진행도 최대 105까지 나오는 현상 수정해보기
-    console.log(parsingText.value)
     typingProgress.value = getPercentage(
         parsingText.value.split("").length,
         targetText.value.split("").length,
@@ -357,17 +468,6 @@ const toggleLanguage = (lang: Language) => {
     resetInfo()
 }
 
-// 오타 확인을 위해 문장 글자단위로 분해
-const splitText = () => {
-    splitedTargetText.value = targetText.value.split("")
-}
-
-const updateTypoStatus = () => {
-    typoStatus.value = new Array(splitedTargetText.value.length).fill(
-        TypoStatus.NotInput,
-    )
-}
-
 const getTargetText = (): Quote[] => {
     let targetDatas: Quote[] = []
 
@@ -386,20 +486,6 @@ const getTargetText = (): Quote[] => {
         targetDatas[randomIndex],
         targetDatas[(randomIndex + 1) % targetDatas.length],
     ]
-}
-
-const getTypoClass = (index: number): string => {
-    const lastIndex = Object.keys(typoStatus.value).length - 1
-
-    if (typoStatus.value[index] === TypoStatus.NotInput) return ""
-    if (typoStatus.value[index] === TypoStatus.Error) return $style.typo
-    if (typoStatus.value[index] === TypoStatus.Correct) {
-        if (parseInt(Object.keys(typoStatus.value)[lastIndex]) === index) {
-            return `${$style.success} ${$style.lastSuccess}`
-        }
-        return $style.success
-    }
-    return ""
 }
 
 const getElapsedTime = (): string => {
@@ -643,15 +729,14 @@ const getActiveClass = (lang: Language): string => {
 
                 > .typo {
                     color: red;
-                    background-color: aqua;
                 }
 
                 > .success {
                     color: var(--color-primary);
                 }
 
-                > .lastSuccess {
-                    border-right: 1px solid var(--color-secondary);
+                > .lastTyped {
+                    border-right: 2px solid var(--color-secondary);
                 }
             }
 
