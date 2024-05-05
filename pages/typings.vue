@@ -563,24 +563,34 @@ const getActiveClass = (lang: Language): string => {
         }
 
         > .icon {
-            height: 100%;
-            display: flex;
-            flex-direction: column-reverse;
-            align-items: center;
-            justify-content: space-around;
             grid-area: i;
+
+            height: 100%;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+
             font-size: 16px;
-            overflow: hidden;
 
             > .list {
                 width: 330px;
-                height: 20px;
-                line-height: 30px;
+                height: 26px;
+
+                text-align: left;
+                line-height: 26px;
+
                 border: 2px solid var(--border-color);
                 border-radius: 10px;
                 box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
-                margin: 10px;
+
+                margin: 5px;
                 padding: 5px;
+
+                &:nth-last-child(n + 6) {
+                    display: none;
+                }
             }
         }
 
