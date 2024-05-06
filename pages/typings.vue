@@ -3,7 +3,7 @@
         <div :class="$style.typing">
             <div :class="[$style.icon, $style.gridItem]" v-auto-animate>
                 <div
-                    :class="$style.list"
+                    :class="[$style.list, getClass(index)]"
                     v-for="(quote, index) in store.typedQuote"
                     :key="'quote_' + index"
                 >
@@ -152,6 +152,26 @@ let toggleLangBtn: Language[] = [Language.Korean, Language.English]
 const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
 
 const listUp = ref()
+const flashIndices = ref(new Set())
+
+watch(store.typedQuote, (newVal, oldVal) => {
+    if (newVal !== oldVal) {
+        // 이전에 저장된 인덱스를 모두 제거
+        flashIndices.value.clear()
+
+        // 새로운 인덱스를 추가
+        newVal.forEach((_, index) => {
+            setTimeout(() => {
+                flashIndices.value.delete(index) // 1초 후 flash 클래스 제거
+            }, 1000)
+            flashIndices.value.add(index) // flash 클래스 추가
+        })
+    }
+})
+
+const getClass = (index) => {
+    return flashIndices.value.has(index) ? $style.flash : ""
+}
 
 onMounted(() => {
     if (process.server) return
@@ -381,7 +401,7 @@ const stopTypingSpeedCalc = () => {
     clearInterval(elapsedTimerId.value)
 }
 
-const endTyping = async () => {
+const endTyping = () => {
     typingCount.value += +1
 
     typoStatus.value = []
@@ -393,7 +413,7 @@ const endTyping = async () => {
 
     calcTypingSpeed(totalTime.value)
 
-    await summarizeSentence(targetText.value)
+    summarizeSentence(targetText.value)
 
     const [target, nextTarget] = getTargetText()
     targetText.value = nextText.value
@@ -407,7 +427,7 @@ const endTyping = async () => {
 }
 
 const summarizeSentence = (sentence) => {
-    const maxLength = 20
+    const maxLength: number = targetLanguage.value === Language.Korean ? 23 : 38
 
     if (sentence.length <= maxLength) {
         store.addList(sentence)
@@ -513,6 +533,21 @@ const getActiveClass = (lang: Language): string => {
 </script>
 
 <style lang="scss" module>
+@keyframes flash {
+    0% {
+        opacity: 0.8;
+        box-shadow: 5px 5px 10px var(--color-primary);
+    }
+    50% {
+        opacity: 0.4;
+        box-shadow: 5px 5px 10px var(--color-primary);
+    }
+    100% {
+        opacity: 0;
+        box-shadow: 5px 5px 10px var(--color-primary);
+    }
+}
+
 .index {
     width: 100%;
     min-height: 100dvh;
@@ -592,6 +627,10 @@ const getActiveClass = (lang: Language): string => {
                     display: none;
                 }
             }
+
+            > .flash {
+                animation: flash 1s ease-out;
+            }
         }
 
         > .language {
@@ -601,8 +640,10 @@ const getActiveClass = (lang: Language): string => {
 
             display: flex;
             flex-direction: column;
-            justify-content: space-evenly;
+            justify-content: space-around;
             align-items: center;
+
+            // padding-block: auto;
 
             > .langBtn {
                 width: 80px;
@@ -619,6 +660,8 @@ const getActiveClass = (lang: Language): string => {
                 border-radius: 7px;
                 box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.2);
 
+                transition-duration: 0.5s;
+
                 &:hover {
                     cursor: pointer;
                     top: -3px;
@@ -629,7 +672,7 @@ const getActiveClass = (lang: Language): string => {
                     height: 25px;
                     line-height: 25px;
 
-                    transition: all 0.2s;
+                    transition: all 0.5s;
                 }
             }
 
@@ -713,15 +756,17 @@ const getActiveClass = (lang: Language): string => {
                     color: var(--color-secondary);
                     line-height: 27px;
 
-                    transition-duration: 0.3s;
+                    position: relative;
+
+                    transition-duration: 0.2s;
 
                     &:hover {
                         cursor: pointer;
                     }
 
                     &:active {
-                        width: 20px;
-                        height: 20px;
+                        width: 22px;
+                        height: 22px;
 
                         color: var(--color-primary);
                         transition-duration: 0s;
