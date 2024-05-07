@@ -77,7 +77,11 @@
                     <span
                         v-for="(char, index) in splitedTargetText"
                         :key="index"
-                        :class="[getTypoClass(index), getLastTyped(index)]"
+                        :class="[
+                            getTypoClass(index),
+                            getLastTyped(index),
+                            getCursorBlink(index) ? $style.cursorBlink : '',
+                        ]"
                     >
                         {{ char }}
                     </span>
@@ -151,10 +155,8 @@ let toggleLangBtn: Language[] = [Language.Korean, Language.English]
 // 경과시간 계산 반복하는 setTimeOut Id
 const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
 
-const listUp = ref()
-
 onMounted(() => {
-    if (process.server) return
+    if (process.server) return //서버사이드렌더링이기 때문
     // runtime.public.API
     const [currentQuote, nextQuote]: Quote[] = getTargetText()
 
@@ -167,6 +169,7 @@ onMounted(() => {
 })
 
 const editGoalCount = (direction: Direction) => {
+    //한 사이클당 문장 몇 회 타이핑할지 선택
     switch (direction) {
         case Direction.Raise:
             if (goalCount.value === maxCycle) {
@@ -221,13 +224,6 @@ const startTyping = (
     calcAccuracy()
     calcProgress()
     checkTypo()
-
-    if (
-        e?.key.toLowerCase() == "space" ||
-        e?.key.toLowerCase() == "backspace"
-    ) {
-        checkTypo()
-    }
 }
 
 // 마지막으로 타이핑한 시간 기준으로 경과시간을 계산
@@ -337,6 +333,17 @@ const getLastTyped = (index: number): string | string[] => {
     }
 }
 
+const getCursorBlink = (index: number): boolean | string => {
+    const splitedParsingText: string[] = parsingText.value.split("")
+    const lastIndex: number = splitedParsingText.length - 1
+
+    if (lastIndex === index) {
+        return true
+    }
+
+    return ""
+}
+
 // 입력 텍스트의 정확도 계산
 const calcAccuracy = () => {
     const typoCount: number = typoStatus.value.filter(
@@ -357,14 +364,14 @@ const calcProgress = () => {
 }
 
 const startTypingSpeedCalc = () => {
-    // elapsedTimerId.value = setInterval(keepCheckElapsedTime, 100) //콘솔창 계속 올라가는 이슈때문에 임시로 변경
+    elapsedTimerId.value = setInterval(keepCheckElapsedTime, 100) //콘솔창 계속 올라가는 이슈때문에 임시로 변경
 }
 
 const keepCheckElapsedTime = () => {
     const date = new Date()
     const currentTime: number = date.getTime()
 
-    elapsedTime.value = (currentTime - startTime.value) / 1000
+    elapsedTime.value = Math.floor((currentTime - startTime.value) / 1000)
 
     calcTypingSpeed(elapsedTime.value)
 }
@@ -505,18 +512,18 @@ const getActiveClass = (lang: Language): string => {
 </script>
 
 <style lang="scss" module>
-@keyframes flash {
+@keyframes flash-border {
     0% {
-        opacity: 0.8;
-        box-shadow: 5px 5px 10px var(--color-primary);
+        border-right-color: var(--color-secondary);
+        height: 70%;
     }
     50% {
-        opacity: 0.4;
-        box-shadow: 5px 5px 10px var(--color-primary);
+        border-right-color: transparent;
+        height: 70%;
     }
     100% {
-        opacity: 0;
-        box-shadow: 5px 5px 10px var(--color-primary);
+        border-right-color: var(--color-secondary);
+        height: 70%;
     }
 }
 
@@ -790,7 +797,17 @@ const getActiveClass = (lang: Language): string => {
 
                 > .lastTyped {
                     border-right: 2px solid var(--color-secondary);
+                    transition-property: border-right;
+                    transition-duration: 1s;
+                    animation: flash-border 1.2s infinite;
+                    // box-shadow: inset 2px 0px 50px
+                    //     rgba(var(--color-primary-rgb), 0.5);
+                    box-shadow: 2px 0px 50px var(--color-primary);
                 }
+
+                // > .cursorBlink {
+                //     // background-color: red;
+                // }
             }
 
             > .inputs {
