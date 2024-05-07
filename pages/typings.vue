@@ -592,8 +592,6 @@ const getActiveClass = (lang: Language): string => {
         > .icon {
             grid-area: i;
 
-            height: 100%;
-
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -601,27 +599,27 @@ const getActiveClass = (lang: Language): string => {
 
             font-size: 16px;
 
+            padding-block: 5px;
+
             > .list {
                 width: 330px;
-                height: 26px;
+                height: 23px;
 
                 text-align: left;
-                line-height: 26px;
+                line-height: 23px;
 
                 border: 2px solid var(--border-color);
                 border-radius: 10px;
                 box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
 
-                margin: 5px;
+                margin-block: 5px;
                 padding: 5px;
+
+                animation: flash-box-shadow 1s;
 
                 &:nth-last-child(n + 6) {
                     display: none;
                 }
-            }
-
-            > .flash {
-                animation: flash 1s ease-out;
             }
         }
 
@@ -634,8 +632,6 @@ const getActiveClass = (lang: Language): string => {
             flex-direction: column;
             justify-content: space-around;
             align-items: center;
-
-            // padding-block: auto;
 
             > .langBtn {
                 width: 80px;
@@ -831,12 +827,17 @@ const getActiveClass = (lang: Language): string => {
 
                 > input {
                     width: 100%;
+
+                    background-color: var(--bg-primary);
+
                     font-size: 20px;
-                    color: black;
+                    color: var(--color-secondary);
 
                     border: none;
                     border-bottom: 2px solid var(--border-color);
                     outline: none;
+
+                    padding-bottom: 5px;
 
                     &::placeholder {
                         color: var(--border-color);
@@ -851,7 +852,7 @@ const getActiveClass = (lang: Language): string => {
             }
 
             > .person {
-                color: #ccc;
+                color: var(--color-secondary);
                 font-size: 18px;
                 font-style: italic;
             }
