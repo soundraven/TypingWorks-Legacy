@@ -515,15 +515,30 @@ const getActiveClass = (lang: Language): string => {
 @keyframes flash-border {
     0% {
         border-right-color: var(--color-secondary);
-        height: 70%;
     }
     50% {
         border-right-color: transparent;
-        height: 70%;
     }
     100% {
         border-right-color: var(--color-secondary);
-        height: 70%;
+    }
+}
+
+@keyframes flash-box-shadow {
+    0% {
+        box-shadow:
+            inset 0px 0px 30px rgba(65, 184, 131, 0.3),
+            0px 0px 35px rgba(65, 184, 131, 1);
+    }
+    50% {
+        box-shadow:
+            inset 0px 0px 30px rgba(65, 184, 131, 0.15),
+            0px 0px 35px rgba(65, 184, 131, 0.5);
+    }
+    100% {
+        box-shadow:
+            inset 0px 0px 30px rgba(65, 184, 131, 0),
+            0px 0px 0px transparent;
     }
 }
 
@@ -795,19 +810,20 @@ const getActiveClass = (lang: Language): string => {
                     color: var(--color-primary);
                 }
 
-                > .lastTyped {
+                > .lastTyped::after {
+                    content: "";
                     border-right: 2px solid var(--color-secondary);
                     transition-property: border-right;
                     transition-duration: 1s;
                     animation: flash-border 1.2s infinite;
-                    // box-shadow: inset 2px 0px 50px
-                    //     rgba(var(--color-primary-rgb), 0.5);
-                    box-shadow: 2px 0px 50px var(--color-primary);
                 }
 
-                // > .cursorBlink {
-                //     // background-color: red;
-                // }
+                > .cursorBlink {
+                    box-shadow:
+                        inset 0px 0px 50px rgba(65, 184, 131, 0),
+                        5px 0px 35px transparent;
+                    animation: flash-box-shadow 1s;
+                }
             }
 
             > .inputs {
