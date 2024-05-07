@@ -3,7 +3,7 @@
         <div :class="$style.typing">
             <div :class="[$style.icon, $style.gridItem]" v-auto-animate>
                 <div
-                    :class="[$style.list, getClass(index)]"
+                    :class="[$style.list]"
                     v-for="(quote, index) in store.typedQuote"
                     :key="'quote_' + index"
                 >
@@ -152,26 +152,6 @@ let toggleLangBtn: Language[] = [Language.Korean, Language.English]
 const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
 
 const listUp = ref()
-const flashIndices = ref(new Set())
-
-watch(store.typedQuote, (newVal, oldVal) => {
-    if (newVal !== oldVal) {
-        // 이전에 저장된 인덱스를 모두 제거
-        flashIndices.value.clear()
-
-        // 새로운 인덱스를 추가
-        newVal.forEach((_, index) => {
-            setTimeout(() => {
-                flashIndices.value.delete(index) // 1초 후 flash 클래스 제거
-            }, 1000)
-            flashIndices.value.add(index) // flash 클래스 추가
-        })
-    }
-})
-
-const getClass = (index) => {
-    return flashIndices.value.has(index) ? $style.flash : ""
-}
 
 onMounted(() => {
     if (process.server) return
@@ -320,22 +300,15 @@ const checkTypo = () => {
 }
 
 const getTypoClass = (index: number): string => {
-    const splitedParsingText: string[] = parsingText.value.split("")
     //오타와 정타에 클래스 부여
-    for (let i = 0; i + 1 < parsingText.value.length; i++) {
-        if (typoStatus.value[index] === TypoStatus.NotInput) return ""
-        if (typoStatus.value[index] === TypoStatus.Error) return $style.typo
-        if (typoStatus.value[index] === TypoStatus.Correct)
-            return $style.success
-    }
+    if (typoStatus.value[index] === TypoStatus.NotInput) return ""
+    if (typoStatus.value[index] === TypoStatus.Error) return $style.typo
+    if (typoStatus.value[index] === TypoStatus.Correct) return $style.success
 
-    // for (let i = 0; i < splitedParsingText.length; i++) {
-    //     if (checkTypoArray.value[index] === TypoStatus.Correct)
-    //         return $style.success
-    // }
+    return ""
 }
 
-const getLastTyped = (index: number): string => {
+const getLastTyped = (index: number): string | string[] => {
     const splitedParsingText: string[] = parsingText.value.split("")
     const lastIndex: number = splitedParsingText.length - 1
 
@@ -349,18 +322,17 @@ const getLastTyped = (index: number): string => {
         combiningRange.test(parsingText.value[lastIndex])
     ) {
         return $style.lastTyped
-    }
-
-    //그렇지 않은 경우 한 박자 빠르게 클래스를 적용(특수문자, 띄어쓰기 등)
-    for (let i = 0; i < parsingText.value.length; i++) {
-        if (lastIndex === index) {
-            switch (checkTypoArray.value[index]) {
-                case TypoStatus.Correct:
-                    return [$style.success, $style.lastTyped]
-                case TypoStatus.Error:
-                    return [$style.typo, $style.lastTyped]
-            }
+    } else if (lastIndex === index) {
+        switch (checkTypoArray.value[index]) {
+            case TypoStatus.Correct:
+                return [$style.success, $style.lastTyped]
+            case TypoStatus.Error:
+                return [$style.typo, $style.lastTyped]
+            default:
+                return $style.lastTyped
         }
+    } else {
+        return ""
     }
 }
 
