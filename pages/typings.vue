@@ -256,16 +256,17 @@ const handleDeletion = (e: Event) => {
     if (inputEvent.inputType === "deleteContentBackward") {
         checkTypoArray.value = []
 
-        for (let i = 0; i < parsingText.value.length; i++) {
+        for (let i = 0; i + 1 < parsingText.value.length; i++) {
             if (targetText.value[i] === undefined) continue
             if (targetText.value[i] === splitedParsingText[i]) {
-                checkTypoArray.value[i] = TypoStatus.Correct //CheckTypoArray는 눈에 보이는거용
+                checkTypoArray.value[i] = TypoStatus.Correct
             } else {
                 checkTypoArray.value[i] = TypoStatus.Error
             }
         }
 
         for (let i = 0; i < typoStatus.value.length; i++) {
+            //Typo 클래스 부여는 typoStatus가 하기때문에 동기화 필요
             if (typoStatus.value[i] !== checkTypoArray.value[i]) {
                 typoStatus.value[i] = checkTypoArray.value[i]
             }
@@ -349,7 +350,6 @@ const calcAccuracy = () => {
 }
 
 const calcProgress = () => {
-    //진행도 최대 105까지 나오는 현상 수정해보기
     typingProgress.value = getPercentage(
         parsingText.value.split("").length,
         targetText.value.split("").length,
