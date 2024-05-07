@@ -527,18 +527,16 @@ const getActiveClass = (lang: Language): string => {
 @keyframes flash-box-shadow {
     0% {
         box-shadow:
-            inset 0px 0px 30px rgba(65, 184, 131, 0.3),
-            0px 0px 35px rgba(65, 184, 131, 1);
+            inset 0px 0px 30px var(--color-primary-shadow-inset-start),
+            0px 0px 35px var(--color-primary-shadow-start);
     }
     50% {
         box-shadow:
-            inset 0px 0px 30px rgba(65, 184, 131, 0.15),
-            0px 0px 35px rgba(65, 184, 131, 0.5);
+            inset 0px 0px 30px var(--color-primary-shadow-inset-mid),
+            0px 0px 35px var(--color-primary-shadow-mid);
     }
     100% {
-        box-shadow:
-            inset 0px 0px 30px rgba(65, 184, 131, 0),
-            0px 0px 0px transparent;
+        box-shadow: none;
     }
 }
 

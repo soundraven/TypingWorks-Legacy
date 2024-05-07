@@ -8,7 +8,10 @@
 .light-mode {
     --color: #243746;
     --color-primary: #41b883;
-    --color-primary-rgb: rgb(65, 184, 131);
+    --color-primary-shadow-start: rgba(65, 184, 131, 1);
+    --color-primary-shadow-mid: rgba(65, 184, 131, 0.5);
+    --color-primary-shadow-inset-start: rgba(65, 184, 131, 0.3);
+    --color-primary-shadow-inset-mid: rgba(65, 184, 131, 0.15);
     --color-secondary: #0e2233;
     --bg: #fff;
     --bg-secondary: #f3f5f4;
@@ -22,6 +25,10 @@
 .dark-mode {
     --color: #ebf4f1;
     --color-primary: #41b38a;
+    --color-primary-shadow-start: rgba(65, 179, 138, 1);
+    --color-primary-shadow-mid: rgba(65, 179, 138, 0.5);
+    --color-primary-shadow-inset-start: rgba(65, 179, 138, 0.3);
+    --color-primary-shadow-inset-mid: rgba(65, 179, 138, 0.15);
     --color-secondary: #fdf9f3;
     --bg: #091a28;
     --bg-secondary: #071521;
@@ -35,8 +42,12 @@
 .sepia-mode {
     --color: #433422;
     --color-primary: #d5bb95;
+    --color-primary-shadow-start: rgba(213, 187, 149, 1);
+    --color-primary-shadow-mid: rgba(213, 187, 149, 0.9);
+    --color-primary-shadow-inset-start: rgba(213, 187, 149, 0.3);
+    --color-primary-shadow-inset-mid: rgba(213, 187, 149, 0.15);
     --color-secondary: #504231;
-    --bg: #f1e7d0;
+    --bg: #f8f5f0;
     --bg-secondary: #eae0c9;
     --border-color: #ded0bf;
     --alpah-row: #f7f2ea;
