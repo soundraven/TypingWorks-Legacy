@@ -13,3 +13,8 @@ export enum Language {
     Korean = "ko",
     English = "en",
 }
+
+export enum Direction {
+    Raise = "raise",
+    Reduce = "reduce",
+}

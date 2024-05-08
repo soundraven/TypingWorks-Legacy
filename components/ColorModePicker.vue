@@ -39,5 +39,10 @@ const getActiveClass = (color: string): string => {
     flex-wrap: wrap;
     justify-content: space-evenly;
     align-items: center;
+
+    .icon {
+        //어째서인지 언어 변경시 그림자 사라지는 현상 발생
+        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+    }
 }
 </style>

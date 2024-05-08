@@ -1,19 +1,23 @@
 <template>
     <div :class="$style.index">
         <div :class="$style.typing">
-            <div :class="[$style.icon, $style.gridItem]">로고위치</div>
-            <div :class="[$style.language, $style.gridItem]">
+            <div :class="[$style.icon, $style.gridItem]" v-auto-animate>
                 <div
-                    :class="[$style.langBtn, getActiveClass(Language.Korean)]"
-                    @click="toggleLanguage(Language.Korean)"
+                    :class="$style.list"
+                    v-for="(quote, index) in store.typedQuote"
+                    :key="'quote_' + index"
                 >
-                    Ko
+                    {{ quote }}
                 </div>
+            </div>
+            <div :class="[$style.language, $style.gridItem]" v-auto-animate>
                 <div
-                    :class="[$style.langBtn, getActiveClass(Language.English)]"
-                    @click="toggleLanguage(Language.English)"
+                    v-for="btn in toggleLangBtn"
+                    :key="btn"
+                    :class="[$style.langBtn, getActiveClass(btn)]"
+                    @click="toggleLanguage(btn)"
                 >
-                    En
+                    <div>{{ btn }}</div>
                 </div>
             </div>
             <div :class="[$style.screenMode, $style.gridItem]">
@@ -31,9 +35,37 @@
             <div :class="[$style.progress, $style.gridItem]">
                 진행도: {{ typingProgress }}
             </div>
-            <div :class="[$style.count, $style.gridItem]">
+            <div :class="[$style.typingCount, $style.gridItem]">
                 count: {{ typingCount }}
             </div>
+            <div :class="[$style.countLimit, $style.gridItem]">
+                <div
+                    :class="$style.arrowBox"
+                    @click="editGoalCount(Direction.Reduce)"
+                >
+                    <Icon
+                        name="ic:baseline-arrow-circle-left"
+                        :class="$style.arrow"
+                    />
+                </div>
+                <div
+                    :class="[$style.arrowBox, $style.count]"
+                    v-if="goalCount !== Infinity"
+                >
+                    {{ goalCount }}회
+                </div>
+                <div :class="[$style.arrowBox, $style.infinity]" v-else>∞</div>
+                <div
+                    :class="$style.arrowBox"
+                    @click="editGoalCount(Direction.Raise)"
+                >
+                    <Icon
+                        name="ic:baseline-arrow-circle-right"
+                        :class="$style.arrow"
+                    />
+                </div>
+            </div>
+
             <div :class="[$style.keyTheme, $style.gridItem]">
                 {{ getElapsedTime() }}
             </div>
@@ -45,7 +77,7 @@
                     <span
                         v-for="(char, index) in splitedTargetText"
                         :key="index"
-                        :class="[getTypoClass(index)]"
+                        :class="[getTypoClass(index), getLastTyped(index)]"
                     >
                         {{ char }}
                     </span>
@@ -60,6 +92,7 @@
                         @keyup="keyupEventHandler"
                         @keydown.enter.prevent="endTyping"
                         @paste="preventPaste"
+                        @input="handleDeletion($event)"
                     />
                 </div>
                 <div :class="$style.nextText">{{ nextText }}</div>
@@ -70,17 +103,15 @@
 
 <script setup lang="ts">
 import { disassemble } from "hangul-js"
-import { TypoStatus, Language, type Quote } from "~/structure/quotes"
+import { TypoStatus, Language, Direction, type Quote } from "~/structure/quotes"
 import EnQuotes from "@/assets/quotes/quotesEn.json"
 import KrQuotes from "@/assets/quotes/quotesKo.json"
+import { vAutoAnimate } from "@formkit/auto-animate"
+import { GAP } from "element-plus"
+import { useTypedQuote } from "@/store/typedQuote"
 
-//겹칠때 AS 쓸수있다
-import { throttle as LodashThrottle } from "lodash"
-
-// import type Quote from "~"
 const $style = useCssModule()
-const colorMode = useColorMode()
-const runtime = useRuntimeConfig()
+const store = useTypedQuote()
 
 //v-memo 확인해보기
 const targetPerson: Ref<string> = ref("")
@@ -89,15 +120,19 @@ const nextPerson: Ref<string> = ref("")
 const nextText: Ref<string> = ref("")
 const targetLanguage: Ref<Language> = ref(Language.Korean)
 const splitedTargetText: Ref<string[]> = ref([])
+const goalCount: Ref<number> = ref(5)
+const oneCycle: number = 5
+const minCycle: number = 1
+const maxCycle: number = 15
+
 // 유저가 타이핑한 문장
 const typedText: Ref<string> = ref("")
 const parsingText: Ref<string> = ref("")
 const typingCount: Ref<number> = ref(0)
 
-// 쪼갠 문장의 길이와 동일한 새 배열 생성, 각 요소는 false
-const typoArray: Ref<boolean[]> = ref([])
 // 문장 입력 상태 혹은 틀림/맞음 체크
-const typoStatus: Ref<{ [k: number]: TypoStatus }> = ref({})
+const typoStatus: Ref<TypoStatus[]> = ref([])
+const checkTypoArray: Ref<TypoStatus[]> = ref([])
 
 const typingAccuracy: Ref<number> = ref(0)
 const typingProgress: Ref<number> = ref(0)
@@ -107,22 +142,52 @@ const cpm: Ref<number> = ref(0)
 const startTime: Ref<number> = ref(0)
 const lastTypingTime: Ref<number> = ref(0)
 // 현재 경과시간만 초로 나오고 나머지는 타임스탬프 형식
-const elapsedTime: Ref<number> = ref(0)
+const elapsedTime: Ref<number> = ref(0) //추후 인풋창 비워지는거 감지해서 시간 초기화 및 함수 정지
 const endTime: Ref<number> = ref(0)
 const totalTime: Ref<number> = ref(0)
+
+let toggleLangBtn: Language[] = [Language.Korean, Language.English]
 
 // 경과시간 계산 반복하는 setTimeOut Id
 const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
 
+const listUp = ref()
+
 onMounted(() => {
     if (process.server) return
     // runtime.public.API
-    const [currentQuote, nextQuote] = getTargetText()
+    const [currentQuote, nextQuote]: Quote[] = getTargetText()
+
     targetText.value = currentQuote.quote
     targetPerson.value = currentQuote.person
     nextText.value = nextQuote.quote
-    readyText()
+
+    splitText()
+    updateTypoStatus()
 })
+
+const editGoalCount = (direction: Direction) => {
+    switch (direction) {
+        case Direction.Raise:
+            if (goalCount.value === maxCycle) {
+                goalCount.value = Infinity
+            } else if (goalCount.value === minCycle) {
+                goalCount.value = oneCycle
+            } else {
+                goalCount.value += oneCycle
+            }
+            break
+        case Direction.Reduce:
+            if (goalCount.value === Infinity) {
+                goalCount.value = maxCycle
+            } else if (goalCount.value > oneCycle) {
+                goalCount.value -= oneCycle
+            } else {
+                goalCount.value = minCycle
+            }
+            break
+    }
+}
 
 //타입캐스팅
 const keyupEventHandler = (e: KeyboardEvent) => {
@@ -144,22 +209,20 @@ const startTyping = (
     e: KeyboardEvent | undefined = undefined,
 ) => {
     parsingText.value = text
-
     // 시작시 startTime 체크
     if (startTime.value === 0) {
         const date = new Date()
         startTime.value = date.getTime()
+
         startTypingSpeedCalc()
     }
 
-    // startTime 있으면 속도, 오타만 검사
-    currentTyping()
-    accuracy()
-    progress()
+    calcElapsedTime()
+    calcAccuracy()
+    calcProgress()
     checkTypo()
 
     if (
-        targetLanguage.value != Language.Korean ||
         e?.key.toLowerCase() == "space" ||
         e?.key.toLowerCase() == "backspace"
     ) {
@@ -168,55 +231,149 @@ const startTyping = (
 }
 
 // 마지막으로 타이핑한 시간 기준으로 경과시간을 계산
-const currentTyping = () => {
+const calcElapsedTime = () => {
     const date = new Date()
+
     lastTypingTime.value = date.getTime()
     elapsedTime.value = (lastTypingTime.value - startTime.value) / 1000
 }
 
-// typoArray에서 true인 i는 오타를 의미
-const checkTypo = () => {
-    typoStatus.value = {}
+// 오타 확인을 위해 문장 글자단위로 분해
+const splitText = () => {
+    splitedTargetText.value = targetText.value.split("")
+}
 
-    //조합문자 조합중 오타로 체크되는것 해결을 위해 i + 1로 수정
+const updateTypoStatus = () => {
+    typoStatus.value = new Array(splitedTargetText.value.length).fill(
+        TypoStatus.NotInput,
+    )
+}
+
+const handleDeletion = (e: Event) => {
+    const inputEvent = e as InputEvent
+    const splitedParsingText: string[] = parsingText.value.split("")
+
+    if (inputEvent.inputType === "deleteContentBackward") {
+        checkTypoArray.value = []
+
+        for (let i = 0; i < parsingText.value.length; i++) {
+            if (targetText.value[i] === undefined) continue
+            if (targetText.value[i] === splitedParsingText[i]) {
+                checkTypoArray.value[i] = TypoStatus.Correct //CheckTypoArray는 눈에 보이는거용
+            } else {
+                checkTypoArray.value[i] = TypoStatus.Error
+            }
+        }
+
+        for (let i = 0; i < typoStatus.value.length; i++) {
+            if (typoStatus.value[i] !== checkTypoArray.value[i]) {
+                typoStatus.value[i] = checkTypoArray.value[i]
+            }
+        }
+    }
+}
+
+const checkTypo = () => {
+    const splitedParsingText: string[] = parsingText.value.split("")
+
     for (let i = 0; i + 1 < parsingText.value.length; i++) {
-        if (targetText.value[i] == undefined) continue
-        if (targetText.value[i] == parsingText.value[i]) {
-            typoStatus.value[i] = TypoStatus.Correct
+        //오타 관리 배열에 TypoStatus 채우기
+        if (splitedParsingText[i] === undefined) {
+            typoStatus.value[i] = TypoStatus.NotInput
+        }
+
+        if (targetText.value[i] === splitedParsingText[i]) {
+            typoStatus.value[i] = TypoStatus.Correct //한박자 늦게 따라오는 오타 체크 배열 - 조합문자 이슈
         } else {
             typoStatus.value[i] = TypoStatus.Error
+        }
+    }
+
+    for (let i = 0; i < parsingText.value.length; i++) {
+        if (targetText.value[i] === undefined) continue
+        if (targetText.value[i] === splitedParsingText[i]) {
+            checkTypoArray.value[i] = TypoStatus.Correct //입력받는대로 따라오는 오타 체크 배열
+        } else {
+            checkTypoArray.value[i] = TypoStatus.Error
+        }
+    }
+}
+
+const getTypoClass = (index: number): string => {
+    const splitedParsingText: string[] = parsingText.value.split("")
+    //오타와 정타에 클래스 부여
+    for (let i = 0; i + 1 < parsingText.value.length; i++) {
+        if (typoStatus.value[index] === TypoStatus.NotInput) return ""
+        if (typoStatus.value[index] === TypoStatus.Error) return $style.typo
+        if (typoStatus.value[index] === TypoStatus.Correct)
+            return $style.success
+    }
+
+    // for (let i = 0; i < splitedParsingText.length; i++) {
+    //     if (checkTypoArray.value[index] === TypoStatus.Correct)
+    //         return $style.success
+    // }
+}
+
+const getLastTyped = (index: number): string => {
+    const splitedParsingText: string[] = parsingText.value.split("")
+    const lastIndex: number = splitedParsingText.length - 1
+
+    const hangulRange = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/ // 한글 자음 모음과 조합 문자의 유니코드 범위
+    const combiningRange = /[\u0300-\u036F]/
+
+    if (
+        (lastIndex === index &&
+            // 마지막 입력이 한글이나 조합 문자일 경우 클래스를 적용하지 않음
+            hangulRange.test(parsingText.value[lastIndex])) ||
+        combiningRange.test(parsingText.value[lastIndex])
+    ) {
+        return $style.lastTyped
+    }
+
+    //그렇지 않은 경우 한 박자 빠르게 클래스를 적용(특수문자, 띄어쓰기 등)
+    for (let i = 0; i < parsingText.value.length; i++) {
+        if (lastIndex === index) {
+            switch (checkTypoArray.value[index]) {
+                case TypoStatus.Correct:
+                    return [$style.success, $style.lastTyped]
+                case TypoStatus.Error:
+                    return [$style.typo, $style.lastTyped]
+            }
         }
     }
 }
 
 // 입력 텍스트의 정확도 계산
-const accuracy = () => {
-    const typoCount = typoArray.value.filter(
-        (value: boolean) => value === true,
+const calcAccuracy = () => {
+    const typoCount: number = typoStatus.value.filter(
+        (value: TypoStatus) => value === TypoStatus.Error,
     ).length
-    typingAccuracy.value = Math.round(
-        ((typoArray.value.length - typoCount) / typoArray.value.length) * 100,
+
+    typingAccuracy.value = getPercentage(
+        typoStatus.value.length - typoCount,
+        typoStatus.value.length,
     )
 }
 
-const progress = () => {
+const calcProgress = () => {
+    //진행도 최대 105까지 나오는 현상 수정해보기
     typingProgress.value = getPercentage(
         parsingText.value.split("").length,
         targetText.value.split("").length,
     )
 }
-// 현재 시간 기준으로 경과시간 및 타이핑 속도 계산
 
-// setTimeout 이용해 0.1초마다 속도 계산
-//requestanimationframe 사용해서 주사율 기준으로 가능
 const startTypingSpeedCalc = () => {
-    elapsedTimerId.value = setInterval(keepCheckElapsedTime, 100)
+    // elapsedTimerId.value = setInterval(keepCheckElapsedTime, 100) //콘솔창 계속 올라가는 이슈때문에 임시로 변경
 }
 
 const keepCheckElapsedTime = () => {
     const date = new Date()
     const currentTime: number = date.getTime()
+
     elapsedTime.value = (currentTime - startTime.value) / 1000
+
     calcTypingSpeed(elapsedTime.value)
 }
 
@@ -224,10 +381,10 @@ const stopTypingSpeedCalc = () => {
     clearInterval(elapsedTimerId.value)
 }
 
-const endTyping = () => {
+const endTyping = async () => {
     typingCount.value += +1
 
-    typoStatus.value = {}
+    typoStatus.value = []
     stopTypingSpeedCalc()
 
     const date = new Date()
@@ -236,14 +393,28 @@ const endTyping = () => {
 
     calcTypingSpeed(totalTime.value)
 
+    await summarizeSentence(targetText.value)
+
     const [target, nextTarget] = getTargetText()
     targetText.value = nextText.value
     targetPerson.value = nextPerson.value
     nextText.value = nextTarget.quote
     nextPerson.value = nextTarget.person
 
-    readyText()
+    splitText()
+    updateTypoStatus()
     resetInfo()
+}
+
+const summarizeSentence = (sentence) => {
+    const maxLength = 20
+
+    if (sentence.length <= maxLength) {
+        store.addList(sentence)
+    } else {
+        const summarized = sentence.substring(0, maxLength) + "..."
+        store.addList(summarized)
+    }
 }
 
 const resetInfo = () => {
@@ -255,44 +426,43 @@ const resetInfo = () => {
     cpm.value = 0
     typingAccuracy.value = 0
     typingProgress.value = 0
+    typingCount.value = 0
 }
 
 const calcTypingSpeed = (takenTime: number) => {
     if (takenTime === 0) return
+
     const totalWords: string = parsingText.value.trim()
     const splitByWords: number =
         totalWords === "" ? 0 : totalWords.split(" ").length
 
     switch (targetLanguage.value) {
         case Language.English: {
-            if (splitByWords !== 0) {
-                wpm.value = Math.round((splitByWords / takenTime) * 60)
-            }
-            if (totalWords.length !== 0) {
-                cpm.value = Math.round((totalWords.length / takenTime) * 60)
-            }
+            wpm.value = calcSpeed(splitByWords, takenTime)
+            cpm.value = calcSpeed(totalWords.length, takenTime)
         }
 
         case Language.Korean: {
             const disassembleText: string[] = disassemble(parsingText.value)
-            if (splitByWords !== 0) {
-                wpm.value = Math.round((splitByWords / takenTime) * 60)
-            }
-            if (disassembleText.length !== 0) {
-                cpm.value = Math.round(
-                    (disassembleText.length / takenTime) * 60,
-                )
-            }
+
+            wpm.value = calcSpeed(splitByWords, takenTime)
+            cpm.value = calcSpeed(disassembleText.length, takenTime)
         }
     }
 }
 
-const toggleLanguage = (lang: string) => {
+const toggleLanguage = (lang: Language) => {
+    if (lang !== targetLanguage.value) {
+        toggleLangBtn.reverse()
+    }
+
     switch (lang) {
         case Language.Korean:
+            if (lang === targetLanguage.value) return
             targetLanguage.value = Language.Korean
             break
         case Language.English:
+            if (lang === targetLanguage.value) return
             targetLanguage.value = Language.English
             break
     }
@@ -302,14 +472,8 @@ const toggleLanguage = (lang: string) => {
     targetPerson.value = currentQuote.person
     nextText.value = nextQuote.quote
 
-    readyText()
+    splitText()
     resetInfo()
-}
-
-// 오타 확인을 위해 문장 글자단위로 분해
-const readyText = () => {
-    splitedTargetText.value = targetText.value.split("")
-    typoArray.value = new Array(splitedTargetText.value.length).fill(false)
 }
 
 const getTargetText = (): Quote[] => {
@@ -332,20 +496,6 @@ const getTargetText = (): Quote[] => {
     ]
 }
 
-const getTypoClass = (index: number): string => {
-    const lastIndex = Object.keys(typoStatus.value).length - 1
-
-    if (typoStatus.value[index] === TypoStatus.NotInput) return ""
-    if (typoStatus.value[index] === TypoStatus.Error) return $style.typo
-    if (typoStatus.value[index] === TypoStatus.Correct) {
-        if (parseInt(Object.keys(typoStatus.value)[lastIndex]) === index) {
-            return `${$style.success} ${$style.lastSuccess}`
-        }
-        return $style.success
-    }
-    return ""
-}
-
 const getElapsedTime = (): string => {
     const min: number = Math.floor(elapsedTime.value / 60)
     const sec: number = elapsedTime.value % 60
@@ -353,7 +503,7 @@ const getElapsedTime = (): string => {
     return `${min}분 ${sec}초`
 }
 
-const getActiveClass = (lang: string): string => {
+const getActiveClass = (lang: Language): string => {
     if (lang === targetLanguage.value) {
         return $style.active
     } else {
@@ -381,7 +531,7 @@ const getActiveClass = (lang: string): string => {
         display: grid;
         grid-template: repeat(8, 1fr) / repeat(10, 1fr);
         grid-template-areas:
-            "i i i n . l m b b b"
+            "i i i n nl l m b b b"
             "i i i kt kt l m b b b"
             "i i i s s w c b b b"
             "i i i s s a p t t t"
@@ -413,7 +563,25 @@ const getActiveClass = (lang: string): string => {
         }
 
         > .icon {
+            height: 100%;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            justify-content: space-around;
             grid-area: i;
+            font-size: 16px;
+            overflow: hidden;
+
+            > .list {
+                width: 330px;
+                height: 20px;
+                line-height: 30px;
+                border: 2px solid var(--border-color);
+                border-radius: 10px;
+                box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+                margin: 10px;
+                padding: 5px;
+            }
         }
 
         > .language {
@@ -430,6 +598,8 @@ const getActiveClass = (lang: string): string => {
                 width: 80px;
                 height: 40px;
 
+                position: relative;
+
                 text-align: center;
                 line-height: 40px;
 
@@ -439,7 +609,18 @@ const getActiveClass = (lang: string): string => {
                 border-radius: 7px;
                 box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.2);
 
-                transition: all 0.4s;
+                &:hover {
+                    cursor: pointer;
+                    top: -3px;
+                }
+
+                &:active {
+                    width: 50px;
+                    height: 25px;
+                    line-height: 25px;
+
+                    transition: all 0.2s;
+                }
             }
 
             > .active {
@@ -495,8 +676,57 @@ const getActiveClass = (lang: string): string => {
             grid-area: t;
         }
 
-        > .count {
+        > .typingCount {
             grid-area: n;
+        }
+
+        > .countLimit {
+            grid-area: nl;
+
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+
+            > .arrowBox {
+                width: 30px;
+                height: 30px;
+
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                > .arrow {
+                    width: 27px;
+                    height: 27px;
+
+                    color: var(--color-secondary);
+                    line-height: 27px;
+
+                    transition-duration: 0.3s;
+
+                    &:hover {
+                        cursor: pointer;
+                    }
+
+                    &:active {
+                        width: 20px;
+                        height: 20px;
+
+                        color: var(--color-primary);
+                        transition-duration: 0s;
+                    }
+                }
+            }
+
+            > .count {
+                width: 40px;
+                height: 40px;
+            }
+
+            > .infinity {
+                font-size: 27px;
+            }
         }
 
         > .keyTheme {
@@ -525,15 +755,14 @@ const getActiveClass = (lang: string): string => {
 
                 > .typo {
                     color: red;
-                    background-color: aqua;
                 }
 
                 > .success {
                     color: var(--color-primary);
                 }
 
-                > .lastSuccess {
-                    border-right: 1px solid var(--color-secondary);
+                > .lastTyped {
+                    border-right: 2px solid var(--color-secondary);
                 }
             }
 
