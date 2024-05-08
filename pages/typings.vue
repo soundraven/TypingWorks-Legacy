@@ -104,7 +104,13 @@
 
 <script setup lang="ts">
 import { disassemble } from "hangul-js"
-import { TypoStatus, Language, Direction, type Quote } from "~/structure/quotes"
+import {
+    TypoStatus,
+    Language,
+    Direction,
+    type Quote,
+    type TypingInfo,
+} from "~/structure/quotes"
 import EnQuotes from "@/assets/quotes/quotesEn.json"
 import KrQuotes from "@/assets/quotes/quotesKo.json"
 import { vAutoAnimate } from "@formkit/auto-animate"
@@ -141,6 +147,24 @@ const typingAccuracy: Ref<number> = ref(0)
 const typingProgress: Ref<number> = ref(0)
 const wpm: Ref<number> = ref(0)
 const cpm: Ref<number> = ref(0)
+const avgWpm: Ref<number> = ref(0)
+const avgCpm: Ref<number> = ref(0)
+const maxWpm: Ref<number> = ref(0)
+const maxCpm: Ref<number> = ref(0)
+const avgAccuracy: Ref<number> = ref(0)
+const avgProgress: Ref<number> = ref(0)
+const entireElapsedtime: Ref<number> = ref(0)
+
+const typingInfo: TypingInfo = reactive({
+    avgWpm: avgWpm.value,
+    avgCpm: avgCpm.value,
+    maxWpm: maxWpm.value,
+    maxCpm: maxCpm.value,
+    avgAccuracy: avgAccuracy.value,
+    avgProgress: avgProgress.value,
+    count: store.typedQuote.length,
+    entireElapsedtime: entireElapsedtime.value,
+})
 
 const startTime: Ref<number> = ref(0)
 const lastTypingTime: Ref<number> = ref(0)
@@ -397,8 +421,9 @@ const endTyping = () => {
     calcTypingSpeed(totalTime.value)
 
     if (store.typedQuote.length >= goalCount.value) {
+        store.sendTypingInfo(typingInfo)
         store.toggleShow()
-        store.resetList()
+        // store.resetList()
     }
 
     const [target, nextTarget] = getTargetText()

@@ -3,6 +3,17 @@ export interface Quote {
     quote: string
 }
 
+export interface TypingInfo {
+    avgWpm: number
+    avgCpm: number
+    maxWpm: number
+    maxCpm: number
+    avgAccuracy: number
+    avgProgress: number
+    count: number
+    entireElapsedtime: number
+}
+
 export enum TypoStatus {
     NotInput = 0,
     Correct = 1,
