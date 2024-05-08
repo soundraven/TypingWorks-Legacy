@@ -22,6 +22,7 @@ const $style = useCssModule()
 
 //dictionary
 const pressedKey: Ref<string> = ref("")
+let timer: ReturnType<typeof setTimeout> | null = null
 
 onMounted(() => {
     if (process.server) return
@@ -43,12 +44,43 @@ const handleKeyUp = (e: KeyboardEvent) => {
 }
 
 const getPressedKeyClass = (key: string): string => {
+    console.log(key)
     return `${$style[key] || ""}`
 }
 </script>
 
 <style lang="scss" module>
+@keyframes flash-box-shadow {
+    0% {
+        box-shadow:
+            inset 0px 0px 35px var(--color-primary-shadow-inset-start),
+            0px 0px 35px var(--color-primary-shadow-start);
+    }
+    25% {
+        box-shadow:
+            inset 0px 0px 30px var(--color-primary-shadow-inset-start),
+            0px 0px 30px var(--color-primary-shadow-start);
+    }
+    50% {
+        box-shadow:
+            inset 0px 0px 25px var(--color-primary-shadow-inset-mid),
+            0px 0px 25px var(--color-primary-shadow-mid);
+    }
+    75% {
+        box-shadow:
+            inset 0px 0px 30px var(--color-primary-shadow-inset-mid),
+            0px 0px 30px var(--color-primary-shadow-mid);
+    }
+    100% {
+        // box-shadow: none;
+        box-shadow:
+            inset 0px 0px 35px var(--color-primary-shadow-inset-start),
+            0px 0px 35px var(--color-primary-shadow-inset-start);
+    }
+}
+
 $u: 18px;
+
 .R0,
 .R1,
 .R2,
@@ -66,9 +98,9 @@ $u: 18px;
 
         background-color: var(--alpah-row);
 
-        border: 1px solid rgb(58, 58, 60, 0.09);
+        border: 1px solid var(--border-color);
         border-radius: 5px;
-        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
+        // box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
 
         margin: auto;
     }
@@ -129,13 +161,14 @@ $u: 18px;
     }
 
     > .key {
-        transition-property: background-color;
         transition-timing-function: ease-out;
-        transition-duration: 0.5s;
+        transition-duration: 0.7s;
 
         &.blink {
             background-color: var(--color-primary);
             transition-duration: 0s;
+            box-shadow: 0px 0px 20px var(--color-primary);
+            opacity: 0.8;
         }
     }
 }

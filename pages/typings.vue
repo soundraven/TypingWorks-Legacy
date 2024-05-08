@@ -77,11 +77,7 @@
                     <span
                         v-for="(char, index) in splitedTargetText"
                         :key="index"
-                        :class="[
-                            getTypoClass(index),
-                            getLastTyped(index),
-                            getCursorBlink(index) ? $style.cursorBlink : '',
-                        ]"
+                        :class="[getTypoClass(index), getLastTyped(index)]"
                     >
                         {{ char }}
                     </span>
@@ -804,19 +800,19 @@ const getActiveClass = (lang: Language): string => {
                     color: var(--color-primary);
                 }
 
+                > .lastTyped {
+                    box-shadow:
+                        inset 0px 0px 50px rgba(65, 184, 131, 0),
+                        5px 0px 35px transparent;
+                    animation: flash-box-shadow 1s;
+                }
+
                 > .lastTyped::after {
                     content: "";
                     border-right: 2px solid var(--color-secondary);
                     transition-property: border-right;
                     transition-duration: 1s;
                     animation: flash-border 1.2s infinite;
-                }
-
-                > .cursorBlink {
-                    box-shadow:
-                        inset 0px 0px 50px rgba(65, 184, 131, 0),
-                        5px 0px 35px transparent;
-                    animation: flash-box-shadow 1s;
                 }
             }
 
