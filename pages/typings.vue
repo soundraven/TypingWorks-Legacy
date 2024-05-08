@@ -3,7 +3,7 @@
         <div :class="$style.typing">
             <div :class="[$style.icon, $style.gridItem]" v-auto-animate>
                 <div
-                    :class="$style.list"
+                    :class="[$style.list]"
                     v-for="(quote, index) in store.typedQuote"
                     :key="'quote_' + index"
                 >
@@ -77,7 +77,11 @@
                     <span
                         v-for="(char, index) in splitedTargetText"
                         :key="index"
-                        :class="[getTypoClass(index), getLastTyped(index)]"
+                        :class="[
+                            getTypoClass(index),
+                            getLastTyped(index),
+                            getCursorBlink(index) ? $style.cursorBlink : '',
+                        ]"
                     >
                         {{ char }}
                     </span>
@@ -151,10 +155,8 @@ let toggleLangBtn: Language[] = [Language.Korean, Language.English]
 // 경과시간 계산 반복하는 setTimeOut Id
 const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
 
-const listUp = ref()
-
 onMounted(() => {
-    if (process.server) return
+    if (process.server) return //서버사이드렌더링이기 때문
     // runtime.public.API
     const [currentQuote, nextQuote]: Quote[] = getTargetText()
 
@@ -167,6 +169,7 @@ onMounted(() => {
 })
 
 const editGoalCount = (direction: Direction) => {
+    //한 사이클당 문장 몇 회 타이핑할지 선택
     switch (direction) {
         case Direction.Raise:
             if (goalCount.value === maxCycle) {
@@ -221,13 +224,6 @@ const startTyping = (
     calcAccuracy()
     calcProgress()
     checkTypo()
-
-    if (
-        e?.key.toLowerCase() == "space" ||
-        e?.key.toLowerCase() == "backspace"
-    ) {
-        checkTypo()
-    }
 }
 
 // 마지막으로 타이핑한 시간 기준으로 경과시간을 계산
@@ -256,16 +252,17 @@ const handleDeletion = (e: Event) => {
     if (inputEvent.inputType === "deleteContentBackward") {
         checkTypoArray.value = []
 
-        for (let i = 0; i < parsingText.value.length; i++) {
+        for (let i = 0; i + 1 < parsingText.value.length; i++) {
             if (targetText.value[i] === undefined) continue
             if (targetText.value[i] === splitedParsingText[i]) {
-                checkTypoArray.value[i] = TypoStatus.Correct //CheckTypoArray는 눈에 보이는거용
+                checkTypoArray.value[i] = TypoStatus.Correct
             } else {
                 checkTypoArray.value[i] = TypoStatus.Error
             }
         }
 
         for (let i = 0; i < typoStatus.value.length; i++) {
+            //Typo 클래스 부여는 typoStatus가 하기때문에 동기화 필요
             if (typoStatus.value[i] !== checkTypoArray.value[i]) {
                 typoStatus.value[i] = checkTypoArray.value[i]
             }
@@ -300,22 +297,15 @@ const checkTypo = () => {
 }
 
 const getTypoClass = (index: number): string => {
-    const splitedParsingText: string[] = parsingText.value.split("")
     //오타와 정타에 클래스 부여
-    for (let i = 0; i + 1 < parsingText.value.length; i++) {
-        if (typoStatus.value[index] === TypoStatus.NotInput) return ""
-        if (typoStatus.value[index] === TypoStatus.Error) return $style.typo
-        if (typoStatus.value[index] === TypoStatus.Correct)
-            return $style.success
-    }
+    if (typoStatus.value[index] === TypoStatus.NotInput) return ""
+    if (typoStatus.value[index] === TypoStatus.Error) return $style.typo
+    if (typoStatus.value[index] === TypoStatus.Correct) return $style.success
 
-    // for (let i = 0; i < splitedParsingText.length; i++) {
-    //     if (checkTypoArray.value[index] === TypoStatus.Correct)
-    //         return $style.success
-    // }
+    return ""
 }
 
-const getLastTyped = (index: number): string => {
+const getLastTyped = (index: number): string | string[] => {
     const splitedParsingText: string[] = parsingText.value.split("")
     const lastIndex: number = splitedParsingText.length - 1
 
@@ -329,19 +319,29 @@ const getLastTyped = (index: number): string => {
         combiningRange.test(parsingText.value[lastIndex])
     ) {
         return $style.lastTyped
+    } else if (lastIndex === index) {
+        switch (checkTypoArray.value[index]) {
+            case TypoStatus.Correct:
+                return [$style.success, $style.lastTyped]
+            case TypoStatus.Error:
+                return [$style.typo, $style.lastTyped]
+            default:
+                return $style.lastTyped
+        }
+    } else {
+        return ""
+    }
+}
+
+const getCursorBlink = (index: number): boolean | string => {
+    const splitedParsingText: string[] = parsingText.value.split("")
+    const lastIndex: number = splitedParsingText.length - 1
+
+    if (lastIndex === index) {
+        return true
     }
 
-    //그렇지 않은 경우 한 박자 빠르게 클래스를 적용(특수문자, 띄어쓰기 등)
-    for (let i = 0; i < parsingText.value.length; i++) {
-        if (lastIndex === index) {
-            switch (checkTypoArray.value[index]) {
-                case TypoStatus.Correct:
-                    return [$style.success, $style.lastTyped]
-                case TypoStatus.Error:
-                    return [$style.typo, $style.lastTyped]
-            }
-        }
-    }
+    return ""
 }
 
 // 입력 텍스트의 정확도 계산
@@ -357,7 +357,6 @@ const calcAccuracy = () => {
 }
 
 const calcProgress = () => {
-    //진행도 최대 105까지 나오는 현상 수정해보기
     typingProgress.value = getPercentage(
         parsingText.value.split("").length,
         targetText.value.split("").length,
@@ -365,14 +364,14 @@ const calcProgress = () => {
 }
 
 const startTypingSpeedCalc = () => {
-    // elapsedTimerId.value = setInterval(keepCheckElapsedTime, 100) //콘솔창 계속 올라가는 이슈때문에 임시로 변경
+    elapsedTimerId.value = setInterval(keepCheckElapsedTime, 100) //콘솔창 계속 올라가는 이슈때문에 임시로 변경
 }
 
 const keepCheckElapsedTime = () => {
     const date = new Date()
     const currentTime: number = date.getTime()
 
-    elapsedTime.value = (currentTime - startTime.value) / 1000
+    elapsedTime.value = Math.floor((currentTime - startTime.value) / 1000)
 
     calcTypingSpeed(elapsedTime.value)
 }
@@ -381,7 +380,7 @@ const stopTypingSpeedCalc = () => {
     clearInterval(elapsedTimerId.value)
 }
 
-const endTyping = async () => {
+const endTyping = () => {
     typingCount.value += +1
 
     typoStatus.value = []
@@ -393,7 +392,7 @@ const endTyping = async () => {
 
     calcTypingSpeed(totalTime.value)
 
-    await summarizeSentence(targetText.value)
+    summarizeSentence(targetText.value)
 
     const [target, nextTarget] = getTargetText()
     targetText.value = nextText.value
@@ -407,7 +406,7 @@ const endTyping = async () => {
 }
 
 const summarizeSentence = (sentence) => {
-    const maxLength = 20
+    const maxLength: number = targetLanguage.value === Language.Korean ? 23 : 38
 
     if (sentence.length <= maxLength) {
         store.addList(sentence)
@@ -513,6 +512,34 @@ const getActiveClass = (lang: Language): string => {
 </script>
 
 <style lang="scss" module>
+@keyframes flash-border {
+    0% {
+        border-right-color: var(--color-secondary);
+    }
+    50% {
+        border-right-color: transparent;
+    }
+    100% {
+        border-right-color: var(--color-secondary);
+    }
+}
+
+@keyframes flash-box-shadow {
+    0% {
+        box-shadow:
+            inset 0px 0px 30px var(--color-primary-shadow-inset-start),
+            0px 0px 35px var(--color-primary-shadow-start);
+    }
+    50% {
+        box-shadow:
+            inset 0px 0px 30px var(--color-primary-shadow-inset-mid),
+            0px 0px 35px var(--color-primary-shadow-mid);
+    }
+    100% {
+        box-shadow: none;
+    }
+}
+
 .index {
     width: 100%;
     min-height: 100dvh;
@@ -563,24 +590,36 @@ const getActiveClass = (lang: Language): string => {
         }
 
         > .icon {
-            height: 100%;
-            display: flex;
-            flex-direction: column-reverse;
-            align-items: center;
-            justify-content: space-around;
             grid-area: i;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+
             font-size: 16px;
-            overflow: hidden;
+
+            padding-block: 5px;
 
             > .list {
                 width: 330px;
-                height: 20px;
-                line-height: 30px;
+                height: 23px;
+
+                text-align: left;
+                line-height: 23px;
+
                 border: 2px solid var(--border-color);
                 border-radius: 10px;
                 box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
-                margin: 10px;
+
+                margin-block: 5px;
                 padding: 5px;
+
+                animation: flash-box-shadow 1s;
+
+                &:nth-last-child(n + 6) {
+                    display: none;
+                }
             }
         }
 
@@ -591,7 +630,7 @@ const getActiveClass = (lang: Language): string => {
 
             display: flex;
             flex-direction: column;
-            justify-content: space-evenly;
+            justify-content: space-around;
             align-items: center;
 
             > .langBtn {
@@ -609,6 +648,8 @@ const getActiveClass = (lang: Language): string => {
                 border-radius: 7px;
                 box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.2);
 
+                transition-duration: 0.5s;
+
                 &:hover {
                     cursor: pointer;
                     top: -3px;
@@ -619,7 +660,7 @@ const getActiveClass = (lang: Language): string => {
                     height: 25px;
                     line-height: 25px;
 
-                    transition: all 0.2s;
+                    transition: all 0.5s;
                 }
             }
 
@@ -703,15 +744,17 @@ const getActiveClass = (lang: Language): string => {
                     color: var(--color-secondary);
                     line-height: 27px;
 
-                    transition-duration: 0.3s;
+                    position: relative;
+
+                    transition-duration: 0.2s;
 
                     &:hover {
                         cursor: pointer;
                     }
 
                     &:active {
-                        width: 20px;
-                        height: 20px;
+                        width: 22px;
+                        height: 22px;
 
                         color: var(--color-primary);
                         transition-duration: 0s;
@@ -761,8 +804,19 @@ const getActiveClass = (lang: Language): string => {
                     color: var(--color-primary);
                 }
 
-                > .lastTyped {
+                > .lastTyped::after {
+                    content: "";
                     border-right: 2px solid var(--color-secondary);
+                    transition-property: border-right;
+                    transition-duration: 1s;
+                    animation: flash-border 1.2s infinite;
+                }
+
+                > .cursorBlink {
+                    box-shadow:
+                        inset 0px 0px 50px rgba(65, 184, 131, 0),
+                        5px 0px 35px transparent;
+                    animation: flash-box-shadow 1s;
                 }
             }
 
@@ -773,12 +827,17 @@ const getActiveClass = (lang: Language): string => {
 
                 > input {
                     width: 100%;
+
+                    background-color: var(--bg-primary);
+
                     font-size: 20px;
-                    color: black;
+                    color: var(--color-secondary);
 
                     border: none;
                     border-bottom: 2px solid var(--border-color);
                     outline: none;
+
+                    padding-bottom: 5px;
 
                     &::placeholder {
                         color: var(--border-color);
@@ -793,7 +852,7 @@ const getActiveClass = (lang: Language): string => {
             }
 
             > .person {
-                color: #ccc;
+                color: var(--color-secondary);
                 font-size: 18px;
                 font-style: italic;
             }
