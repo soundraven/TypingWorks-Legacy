@@ -98,6 +98,7 @@
                 <div :class="$style.nextText">{{ nextText }}</div>
             </div>
         </div>
+        <ResultWindow v-if="store.showResult" />
     </div>
 </template>
 
@@ -109,6 +110,7 @@ import KrQuotes from "@/assets/quotes/quotesKo.json"
 import { vAutoAnimate } from "@formkit/auto-animate"
 import { GAP } from "element-plus"
 import { useTypedQuote } from "@/store/typedQuote"
+import ResultWindow from "~/components/ResultWindow.vue"
 
 const $style = useCssModule()
 const store = useTypedQuote()
@@ -120,6 +122,8 @@ const nextPerson: Ref<string> = ref("")
 const nextText: Ref<string> = ref("")
 const targetLanguage: Ref<Language> = ref(Language.Korean)
 const splitedTargetText: Ref<string[]> = ref([])
+
+const typingCount: Ref<number> = ref(0)
 const goalCount: Ref<number> = ref(5)
 const oneCycle: number = 5
 const minCycle: number = 1
@@ -128,7 +132,6 @@ const maxCycle: number = 15
 // 유저가 타이핑한 문장
 const typedText: Ref<string> = ref("")
 const parsingText: Ref<string> = ref("")
-const typingCount: Ref<number> = ref(0)
 
 // 문장 입력 상태 혹은 틀림/맞음 체크
 const typoStatus: Ref<TypoStatus[]> = ref([])
@@ -376,8 +379,13 @@ const stopTypingSpeedCalc = () => {
     clearInterval(elapsedTimerId.value)
 }
 
+const raiseTypingCount = () => {
+    typingCount.value = store.typedQuote.length
+}
+
 const endTyping = () => {
-    typingCount.value += +1
+    summarizeSentence(targetText.value)
+    raiseTypingCount()
 
     typoStatus.value = []
     stopTypingSpeedCalc()
@@ -388,7 +396,10 @@ const endTyping = () => {
 
     calcTypingSpeed(totalTime.value)
 
-    summarizeSentence(targetText.value)
+    if (store.typedQuote.length >= goalCount.value) {
+        store.toggleShow()
+        store.resetList()
+    }
 
     const [target, nextTarget] = getTargetText()
     targetText.value = nextText.value
@@ -421,7 +432,6 @@ const resetInfo = () => {
     cpm.value = 0
     typingAccuracy.value = 0
     typingProgress.value = 0
-    typingCount.value = 0
 }
 
 const calcTypingSpeed = (takenTime: number) => {

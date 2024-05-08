@@ -44,7 +44,6 @@ const handleKeyUp = (e: KeyboardEvent) => {
 }
 
 const getPressedKeyClass = (key: string): string => {
-    console.log(key)
     return `${$style[key] || ""}`
 }
 </script>
@@ -72,7 +71,6 @@ const getPressedKeyClass = (key: string): string => {
             0px 0px 30px var(--color-primary-shadow-mid);
     }
     100% {
-        // box-shadow: none;
         box-shadow:
             inset 0px 0px 35px var(--color-primary-shadow-inset-start),
             0px 0px 35px var(--color-primary-shadow-inset-start);
@@ -100,7 +98,6 @@ $u: 18px;
 
         border: 1px solid var(--border-color);
         border-radius: 5px;
-        // box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
 
         margin: auto;
     }
