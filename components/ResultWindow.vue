@@ -1,28 +1,28 @@
 <template>
     <div :class="$style.index">
         <div>
-            {{ typingInfo.avgWpm }}
+            {{ store.typingInfo.avgWpm }}
         </div>
         <div>
-            {{ typingInfo.avgCpm }}
+            {{ store.typingInfo.avgCpm }}
         </div>
         <div>
-            {{ typingInfo.maxWpm }}
+            {{ store.typingInfo.maxWpm }}
         </div>
         <div>
-            {{ typingInfo.maxCpm }}
+            {{ store.typingInfo.maxCpm }}
         </div>
         <div>
-            {{ typingInfo.avgAccuracy }}
+            {{ store.typingInfo.avgTypingAccuracy }}
         </div>
         <div>
-            {{ typingInfo.avgProgress }}
+            {{ store.typingInfo.avgTypingProgress }}
         </div>
         <div>
-            {{ typingInfo.count }}
+            {{ store.typingInfo.count }}
         </div>
         <div>
-            {{ typingInfo.entireElapsedtime }}
+            {{ store.typingInfo.entireElapsedtime }}
         </div>
         <button @click="store.resetList">리셋버튼</button>
     </div>
@@ -33,8 +33,6 @@ import { useTypedQuote } from "@/store/typedQuote"
 
 const $style = useCssModule()
 const store = useTypedQuote()
-
-const typingInfo = store.typingInfo
 </script>
 
 <style module lang="scss">

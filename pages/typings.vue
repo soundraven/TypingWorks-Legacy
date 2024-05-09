@@ -116,7 +116,6 @@ import KrQuotes from "@/assets/quotes/quotesKo.json"
 import { vAutoAnimate } from "@formkit/auto-animate"
 import { GAP } from "element-plus"
 import { useTypedQuote } from "@/store/typedQuote"
-import ResultWindow from "~/components/ResultWindow.vue"
 
 const $style = useCssModule()
 const store = useTypedQuote()
@@ -151,17 +150,23 @@ const avgWpm: Ref<number> = ref(0)
 const avgCpm: Ref<number> = ref(0)
 const maxWpm: Ref<number> = ref(0)
 const maxCpm: Ref<number> = ref(0)
-const avgAccuracy: Ref<number> = ref(0)
-const avgProgress: Ref<number> = ref(0)
+const avgTypingAccuracy: Ref<number> = ref(0)
+const avgTypingProgress: Ref<number> = ref(0)
 const entireElapsedtime: Ref<number> = ref(0)
+
+const wpmArray: Ref<number[]> = ref([])
+const cpmArray: Ref<number[]> = ref([])
+const typingAccuracyArray: Ref<number[]> = ref([])
+const typingProgressArray: Ref<number[]> = ref([])
+const ElapsedTimeArray: Ref<number[]> = ref([])
 
 const typingInfo: TypingInfo = reactive({
     avgWpm: avgWpm.value,
     avgCpm: avgCpm.value,
     maxWpm: maxWpm.value,
     maxCpm: maxCpm.value,
-    avgAccuracy: avgAccuracy.value,
-    avgProgress: avgProgress.value,
+    avgTypingAccuracy: avgTypingAccuracy.value,
+    avgTypingProgress: avgTypingProgress.value,
     count: store.typedQuote.length,
     entireElapsedtime: entireElapsedtime.value,
 })
@@ -276,14 +281,16 @@ const handleDeletion = (e: Event) => {
         checkTypoArray.value = []
 
         for (let i = 0; i + 1 < parsingText.value.length; i++) {
-            if (targetText.value[i] === undefined) continue
+            if (typeof targetText.value[i] === undefined) continue
+            //배열에 없는 인덱스 번호를 넣으면 다른 언어에선 터짐.
+            //typeof로 비교하면 Undefined가 string값으로 나온다고 함.추가로 알아보기
             if (targetText.value[i] === splitedParsingText[i]) {
                 checkTypoArray.value[i] = TypoStatus.Correct
             } else {
                 checkTypoArray.value[i] = TypoStatus.Error
             }
         }
-
+        //string타입에 [i] 써도 되는건지 확인
         for (let i = 0; i < typoStatus.value.length; i++) {
             //Typo 클래스 부여는 typoStatus가 하기때문에 동기화 필요
             if (typoStatus.value[i] !== checkTypoArray.value[i]) {
@@ -356,17 +363,6 @@ const getLastTyped = (index: number): string | string[] => {
     }
 }
 
-const getCursorBlink = (index: number): boolean | string => {
-    const splitedParsingText: string[] = parsingText.value.split("")
-    const lastIndex: number = splitedParsingText.length - 1
-
-    if (lastIndex === index) {
-        return true
-    }
-
-    return ""
-}
-
 // 입력 텍스트의 정확도 계산
 const calcAccuracy = () => {
     const typoCount: number = typoStatus.value.filter(
@@ -400,7 +396,7 @@ const keepCheckElapsedTime = () => {
 }
 
 const stopTypingSpeedCalc = () => {
-    clearInterval(elapsedTimerId.value)
+    clearInterval(elapsedTimerId.value) //unMounted될때도 함수 호출해줘야함. 안그러면 계속돌아갈수있음
 }
 
 const raiseTypingCount = () => {
@@ -408,6 +404,12 @@ const raiseTypingCount = () => {
 }
 
 const endTyping = () => {
+    wpmArray.value.push(wpm.value)
+    cpmArray.value.push(cpm.value)
+    typingAccuracyArray.value.push(typingAccuracy.value)
+    typingProgressArray.value.push(typingProgress.value)
+    ElapsedTimeArray.value.push(elapsedTime.value)
+
     summarizeSentence(targetText.value)
     raiseTypingCount()
 
@@ -421,6 +423,29 @@ const endTyping = () => {
     calcTypingSpeed(totalTime.value)
 
     if (store.typedQuote.length >= goalCount.value) {
+        avgWpm.value =
+            wpmArray.value.reduce((acc, cur) => acc + cur, 0) /
+            wpmArray.value.length
+        avgCpm.value =
+            cpmArray.value.reduce((acc, cur) => acc + cur, 0) /
+            cpmArray.value.length
+        avgTypingAccuracy.value =
+            typingAccuracyArray.value.reduce((acc, cur) => acc + cur, 0) /
+            typingAccuracyArray.value.length
+        avgTypingProgress.value =
+            typingProgressArray.value.reduce((acc, cur) => acc + cur, 0) /
+            typingProgressArray.value.length
+        entireElapsedtime.value = ElapsedTimeArray.value.reduce(
+            (acc, cur) => acc + cur,
+            0,
+        )
+
+        typingInfo.avgWpm = avgWpm.value
+        typingInfo.avgCpm = avgCpm.value
+        typingInfo.avgTypingAccuracy = avgTypingAccuracy.value
+        typingInfo.avgTypingProgress = avgTypingProgress.value
+        typingInfo.entireElapsedtime = entireElapsedtime.value
+
         store.sendTypingInfo(typingInfo)
         store.toggleShow()
         // store.resetList()

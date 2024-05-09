@@ -9,8 +9,8 @@ export const useTypedQuote = defineStore("typingStack", () => {
         avgCpm: 0,
         maxWpm: 0,
         maxCpm: 0,
-        avgAccuracy: 0,
-        avgProgress: 0,
+        avgTypingAccuracy: 0,
+        avgTypingProgress: 0,
         count: typedQuote.value.length,
         entireElapsedtime: 0,
     })
@@ -22,6 +22,7 @@ export const useTypedQuote = defineStore("typingStack", () => {
     }
 
     const sendTypingInfo = (info: TypingInfo) => {
+        console.log(info)
         typingInfo = info
     }
 

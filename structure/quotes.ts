@@ -8,8 +8,8 @@ export interface TypingInfo {
     avgCpm: number
     maxWpm: number
     maxCpm: number
-    avgAccuracy: number
-    avgProgress: number
+    avgTypingAccuracy: number
+    avgTypingProgress: number
     count: number
     entireElapsedtime: number
 }
