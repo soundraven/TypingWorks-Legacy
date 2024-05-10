@@ -10,21 +10,21 @@
             </div>
             <div :class="$style.wpm">Max/Avg WPM</div>
             <div :class="$style.wpmInfo">
-                {{ store.typingInfo.maxWpm }} {{ store.typingInfo.avgWpm }}
+                {{ store.typingInfo.maxWpm }} / {{ store.typingInfo.avgWpm }}
             </div>
             <div :class="$style.cpm">Max/Avg CPM</div>
             <div :class="$style.cpmInfo">
-                {{ store.typingInfo.maxCpm }} {{ store.typingInfo.avgCpm }}
+                {{ store.typingInfo.maxCpm }} / {{ store.typingInfo.avgCpm }}
             </div>
             <div :class="$style.accuracy">Accuracy</div>
             <div :class="$style.accuracyInfo">
-                {{ store.typingInfo.avgTypingAccuracy }}
+                {{ store.typingInfo.avgTypingAccuracy }} %
             </div :class="$style.progress">
             <div :class="$style.progress">Progress</div>
             <div :class="$style.progressInfo">
-                {{ store.typingInfo.avgTypingProgress }}
+                {{ store.typingInfo.avgTypingProgress }} %
             </div>
-            <div :class="$style.explanation">간단설명</div>
+            <div :class="$style.explanation">Press Enter or Esc to continue</div>
         </div>
     </div>
 </template>
@@ -34,6 +34,21 @@ import { useTypedQuote } from "@/store/typedQuote"
 
 const $style = useCssModule()
 const store = useTypedQuote()
+
+const closeResult = (e: KeyboardEvent) => { 
+    if (store.showResult === true && (e.key === 'Enter' || e.key === 'Escape')) { 
+        store.toggleShow()
+    }
+    
+}
+
+onMounted(() => {
+    window.addEventListener('keydown', closeResult)
+})
+
+onBeforeUnmount(() => {
+    window.removeEventListener('keydown', closeResult)
+})
 </script>
 
 <style module lang="scss">
@@ -63,6 +78,22 @@ const store = useTypedQuote()
         grid-gap: 20px;
 
         background-color: var(--bg);
+        box-shadow: 0 0 50px var(--color-primary);
+
+        border: 2px solid var(--border-color);
+        border-radius: 20px;
+        
+        padding: 10px;
+
+        div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+                    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+        }
 
         .pageName {
             grid-area: 1 / 1 / 2 / 4;
