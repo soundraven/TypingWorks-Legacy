@@ -24,7 +24,8 @@
             <div :class="$style.progressInfo">
                 {{ store.typingInfo.avgTypingProgress }} %
             </div>
-            <div :class="$style.explanation">Press Enter or Esc to continue</div>
+            <div :class="$style.explanation">Press Enter or Esc to continue
+            <button @click="closeResult()">리셋임시버튼</button></div>
         </div>
     </div>
 </template>
@@ -35,20 +36,27 @@ import { useTypedQuote } from "@/store/typedQuote"
 const $style = useCssModule()
 const store = useTypedQuote()
 
-const closeResult = (e: KeyboardEvent) => { 
-    if (store.showResult === true && (e.key === 'Enter' || e.key === 'Escape')) { 
-        store.toggleShow()
-    }
-    
+const emit = defineEmits()
+
+const closeResult = () => { 
+    store.toggleShow()
+    store.resetList()
+    emit('resetInfo')
 }
+// const closeResult = (e: KeyboardEvent) => { 
+//     if (store.showResult === true && (e.key === 'Enter' || e.key === 'Escape')) { 
+//         store.toggleShow()
+//     }
+    
+// }
 
-onMounted(() => {
-    window.addEventListener('keydown', closeResult)
-})
+// onMounted(() => {
+//     window.addEventListener('keydown', closeResult)
+// })
 
-onBeforeUnmount(() => {
-    window.removeEventListener('keydown', closeResult)
-})
+// onBeforeUnmount(() => {
+//     window.removeEventListener('keydown', closeResult)
+// })
 </script>
 
 <style module lang="scss">

@@ -98,7 +98,11 @@
                 <div :class="$style.nextText">{{ nextText }}</div>
             </div>
         </div>
-        <ResultWindow v-if="store.showResult" :class="$style.resultWindow" />
+        <ResultWindow
+            v-if="store.showResult"
+            :class="$style.resultWindow"
+            @resetInfo="resetInfo()"
+        />
     </div>
 </template>
 
