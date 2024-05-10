@@ -98,7 +98,7 @@
                 <div :class="$style.nextText">{{ nextText }}</div>
             </div>
         </div>
-        <ResultWindow v-if="store.showResult" />
+        <ResultWindow v-if="store.showResult" :class="$style.resultWindow" />
     </div>
 </template>
 

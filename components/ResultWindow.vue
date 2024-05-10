@@ -1,30 +1,31 @@
 <template>
     <div :class="$style.index">
-        <div>
-            {{ store.typingInfo.avgWpm }}
+        <div :class="$style.infos">
+            <div :class="$style.pageName">Typing.Works.Legacy</div>
+            <div></div>
+            <div :class="$style.currentTime">2024-05-10 / 12:01:38</div>
+            <div :class="$style.typingMode">Typing Mode</div>
+            <div :class="$style.typingModeInfo">
+                {{ store.typingInfo.count }}
+            </div>
+            <div :class="$style.wpm">Max/Avg WPM</div>
+            <div :class="$style.wpmInfo">
+                {{ store.typingInfo.maxWpm }} {{ store.typingInfo.avgWpm }}
+            </div>
+            <div :class="$style.cpm">Max/Avg CPM</div>
+            <div :class="$style.cpmInfo">
+                {{ store.typingInfo.maxCpm }} {{ store.typingInfo.avgCpm }}
+            </div>
+            <div :class="$style.accuracy">Accuracy</div>
+            <div :class="$style.accuracyInfo">
+                {{ store.typingInfo.avgTypingAccuracy }}
+            </div :class="$style.progress">
+            <div :class="$style.progress">Progress</div>
+            <div :class="$style.progressInfo">
+                {{ store.typingInfo.avgTypingProgress }}
+            </div>
+            <div :class="$style.explanation">간단설명</div>
         </div>
-        <div>
-            {{ store.typingInfo.avgCpm }}
-        </div>
-        <div>
-            {{ store.typingInfo.maxWpm }}
-        </div>
-        <div>
-            {{ store.typingInfo.maxCpm }}
-        </div>
-        <div>
-            {{ store.typingInfo.avgTypingAccuracy }}
-        </div>
-        <div>
-            {{ store.typingInfo.avgTypingProgress }}
-        </div>
-        <div>
-            {{ store.typingInfo.count }}
-        </div>
-        <div>
-            {{ store.typingInfo.entireElapsedtime }}
-        </div>
-        <button @click="store.resetList">리셋버튼</button>
     </div>
 </template>
 
@@ -37,6 +38,83 @@ const store = useTypedQuote()
 
 <style module lang="scss">
 .index {
-    background-color: red;
+    width: 100vw;
+    height: 100vh;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: rgba(0, 0, 0, 0.5);
+
+    .infos {
+        width: 600px;
+        height: 800px;
+
+        position: relative;
+
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(8, 1fr);
+        grid-gap: 20px;
+
+        background-color: var(--bg);
+
+        .pageName {
+            grid-area: 1 / 1 / 2 / 4;
+        }
+
+        .currentTime {
+            grid-area: 2 / 1 / 3 / 4;
+        }
+
+        .typingMode {
+            grid-area: 3 / 1 / 4 / 2;
+        }
+
+        .typingModeInfo {
+            grid-area: 3 / 2 / 4 / 4;
+        }
+
+        .wpm {
+            grid-area: 4 / 1 / 5 / 2;
+        }
+
+        .wpmInfo {
+            grid-area: 4 / 2 / 5 / 4;
+        }
+
+        .cpm {
+            grid-area: 5 / 1 / 6 / 2;
+        }
+
+        .cpmInfo {
+            grid-area: 5 / 2 / 6 / 4;
+        }
+
+        .accuracy {
+            grid-area: 6 / 1 / 7 / 2;
+        }
+
+        .accuracyInfo {
+            grid-area: 6 / 2 / 7 / 4;
+        }
+
+        .progress {
+            grid-area: 7 / 1 / 8 / 2;
+        }
+
+        .progressInfo {
+            grid-area: 7 / 2 / 8 / 4;
+        }
+
+        .explanation {
+            grid-area: 8 / 1 / 9 / 4; 
+        }
+    }
 }
 </style>
