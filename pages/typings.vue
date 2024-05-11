@@ -102,7 +102,7 @@
             v-if="showResult"
             :class="$style.resultWindow"
             :typingInfo="typingInfo"
-            @closeResult="finishCycle()"
+            @closeResult="finishCycle"
         />
     </div>
 </template>
@@ -410,6 +410,7 @@ const raiseTypingCount = () => {
 }
 
 const endTyping = () => {
+    if (showResult.value) return
     wpmArray.value.push(wpm.value)
     cpmArray.value.push(cpm.value)
     typingAccuracyArray.value.push(typingAccuracy.value)
@@ -493,8 +494,10 @@ const resetInfo = () => {
 }
 
 const finishCycle = () => {
+    console.log("it works")
     resetInfo()
     typingCount.value = 0
+    console.log(typingCount.value)
     toggleShow()
 }
 

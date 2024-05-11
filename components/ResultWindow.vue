@@ -26,7 +26,6 @@
             </div>
             <div :class="$style.explanation">
                 Press Enter or Esc to continue
-                <!-- <button @click="closeResult()">리셋임시버튼</button> -->
             </div>
         </div>
     </div>
@@ -45,31 +44,22 @@ import {
 const $style = useCssModule()
 const store = useTypedQuote()
 
-const emit = defineEmits()
+const emits = defineEmits()
 const props = defineProps(["typingInfo"])
 
 const typingInfo = props.typingInfo
 
 const closeResult = (e) => {
     if (e.key === "Enter" || e.key === "Escape") {
-        console.log("it works")
-        console.log(e.key)
-        // store.toggleShow()
         store.resetList()
-        emit("closeResult")
+        emits("closeResult")
     }
 }
-// const closeResult = (e: KeyboardEvent) => {
-//     if (store.showResult === true && (e.key === 'Enter' || e.key === 'Escape')) {
-//         store.toggleShow()
-//     }
-
-// }
 
 onMounted(() => {
     setTimeout(() => {
         window.addEventListener("keyup", closeResult)
-    }, 100)
+    }, 500)
 })
 
 onBeforeUnmount(() => {
