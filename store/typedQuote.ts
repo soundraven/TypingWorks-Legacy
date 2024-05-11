@@ -22,15 +22,12 @@ export const useTypedQuote = defineStore("typingStack", () => {
     }
 
     const sendTypingInfo = (info: TypingInfo) => {
-        console.log(info)
-        // typingInfo.avgWpm = info.avgWpm
-        // typingInfo.avgCpm = info.avgCpm
-        // typingInfo.avgTypingAccuracy = info.avgTypingAccuracy
         typingInfo = info
-        console.log(typingInfo)
     }
 
     const toggleShow = () => {
+        console.log("store working")
+        console.log("result status:", showResult)
         showResult.value = !showResult.value
     }
 

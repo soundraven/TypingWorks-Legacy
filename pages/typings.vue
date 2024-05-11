@@ -99,10 +99,10 @@
             </div>
         </div>
         <ResultWindow
-            v-if="store.showResult"
+            v-if="showResult"
             :class="$style.resultWindow"
             :typingInfo="typingInfo"
-            @resetInfo="resetInfo()"
+            @closeResult="finishCycle()"
         />
     </div>
 </template>
@@ -172,9 +172,10 @@ const typingInfo: TypingInfo = reactive({
     maxCpm: maxCpm.value,
     avgTypingAccuracy: avgTypingAccuracy.value,
     avgTypingProgress: avgTypingProgress.value,
-    count: store.typedQuote.length,
+    count: typingCount.value,
     entireElapsedtime: entireElapsedtime.value,
 })
+const showResult: Ref<boolean> = ref(false)
 
 const startTime: Ref<number> = ref(0)
 const lastTypingTime: Ref<number> = ref(0)
@@ -405,7 +406,7 @@ const stopTypingSpeedCalc = () => {
 }
 
 const raiseTypingCount = () => {
-    typingCount.value = store.typedQuote.length
+    typingCount.value++
 }
 
 const endTyping = () => {
@@ -450,10 +451,10 @@ const endTyping = () => {
     typingInfo.avgTypingProgress = avgTypingProgress.value
     typingInfo.entireElapsedtime = entireElapsedtime.value
 
-    if (store.typedQuote.length >= goalCount.value) {
+    if (typingCount.value >= goalCount.value) {
         // store.sendTypingInfo(typingInfo)
         console.log(typingInfo)
-        store.toggleShow()
+        toggleShow()
         // store.resetList()
     }
 
@@ -484,10 +485,17 @@ const resetInfo = () => {
     parsingText.value = ""
     startTime.value = 0
     elapsedTime.value = 0
+
     wpm.value = 0
     cpm.value = 0
     typingAccuracy.value = 0
     typingProgress.value = 0
+}
+
+const finishCycle = () => {
+    resetInfo()
+    typingCount.value = 0
+    toggleShow()
 }
 
 const calcTypingSpeed = (takenTime: number) => {
@@ -570,6 +578,14 @@ const getActiveClass = (lang: Language): string => {
     } else {
         return ""
     }
+}
+
+const toggleShow = () => {
+    console.log(showResult.value)
+
+    showResult.value = !showResult.value
+
+    console.log(showResult.value)
 }
 </script>
 

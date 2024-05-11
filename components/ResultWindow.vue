@@ -26,7 +26,7 @@
             </div>
             <div :class="$style.explanation">
                 Press Enter or Esc to continue
-                <button @click="closeResult()">리셋임시버튼</button>
+                <!-- <button @click="closeResult()">리셋임시버튼</button> -->
             </div>
         </div>
     </div>
@@ -50,10 +50,14 @@ const props = defineProps(["typingInfo"])
 
 const typingInfo = props.typingInfo
 
-const closeResult = () => {
-    store.toggleShow()
-    store.resetList()
-    emit("resetInfo")
+const closeResult = (e) => {
+    if (e.key === "Enter" || e.key === "Escape") {
+        console.log("it works")
+        console.log(e.key)
+        // store.toggleShow()
+        store.resetList()
+        emit("closeResult")
+    }
 }
 // const closeResult = (e: KeyboardEvent) => {
 //     if (store.showResult === true && (e.key === 'Enter' || e.key === 'Escape')) {
@@ -63,12 +67,14 @@ const closeResult = () => {
 // }
 
 onMounted(() => {
-    // window.addEventListener('keydown', closeResult)
+    setTimeout(() => {
+        window.addEventListener("keyup", closeResult)
+    }, 100)
 })
 
-// onBeforeUnmount(() => {
-//     window.removeEventListener('keydown', closeResult)
-// })
+onBeforeUnmount(() => {
+    window.removeEventListener("keyup", closeResult)
+})
 </script>
 
 <style module lang="scss">
