@@ -11,7 +11,7 @@ export const useTypedQuote = defineStore("typingStack", () => {
         maxCpm: 0,
         avgTypingAccuracy: 0,
         avgTypingProgress: 0,
-        count: typedQuote.value.length,
+        count: 0,
         entireElapsedtime: 0,
     })
 
@@ -23,7 +23,11 @@ export const useTypedQuote = defineStore("typingStack", () => {
 
     const sendTypingInfo = (info: TypingInfo) => {
         console.log(info)
+        // typingInfo.avgWpm = info.avgWpm
+        // typingInfo.avgCpm = info.avgCpm
+        // typingInfo.avgTypingAccuracy = info.avgTypingAccuracy
         typingInfo = info
+        console.log(typingInfo)
     }
 
     const toggleShow = () => {

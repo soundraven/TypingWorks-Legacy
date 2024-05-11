@@ -6,53 +6,65 @@
             <div :class="$style.currentTime">2024-05-10 / 12:01:38</div>
             <div :class="$style.typingMode">Typing Mode</div>
             <div :class="$style.typingModeInfo">
-                {{ store.typingInfo.count }}
+                {{ props.typingInfo.count }}
             </div>
             <div :class="$style.wpm">Max/Avg WPM</div>
             <div :class="$style.wpmInfo">
-                {{ store.typingInfo.maxWpm }} / {{ store.typingInfo.avgWpm }}
+                {{ props.typingInfo.maxWpm }} / {{ props.typingInfo.avgWpm }}
             </div>
             <div :class="$style.cpm">Max/Avg CPM</div>
             <div :class="$style.cpmInfo">
-                {{ store.typingInfo.maxCpm }} / {{ store.typingInfo.avgCpm }}
+                {{ props.typingInfo.maxCpm }} / {{ props.typingInfo.avgCpm }}
             </div>
             <div :class="$style.accuracy">Accuracy</div>
             <div :class="$style.accuracyInfo">
-                {{ store.typingInfo.avgTypingAccuracy }} %
-            </div :class="$style.progress">
+                {{ props.typingInfo.avgTypingAccuracy }} %
+            </div>
             <div :class="$style.progress">Progress</div>
             <div :class="$style.progressInfo">
-                {{ store.typingInfo.avgTypingProgress }} %
+                {{ props.typingInfo.avgTypingProgress }} %
             </div>
-            <div :class="$style.explanation">Press Enter or Esc to continue
-            <button @click="closeResult()">리셋임시버튼</button></div>
+            <div :class="$style.explanation">
+                Press Enter or Esc to continue
+                <button @click="closeResult()">리셋임시버튼</button>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import { useTypedQuote } from "@/store/typedQuote"
+import {
+    TypoStatus,
+    Language,
+    Direction,
+    type Quote,
+    type TypingInfo,
+} from "~/structure/quotes"
 
 const $style = useCssModule()
 const store = useTypedQuote()
 
 const emit = defineEmits()
+const props = defineProps(["typingInfo"])
 
-const closeResult = () => { 
+const typingInfo = props.typingInfo
+
+const closeResult = () => {
     store.toggleShow()
     store.resetList()
-    emit('resetInfo')
+    emit("resetInfo")
 }
-// const closeResult = (e: KeyboardEvent) => { 
-//     if (store.showResult === true && (e.key === 'Enter' || e.key === 'Escape')) { 
+// const closeResult = (e: KeyboardEvent) => {
+//     if (store.showResult === true && (e.key === 'Enter' || e.key === 'Escape')) {
 //         store.toggleShow()
 //     }
-    
+
 // }
 
-// onMounted(() => {
-//     window.addEventListener('keydown', closeResult)
-// })
+onMounted(() => {
+    // window.addEventListener('keydown', closeResult)
+})
 
 // onBeforeUnmount(() => {
 //     window.removeEventListener('keydown', closeResult)
@@ -90,7 +102,7 @@ const closeResult = () => {
 
         border: 2px solid var(--border-color);
         border-radius: 20px;
-        
+
         padding: 10px;
 
         div {
@@ -100,7 +112,7 @@ const closeResult = () => {
             font-size: 20px;
             border: 1px solid var(--border-color);
             border-radius: 20px;
-                    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
         }
 
         .pageName {
@@ -152,7 +164,7 @@ const closeResult = () => {
         }
 
         .explanation {
-            grid-area: 8 / 1 / 9 / 4; 
+            grid-area: 8 / 1 / 9 / 4;
         }
     }
 }

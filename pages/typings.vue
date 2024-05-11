@@ -101,6 +101,7 @@
         <ResultWindow
             v-if="store.showResult"
             :class="$style.resultWindow"
+            :typingInfo="typingInfo"
             @resetInfo="resetInfo()"
         />
     </div>
@@ -426,31 +427,32 @@ const endTyping = () => {
 
     calcTypingSpeed(totalTime.value)
 
+    avgWpm.value =
+        wpmArray.value.reduce((acc, cur) => acc + cur, 0) /
+        wpmArray.value.length
+    avgCpm.value =
+        cpmArray.value.reduce((acc, cur) => acc + cur, 0) /
+        cpmArray.value.length
+    avgTypingAccuracy.value =
+        typingAccuracyArray.value.reduce((acc, cur) => acc + cur, 0) /
+        typingAccuracyArray.value.length
+    avgTypingProgress.value =
+        typingProgressArray.value.reduce((acc, cur) => acc + cur, 0) /
+        typingProgressArray.value.length
+    entireElapsedtime.value = ElapsedTimeArray.value.reduce(
+        (acc, cur) => acc + cur,
+        0,
+    )
+
+    typingInfo.avgWpm = avgWpm.value
+    typingInfo.avgCpm = avgCpm.value
+    typingInfo.avgTypingAccuracy = avgTypingAccuracy.value
+    typingInfo.avgTypingProgress = avgTypingProgress.value
+    typingInfo.entireElapsedtime = entireElapsedtime.value
+
     if (store.typedQuote.length >= goalCount.value) {
-        avgWpm.value =
-            wpmArray.value.reduce((acc, cur) => acc + cur, 0) /
-            wpmArray.value.length
-        avgCpm.value =
-            cpmArray.value.reduce((acc, cur) => acc + cur, 0) /
-            cpmArray.value.length
-        avgTypingAccuracy.value =
-            typingAccuracyArray.value.reduce((acc, cur) => acc + cur, 0) /
-            typingAccuracyArray.value.length
-        avgTypingProgress.value =
-            typingProgressArray.value.reduce((acc, cur) => acc + cur, 0) /
-            typingProgressArray.value.length
-        entireElapsedtime.value = ElapsedTimeArray.value.reduce(
-            (acc, cur) => acc + cur,
-            0,
-        )
-
-        typingInfo.avgWpm = avgWpm.value
-        typingInfo.avgCpm = avgCpm.value
-        typingInfo.avgTypingAccuracy = avgTypingAccuracy.value
-        typingInfo.avgTypingProgress = avgTypingProgress.value
-        typingInfo.entireElapsedtime = entireElapsedtime.value
-
-        store.sendTypingInfo(typingInfo)
+        // store.sendTypingInfo(typingInfo)
+        console.log(typingInfo)
         store.toggleShow()
         // store.resetList()
     }
