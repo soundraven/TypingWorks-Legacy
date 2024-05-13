@@ -265,7 +265,9 @@ const calcElapsedTime = () => {
     const date = new Date()
 
     lastTypingTime.value = date.getTime()
-    elapsedTime.value = (lastTypingTime.value - startTime.value) / 1000
+    elapsedTime.value = Math.floor(
+        (lastTypingTime.value - startTime.value) / 1000,
+    )
 }
 
 // 오타 확인을 위해 문장 글자단위로 분해
@@ -389,7 +391,7 @@ const calcProgress = () => {
 }
 
 const startTypingSpeedCalc = () => {
-    elapsedTimerId.value = setInterval(keepCheckElapsedTime, 100) //콘솔창 계속 올라가는 이슈때문에 임시로 변경
+    elapsedTimerId.value = setInterval(keepCheckElapsedTime, 100)
 }
 
 const keepCheckElapsedTime = () => {
