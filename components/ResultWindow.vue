@@ -49,7 +49,7 @@ const props = defineProps(["typingInfo"])
 
 const typingInfo = props.typingInfo
 
-const closeResult = (e) => {
+const closeResult = (e: KeyboardEvent) => {
     if (e.key === "Enter" || e.key === "Escape") {
         store.resetList()
         emits("closeResult")

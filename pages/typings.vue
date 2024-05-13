@@ -3,11 +3,11 @@
         <div :class="$style.typing">
             <div :class="[$style.icon, $style.gridItem]" v-auto-animate>
                 <div
-                    :class="[$style.list]"
+                    :class="[$style.listBox]"
                     v-for="(quote, index) in store.typedQuote"
                     :key="'quote_' + index"
                 >
-                    {{ quote }}
+                    <div :class="$style.list">{{ quote }}</div>
                 </div>
             </div>
             <div :class="[$style.language, $style.gridItem]" v-auto-animate>
@@ -417,7 +417,7 @@ const endTyping = () => {
     typingProgressArray.value.push(typingProgress.value)
     ElapsedTimeArray.value.push(elapsedTime.value)
 
-    summarizeSentence(targetText.value)
+    store.addList(targetText.value)
     raiseTypingCount()
 
     typoStatus.value = []
@@ -468,17 +468,6 @@ const endTyping = () => {
     splitText()
     updateTypoStatus()
     resetInfo()
-}
-
-const summarizeSentence = (sentence) => {
-    const maxLength: number = targetLanguage.value === Language.Korean ? 23 : 38
-
-    if (sentence.length <= maxLength) {
-        store.addList(sentence)
-    } else {
-        const summarized = sentence.substring(0, maxLength) + "..."
-        store.addList(summarized)
-    }
 }
 
 const resetInfo = () => {
@@ -608,12 +597,12 @@ const toggleShow = () => {
 @keyframes flash-box-shadow {
     0% {
         box-shadow:
-            inset 0px 0px 30px var(--color-primary-shadow-inset-start),
+            // inset 0px 0px 30px var(--color-primary-shadow-inset-start),
             0px 0px 35px var(--color-primary-shadow-start);
     }
     50% {
         box-shadow:
-            inset 0px 0px 30px var(--color-primary-shadow-inset-mid),
+            // inset 0px 0px 30px var(--color-primary-shadow-inset-mid),
             0px 0px 35px var(--color-primary-shadow-mid);
     }
     100% {
@@ -680,26 +669,42 @@ const toggleShow = () => {
 
             font-size: 16px;
 
-            padding-block: 5px;
+            padding-block: 4.5px;
 
-            > .list {
-                width: 330px;
-                height: 23px;
+            overflow: hidden;
 
-                text-align: left;
-                line-height: 23px;
+            > .listBox {
+                width: 340px;
+                height: 33px;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
 
                 border: 2px solid var(--border-color);
                 border-radius: 10px;
-                box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
 
-                margin-block: 5px;
-                padding: 5px;
+                margin-block: 4.5px;
 
                 animation: flash-box-shadow 1s;
 
-                &:nth-last-child(n + 6) {
-                    display: none;
+                > .list {
+                    width: 100%;
+                    height: 100%;
+
+                    text-align: left;
+                    line-height: 33px;
+
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    word-break: break-all;
+
+                    overflow: hidden;
+
+                    border-radius: 10px;
+                    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+
+                    padding-inline: 5px;
                 }
             }
         }
