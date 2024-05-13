@@ -25,7 +25,8 @@
                 {{ props.typingInfo.avgTypingProgress }} %
             </div>
             <div :class="$style.explanation">
-                Press Enter or Esc to continue
+                Press&nbsp;<span>Enter</span>&nbsp;or&nbsp;<span>Esc</span>&nbsp;to
+                continue
             </div>
         </div>
     </div>
@@ -33,21 +34,12 @@
 
 <script setup lang="ts">
 import { useTypedQuote } from "@/store/typedQuote"
-import {
-    TypoStatus,
-    Language,
-    Direction,
-    type Quote,
-    type TypingInfo,
-} from "~/structure/quotes"
 
 const $style = useCssModule()
 const store = useTypedQuote()
 
 const emits = defineEmits()
 const props = defineProps(["typingInfo"])
-
-const typingInfo = props.typingInfo
 
 const closeResult = (e: KeyboardEvent) => {
     if (e.key === "Enter" || e.key === "Escape") {
@@ -58,12 +50,12 @@ const closeResult = (e: KeyboardEvent) => {
 
 onMounted(() => {
     setTimeout(() => {
-        window.addEventListener("keyup", closeResult)
+        window.addEventListener("keydown", closeResult)
     }, 500)
 })
 
 onBeforeUnmount(() => {
-    window.removeEventListener("keyup", closeResult)
+    window.removeEventListener("keydown", closeResult)
 })
 </script>
 
@@ -82,7 +74,7 @@ onBeforeUnmount(() => {
 
     background-color: rgba(0, 0, 0, 0.5);
 
-    .infos {
+    > .infos {
         width: 600px;
         height: 800px;
 
@@ -101,14 +93,20 @@ onBeforeUnmount(() => {
 
         padding: 10px;
 
-        div {
+        > div {
             display: flex;
             justify-content: center;
             align-items: center;
+
             font-size: 20px;
+
             border: 1px solid var(--border-color);
             border-radius: 20px;
-            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
+
+            > span {
+                color: var(--color-primary);
+            }
         }
 
         .pageName {

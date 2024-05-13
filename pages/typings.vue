@@ -1,7 +1,7 @@
 <template>
     <div :class="$style.index">
         <div :class="$style.typing">
-            <div :class="[$style.icon, $style.gridItem]" v-auto-animate>
+            <div :class="[$style.typedText, $style.gridItem]" v-auto-animate>
                 <div
                     :class="[$style.listBox]"
                     v-for="(quote, index) in store.typedQuote"
@@ -597,12 +597,12 @@ const toggleShow = () => {
 @keyframes flash-box-shadow {
     0% {
         box-shadow:
-            // inset 0px 0px 30px var(--color-primary-shadow-inset-start),
+            inset 0px 0px 30px var(--color-primary-shadow-inset-start),
             0px 0px 35px var(--color-primary-shadow-start);
     }
     50% {
         box-shadow:
-            // inset 0px 0px 30px var(--color-primary-shadow-inset-mid),
+            inset 0px 0px 30px var(--color-primary-shadow-inset-mid),
             0px 0px 35px var(--color-primary-shadow-mid);
     }
     100% {
@@ -641,7 +641,7 @@ const toggleShow = () => {
         background-color: var(--bg-secondary);
         border: 2px solid var(--border-color);
         border-radius: 10px;
-        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
 
         margin-inline: auto;
         padding: 20px;
@@ -656,10 +656,10 @@ const toggleShow = () => {
 
             border: 2px solid var(--border-color);
             border-radius: 10px;
-            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
         }
 
-        > .icon {
+        > .typedText {
             grid-area: i;
 
             display: flex;
@@ -702,7 +702,7 @@ const toggleShow = () => {
                     overflow: hidden;
 
                     border-radius: 10px;
-                    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+                    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
 
                     padding-inline: 5px;
                 }
@@ -732,7 +732,7 @@ const toggleShow = () => {
 
                 border: 2px solid var(--border-color);
                 border-radius: 7px;
-                box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.2);
+                box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.15);
 
                 transition-duration: 0.5s;
 
