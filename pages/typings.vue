@@ -411,26 +411,15 @@ const raiseTypingCount = () => {
     typingCount.value++
 }
 
-const endTyping = () => {
-    if (showResult.value) return
+const pushTypingInfo = () => {
     wpmArray.value.push(wpm.value)
     cpmArray.value.push(cpm.value)
     typingAccuracyArray.value.push(typingAccuracy.value)
     typingProgressArray.value.push(typingProgress.value)
     ElapsedTimeArray.value.push(elapsedTime.value)
+}
 
-    store.addList(targetText.value)
-    raiseTypingCount()
-
-    typoStatus.value = []
-    stopTypingSpeedCalc()
-
-    const date = new Date()
-    endTime.value = date.getTime()
-    totalTime.value = (endTime.value - startTime.value) / 1000
-
-    calcTypingSpeed(totalTime.value)
-
+const updateTypingInfo = () => {
     avgWpm.value =
         wpmArray.value.reduce((acc, cur) => acc + cur, 0) /
         wpmArray.value.length
@@ -447,25 +436,47 @@ const endTyping = () => {
         (acc, cur) => acc + cur,
         0,
     )
-
-    typingInfo.avgWpm = avgWpm.value
+    ;(typingInfo.maxWpm = Math.max(...wpmArray.value)),
+        (typingInfo.maxCpm = Math.max(...cpmArray.value)),
+        (typingInfo.avgWpm = avgWpm.value)
     typingInfo.avgCpm = avgCpm.value
     typingInfo.avgTypingAccuracy = avgTypingAccuracy.value
     typingInfo.avgTypingProgress = avgTypingProgress.value
     typingInfo.entireElapsedtime = entireElapsedtime.value
+}
 
-    if (typingCount.value >= goalCount.value) {
-        // store.sendTypingInfo(typingInfo)
-        console.log(typingInfo)
-        toggleShow()
-        // store.resetList()
-    }
-
+const readyQuote = () => {
     const [target, nextTarget] = getTargetText()
+
     targetText.value = nextText.value
     targetPerson.value = nextPerson.value
     nextText.value = nextTarget.quote
     nextPerson.value = nextTarget.person
+}
+
+const endTyping = () => {
+    if (showResult.value) return
+
+    stopTypingSpeedCalc()
+
+    store.addList(targetText.value)
+
+    pushTypingInfo()
+    raiseTypingCount()
+
+    const date = new Date()
+    endTime.value = date.getTime()
+    totalTime.value = (endTime.value - startTime.value) / 1000
+
+    calcTypingSpeed(totalTime.value)
+
+    updateTypingInfo()
+
+    if (typingCount.value >= goalCount.value) {
+        toggleShow()
+    }
+
+    readyQuote()
 
     splitText()
     updateTypoStatus()
@@ -482,6 +493,22 @@ const resetInfo = () => {
     cpm.value = 0
     typingAccuracy.value = 0
     typingProgress.value = 0
+
+    avgWpm.value = 0
+    avgCpm.value = 0
+    maxWpm.value = 0
+    maxCpm.value = 0
+    avgTypingAccuracy.value = 0
+    avgTypingProgress.value = 0
+    entireElapsedtime.value = 0
+
+    wpmArray.value = []
+    cpmArray.value = []
+    typingAccuracyArray.value = []
+    typingProgressArray.value = []
+    ElapsedTimeArray.value = []
+
+    typoStatus.value = []
 }
 
 const finishCycle = () => {

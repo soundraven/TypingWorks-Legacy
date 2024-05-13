@@ -3,7 +3,7 @@
         <div :class="$style.infos">
             <div :class="$style.pageName">Typing.Works.Legacy</div>
             <div></div>
-            <div :class="$style.currentTime">2024-05-10 / 12:01:38</div>
+            <div :class="$style.currentTime">{{ formattedTime }}</div>
             <div :class="$style.typingMode">Typing Mode</div>
             <div :class="$style.typingModeInfo">
                 {{ props.typingInfo.count }}
@@ -47,6 +47,9 @@ const closeResult = (e: KeyboardEvent) => {
         emits("closeResult")
     }
 }
+
+const currentTime = new Date()
+const formattedTime = currentTime.toLocaleString()
 
 onMounted(() => {
     setTimeout(() => {
