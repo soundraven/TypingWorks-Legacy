@@ -74,13 +74,13 @@
             </div>
             <div :class="[$style.textArea, $style.gridItem]">
                 <div :class="$style.text">
-                    <span
+                    <div
                         v-for="(char, index) in splitedTargetText"
                         :key="index"
                         :class="[getTypoClass(index), getLastTyped(index)]"
                     >
                         {{ char }}
-                    </span>
+                    </div>
                 </div>
                 <div :class="$style.inputs">
                     <input
@@ -639,16 +639,16 @@ const toggleShow = () => {
 
 @keyframes shake {
     0% {
-        top: 0px;
+        transform: translateY(0);
     }
     25% {
-        top: -1px;
+        transform: translateY(-2px);
     }
     75% {
-        top: 1px;
+        transform: translateY(2px);
     }
     100% {
-        top: 0px;
+        transform: translateY(0);
     }
 }
 
@@ -916,9 +916,10 @@ const toggleShow = () => {
                 height: 30px;
                 font-size: 20px;
                 margin-right: auto;
+                display: flex;
 
-                > span {
-                    height: 100%;
+                > div {
+                    min-width: 7px;
                     transition-property: color;
                     transition-duration: 0.2s;
                     transition-timing-function: ease-out;
@@ -926,7 +927,6 @@ const toggleShow = () => {
 
                 > .typo {
                     color: rgb(255, 0, 0, 0.8);
-                    position: relative;
                     animation: shake 0.2s;
                 }
 
