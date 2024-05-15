@@ -26,8 +26,6 @@ export const useTypedQuote = defineStore("typingStack", () => {
     }
 
     const toggleShow = () => {
-        console.log("store working")
-        console.log("result status:", showResult)
         showResult.value = !showResult.value
     }
 

@@ -84,15 +84,19 @@
                 </div>
                 <div :class="$style.inputs">
                     <input
-                        v-on:input="updateTypedText($event)"
+                        v-on:input="
+                            ($event) => {
+                                handleDeletion($event), updateTypedText($event)
+                            }
+                        "
                         v-bind:value="typedText"
                         type="text"
                         autofocus
                         placeholder="위에 보이는 문장을 따라 타이핑해보세요."
+                        spellcheck="false"
                         @keyup="keyupEventHandler"
                         @keydown.enter.prevent="endTyping"
                         @paste="preventPaste"
-                        @input="handleDeletion($event)"
                     />
                 </div>
                 <div :class="$style.nextText">{{ nextText }}</div>
@@ -119,8 +123,7 @@ import {
 import EnQuotes from "@/assets/quotes/quotesEn.json"
 import KrQuotes from "@/assets/quotes/quotesKo.json"
 import { vAutoAnimate } from "@formkit/auto-animate"
-import { GAP } from "element-plus"
-import { useTypedQuote } from "@/store/typedQuote"
+import { useTypedQuote } from "~/store/typedQuote"
 
 const $style = useCssModule()
 const store = useTypedQuote()
@@ -419,7 +422,7 @@ const pushTypingInfo = () => {
     ElapsedTimeArray.value.push(elapsedTime.value)
 }
 
-const updateTypingInfo = () => {
+const calcTypingInfo = () => {
     avgWpm.value =
         wpmArray.value.reduce((acc, cur) => acc + cur, 0) /
         wpmArray.value.length
@@ -470,7 +473,7 @@ const endTyping = () => {
 
     calcTypingSpeed(totalTime.value)
 
-    updateTypingInfo()
+    calcTypingInfo()
 
     if (typingCount.value >= goalCount.value) {
         toggleShow()
@@ -512,10 +515,9 @@ const resetInfo = () => {
 }
 
 const finishCycle = () => {
-    console.log("it works")
     resetInfo()
     typingCount.value = 0
-    console.log(typingCount.value)
+
     toggleShow()
 }
 
@@ -602,11 +604,7 @@ const getActiveClass = (lang: Language): string => {
 }
 
 const toggleShow = () => {
-    console.log(showResult.value)
-
     showResult.value = !showResult.value
-
-    console.log(showResult.value)
 }
 </script>
 
@@ -636,6 +634,21 @@ const toggleShow = () => {
     }
     100% {
         box-shadow: none;
+    }
+}
+
+@keyframes shake {
+    0% {
+        top: 0px;
+    }
+    25% {
+        top: -1px;
+    }
+    75% {
+        top: 1px;
+    }
+    100% {
+        top: 0px;
     }
 }
 
@@ -912,7 +925,9 @@ const toggleShow = () => {
                 }
 
                 > .typo {
-                    color: red;
+                    color: rgb(255, 0, 0, 0.8);
+                    position: relative;
+                    animation: shake 0.2s;
                 }
 
                 > .success {

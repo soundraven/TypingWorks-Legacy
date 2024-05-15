@@ -1,40 +1,54 @@
 <template>
-    <div :class="{ 'flash-effect': isFlashing }">내 Div</div>
+    <div class="text">
+        <span :class="getTypoClass(0)">Shake me!</span>
+    </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref } from "vue"
 
-const isFlashing = ref(false)
-
-const $style = useCssModule()
-
-onMounted(() => {
-    isFlashing.value = true
-    setTimeout(() => {
-        isFlashing.value = false
-    }, 1000) // 1초 후에 플래시 효과를 종료합니다.
-})
-</script>
-
-<style>
-.flash-effect {
-    animation: flash 1s ease-out;
+// 테스트를 위한 TypoStatus 정의
+const TypoStatus = {
+    NotInput: 0,
+    Error: 1,
+    Correct: 2,
 }
 
-@keyframes flash {
-    0% {
-        opacity: 0.8;
-        box-shadow: 0 0 20px 10px var(--color-primary);
-    }
+// 상태 초기화
+const typoStatus = ref({ value: [TypoStatus.Error] })
 
-    50% {
-        opacity: 0.4;
-        box-shadow: 0 0 20px 10px rgba(0, 0, 0, 0.8);
+// 클래스 부여 함수
+const getTypoClass = (index) => {
+    if (typoStatus.value[index] === TypoStatus.NotInput) return ""
+    if (typoStatus.value[index] === TypoStatus.Error) return "typo"
+    if (typoStatus.value[index] === TypoStatus.Correct) return "success"
+    return ""
+}
+</script>
+
+<style scoped>
+@keyframes shake {
+    0% {
+        transform: translateY(0);
+    }
+    25% {
+        transform: translateY(-5px);
+    }
+    75% {
+        transform: translateY(5px);
     }
     100% {
-        opacity: 0;
-        box-shadow: none;
+        transform: translateY(0);
     }
+}
+
+.typo {
+    color: rgba(255, 0, 0, 0.8);
+    position: relative;
+    animation: shake 1s ease-in-out infinite;
+}
+
+.success {
+    color: var(--color-primary);
 }
 </style>

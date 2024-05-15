@@ -22,12 +22,11 @@ const $style = useCssModule()
 
 //dictionary
 const pressedKey: Ref<string> = ref("")
-let timer: ReturnType<typeof setTimeout> | null = null
 
 onMounted(() => {
     if (process.server) return
-    window.addEventListener("keydown", handleKeyDown)
-    window.addEventListener("keyup", handleKeyUp)
+    window.addEventListener("keydown", handleKeyDown) //누를시 반짝임
+    window.addEventListener("keyup", handleKeyUp) //뗄시 없어짐
 })
 
 onBeforeUnmount(() => {
