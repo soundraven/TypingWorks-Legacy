@@ -2,6 +2,7 @@ export const getPercentage = (
     numerator: number,
     denominator: number,
 ): number => {
+    if (numerator === 0) return 0
     return Math.round((numerator / denominator) * 100)
 }
 

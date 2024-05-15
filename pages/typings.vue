@@ -86,7 +86,7 @@
                     <input
                         v-on:input="
                             ($event) => {
-                                handleDeletion($event), updateTypedText($event)
+                                updateTypedText($event), handleDeletion($event)
                             }
                         "
                         v-bind:value="typedText"
@@ -244,10 +244,7 @@ const updateTypedText = (e) => {
     typedText.value = (e.target as HTMLInputElement).value
 }
 
-const startTyping = (
-    text: string,
-    e: KeyboardEvent | undefined = undefined,
-) => {
+const startTyping = (text: string) => {
     parsingText.value = text
     // 시작시 startTime 체크
     if (startTime.value === 0) {
@@ -260,7 +257,7 @@ const startTyping = (
     calcElapsedTime()
     calcAccuracy()
     calcProgress()
-    checkTypo()
+    // checkTypo()
 }
 
 // 마지막으로 타이핑한 시간 기준으로 경과시간을 계산
@@ -288,10 +285,18 @@ const handleDeletion = (e: Event) => {
     const inputEvent = e as InputEvent
     const splitedParsingText: string[] = parsingText.value.split("")
 
-    if (inputEvent.inputType === "deleteContentBackward") {
-        checkTypoArray.value = []
+    const deleteTypes = [
+        "deleteContentBackward",
+        "deleteContentForward",
+        "deleteByCut",
+        "deleteByDrag",
+    ]
 
-        for (let i = 0; i + 1 < parsingText.value.length; i++) {
+    if (deleteTypes.includes(inputEvent.inputType)) {
+        checkTypoArray.value = []
+        parsingText.value = typedText.value
+
+        for (let i = 0; i < parsingText.value.length; i++) {
             if (typeof targetText.value[i] === undefined) continue
             //배열에 없는 인덱스 번호를 넣으면 다른 언어에선 터짐.
             //typeof로 비교하면 Undefined가 string값으로 나온다고 함.추가로 알아보기
@@ -301,6 +306,7 @@ const handleDeletion = (e: Event) => {
                 checkTypoArray.value[i] = TypoStatus.Error
             }
         }
+
         //string타입에 [i] 써도 되는건지 확인
         for (let i = 0; i < typoStatus.value.length; i++) {
             //Typo 클래스 부여는 typoStatus가 하기때문에 동기화 필요
@@ -336,6 +342,31 @@ const checkTypo = () => {
         }
     }
 }
+// const checkTypo = () => {
+//     const splitedParsingText: string[] = parsingText.value.split("")
+
+//     for (let i = 0; i + 1 < parsingText.value.length; i++) {
+//         //오타 관리 배열에 TypoStatus 채우기
+//         if (splitedParsingText[i] === undefined) {
+//             typoStatus.value[i] = TypoStatus.NotInput
+//         }
+
+//         if (targetText.value[i] === splitedParsingText[i]) {
+//             typoStatus.value[i] = TypoStatus.Correct //한박자 늦게 따라오는 오타 체크 배열 - 조합문자 이슈
+//         } else {
+//             typoStatus.value[i] = TypoStatus.Error
+//         }
+//     }
+
+//     for (let i = 0; i < parsingText.value.length; i++) {
+//         if (targetText.value[i] === undefined) continue
+//         if (targetText.value[i] === splitedParsingText[i]) {
+//             checkTypoArray.value[i] = TypoStatus.Correct //입력받는대로 따라오는 오타 체크 배열
+//         } else {
+//             checkTypoArray.value[i] = TypoStatus.Error
+//         }
+//     }
+// }
 
 const getTypoClass = (index: number): string => {
     //오타와 정타에 클래스 부여
@@ -491,6 +522,7 @@ const resetInfo = () => {
     parsingText.value = ""
     startTime.value = 0
     elapsedTime.value = 0
+    elapsedTimerId.value = undefined
 
     wpm.value = 0
     cpm.value = 0
@@ -606,6 +638,61 @@ const getActiveClass = (lang: Language): string => {
 const toggleShow = () => {
     showResult.value = !showResult.value
 }
+
+watch(parsingText, (newValue) => {
+    //타이밍은 parsingText기준으로
+    if (newValue === "") {
+        //이건 일단 작동하니까 잠깐 두고
+        parsingText.value = ""
+        checkTypoArray.value = []
+
+        const splitedParsingText: string[] = parsingText.value.split("")
+
+        for (let i = 0; i + 1 < parsingText.value.length; i++) {
+            if (typeof targetText.value[i] === undefined) continue
+            //배열에 없는 인덱스 번호를 넣으면 다른 언어에선 터짐.
+            //typeof로 비교하면 Undefined가 string값으로 나온다고 함.추가로 알아보기
+            if (targetText.value[i] === splitedParsingText[i]) {
+                checkTypoArray.value[i] = TypoStatus.Correct
+            } else {
+                checkTypoArray.value[i] = TypoStatus.Error
+            }
+        }
+
+        //string타입에 [i] 써도 되는건지 확인
+        for (let i = 0; i < typoStatus.value.length; i++) {
+            //Typo 클래스 부여는 typoStatus가 하기때문에 동기화 필요
+            if (typoStatus.value[i] !== checkTypoArray.value[i]) {
+                typoStatus.value[i] = checkTypoArray.value[i]
+            }
+        }
+
+        resetInfo()
+    }
+
+    checkTypo()
+
+    // const splitedTypedText: string[] = typedText.value.split("")
+
+    // for (let i = 0; i + 1 < typedText.value.length; i++) {
+    //     if (typeof typedText.value[i] === undefined) continue
+    //     //배열에 없는 인덱스 번호를 넣으면 다른 언어에선 터짐.
+    //     //typeof로 비교하면 Undefined가 string값으로 나온다고 함.추가로 알아보기
+    //     if (typedText.value[i] === splitedTypedText[i]) {
+    //         checkTypoArray.value[i] = TypoStatus.Correct
+    //     } else {
+    //         checkTypoArray.value[i] = TypoStatus.Error
+    //     }
+    // }
+
+    // //string타입에 [i] 써도 되는건지 확인
+    // for (let i = 0; i < typoStatus.value.length; i++) {
+    //     //Typo 클래스 부여는 typoStatus가 하기때문에 동기화 필요
+    //     if (typoStatus.value[i] !== checkTypoArray.value[i]) {
+    //         typoStatus.value[i] = checkTypoArray.value[i]
+    //     }
+    // }
+})
 </script>
 
 <style lang="scss" module>
@@ -631,6 +718,10 @@ const toggleShow = () => {
         box-shadow:
             inset 0px 0px 30px var(--color-primary-shadow-inset-mid),
             0px 0px 35px var(--color-primary-shadow-mid);
+    }
+
+    75% {
+        box-shadow-inset: 0px 0px 30px var(--color-primary-shadow-inset-mid);
     }
     100% {
         box-shadow: none;
@@ -914,15 +1005,20 @@ const toggleShow = () => {
 
             > .text {
                 height: 30px;
-                font-size: 20px;
-                margin-right: auto;
+
                 display: flex;
 
+                font-size: 20px;
+                line-height: 30px;
+
+                margin-right: auto;
+
                 > div {
-                    min-width: 7px;
+                    min-width: 5px;
                     transition-property: color;
                     transition-duration: 0.2s;
                     transition-timing-function: ease-out;
+                    position: relative;
                 }
 
                 > .typo {
@@ -935,18 +1031,21 @@ const toggleShow = () => {
                 }
 
                 > .lastTyped {
-                    box-shadow:
-                        inset 0px 0px 50px rgba(65, 184, 131, 0),
-                        5px 0px 35px transparent;
                     animation: flash-box-shadow 1s;
                 }
 
                 > .lastTyped::after {
                     content: "";
+                    height: 80%;
+
                     border-right: 2px solid var(--color-secondary);
-                    transition-property: border-right;
-                    transition-duration: 1s;
+
                     animation: flash-border 1.2s infinite;
+
+                    position: absolute;
+                    right: -1px;
+                    top: 50%;
+                    transform: translateY(-50%);
                 }
             }
 
