@@ -1,8 +1,8 @@
 import { defineStore } from "pinia"
-import type { TypingInfo } from "~/structure/quotes"
+import type { TypingInfo, Quote } from "~/structure/quotes"
 
 export const useTypedQuote = defineStore("typingStack", () => {
-    const typedQuote: Ref<string[]> = ref([])
+    const typedQuote: Ref<Quote[]> = ref([])
 
     let typingInfo: TypingInfo = reactive({
         avgWpm: 0,
@@ -17,8 +17,8 @@ export const useTypedQuote = defineStore("typingStack", () => {
 
     const showResult: Ref<boolean> = ref(false)
 
-    const addList = (quote: string) => {
-        typedQuote.value.push(quote)
+    const addList = (quote: string, person: string) => {
+        typedQuote.value.push({ quote: quote, person: person })
     }
 
     const sendTypingInfo = (info: TypingInfo) => {

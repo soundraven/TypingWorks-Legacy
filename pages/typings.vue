@@ -4,11 +4,13 @@
             <div :class="[$style.typedText, $style.gridItem]" v-auto-animate>
                 <div
                     :class="[$style.listBox]"
-                    v-for="(quote, index) in store.typedQuote"
+                    v-for="(typedQuote, index) in store.typedQuote"
                     :key="'quote_' + index"
-                    @click="switchTargetText(quote)"
+                    @click="
+                        switchTargetText(typedQuote.quote, typedQuote.person)
+                    "
                 >
-                    <div :class="$style.list">{{ quote }}</div>
+                    <div :class="$style.list">{{ typedQuote.quote }}</div>
                 </div>
             </div>
             <div :class="[$style.language, $style.gridItem]" v-auto-animate>
@@ -494,7 +496,7 @@ const endTyping = () => {
 
     stopTypingSpeedCalc()
 
-    store.addList(targetText.value)
+    store.addList(targetText.value, targetPerson.value)
 
     pushTypingInfo()
     raiseTypingCount()
@@ -695,11 +697,11 @@ watch(parsingText, (newValue) => {
     // }
 })
 
-const switchTargetText = (quote: string) => {
+const switchTargetText = (quote: string, person: string) => {
     targetText.value = quote
+    targetPerson.value = person
     splitText()
     updateTypoStatus()
-    // targetPerson.value = currentQuote.person 추후 store에서 person도 저장하도록 수정
 }
 </script>
 
