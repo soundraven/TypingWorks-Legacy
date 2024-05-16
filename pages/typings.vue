@@ -6,6 +6,7 @@
                     :class="[$style.listBox]"
                     v-for="(quote, index) in store.typedQuote"
                     :key="'quote_' + index"
+                    @click="switchTargetText(quote)"
                 >
                     <div :class="$style.list">{{ quote }}</div>
                 </div>
@@ -233,7 +234,7 @@ const editGoalCount = (direction: Direction) => {
 const keyupEventHandler = (e: KeyboardEvent) => {
     if (e.code === "Enter") return
 
-    startTyping((e.currentTarget as HTMLInputElement).value, e)
+    startTyping((e.currentTarget as HTMLInputElement).value)
 }
 
 const preventPaste = (e: ClipboardEvent) => {
@@ -693,6 +694,13 @@ watch(parsingText, (newValue) => {
     //     }
     // }
 })
+
+const switchTargetText = (quote: string) => {
+    targetText.value = quote
+    splitText()
+    updateTypoStatus()
+    // targetPerson.value = currentQuote.person 추후 store에서 person도 저장하도록 수정
+}
 </script>
 
 <style lang="scss" module>
@@ -820,6 +828,12 @@ watch(parsingText, (newValue) => {
                 margin-block: 4.5px;
 
                 animation: flash-box-shadow 1s;
+
+                & :hover {
+                    overflow: visible;
+                    white-space: normal;
+                    cursor: pointer;
+                }
 
                 > .list {
                     width: 100%;
