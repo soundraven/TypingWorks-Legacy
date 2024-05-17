@@ -525,6 +525,7 @@ const resetInfo = () => {
     parsingText.value = ""
     startTime.value = 0
     elapsedTime.value = 0
+    clearInterval(elapsedTimerId.value)
     elapsedTimerId.value = undefined
 
     wpm.value = 0
@@ -624,6 +625,10 @@ const getTargetText = (): Quote[] => {
 }
 
 const getElapsedTime = (): string => {
+    if (elapsedTime.value === 0) {
+        return `${0}분 ${0}초`
+    }
+
     const min: number = Math.floor(elapsedTime.value / 60)
     const sec: number = elapsedTime.value % 60
 
