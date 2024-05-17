@@ -248,9 +248,12 @@ const updateTypedText = (e) => {
 }
 
 const startTyping = (text: string) => {
+    console.log(text, "checkBackspace")
+
     parsingText.value = text
     // 시작시 startTime 체크
     if (startTime.value === 0) {
+        if (text === "") return
         const date = new Date()
         startTime.value = date.getTime()
 
@@ -264,6 +267,7 @@ const startTyping = (text: string) => {
 }
 
 // 마지막으로 타이핑한 시간 기준으로 경과시간을 계산
+//이거 이제 없어도 되지 않나?
 const calcElapsedTime = () => {
     const date = new Date()
 
@@ -432,6 +436,7 @@ const startTypingSpeedCalc = () => {
 }
 
 const keepCheckElapsedTime = () => {
+    console.log(elapsedTime.value, elapsedTimerId.value)
     const date = new Date()
     const currentTime: number = date.getTime()
 
@@ -521,12 +526,15 @@ const endTyping = () => {
 }
 
 const resetInfo = () => {
+    console.log("reset!!")
     typedText.value = ""
     parsingText.value = ""
     startTime.value = 0
     elapsedTime.value = 0
+    console.log(elapsedTime.value, elapsedTimerId.value)
     clearInterval(elapsedTimerId.value)
     elapsedTimerId.value = undefined
+    console.log(elapsedTime.value, elapsedTimerId.value)
 
     wpm.value = 0
     cpm.value = 0
@@ -650,9 +658,11 @@ const toggleShow = () => {
 watch(parsingText, (newValue) => {
     //타이밍은 parsingText기준으로
     if (newValue === "") {
+        console.log("watch void")
         //이건 일단 작동하니까 잠깐 두고
-        parsingText.value = ""
-        checkTypoArray.value = []
+        resetInfo()
+        // parsingText.value = ""
+        // checkTypoArray.value = []
 
         const splitedParsingText: string[] = parsingText.value.split("")
 
@@ -674,8 +684,6 @@ watch(parsingText, (newValue) => {
                 typoStatus.value[i] = checkTypoArray.value[i]
             }
         }
-
-        resetInfo()
     }
 
     checkTypo()
