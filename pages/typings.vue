@@ -9,7 +9,12 @@
                     @click="
                         switchTargetText(typedQuote.quote, typedQuote.person)
                     "
+                    @mouseenter="setHoverIndex(index)"
+                    @mouseleave="setHoverIndex(null)"
                 >
+                    <div :class="$style.hoverQuote" v-if="isHovered(index)">
+                        {{ typedQuote.quote }}
+                    </div>
                     <div :class="$style.list">{{ typedQuote.quote }}</div>
                 </div>
             </div>
@@ -130,6 +135,7 @@ import { useTypedQuote } from "~/store/typedQuote"
 
 const $style = useCssModule()
 const store = useTypedQuote()
+//NuxtApp 사용해야함
 
 //v-memo 확인해보기
 const targetPerson: Ref<string> = ref("")
@@ -182,6 +188,18 @@ const typingInfo: TypingInfo = reactive({
     entireElapsedtime: entireElapsedtime.value,
 })
 const showResult: Ref<boolean> = ref(false)
+
+const hoverIndex: Ref<number | null> = ref(null)
+
+const setHoverIndex = (index) => {
+    hoverIndex.value = index
+    console.log(hoverIndex.value)
+}
+
+const isHovered = (index) => {
+    console.log(hoverIndex.value)
+    return hoverIndex.value === index
+}
 
 const startTime: Ref<number> = ref(0)
 const lastTypingTime: Ref<number> = ref(0)
@@ -436,7 +454,6 @@ const startTypingSpeedCalc = () => {
 }
 
 const keepCheckElapsedTime = () => {
-    console.log(elapsedTime.value, elapsedTimerId.value)
     const date = new Date()
     const currentTime: number = date.getTime()
 
@@ -716,6 +733,10 @@ const switchTargetText = (quote: string, person: string) => {
     splitText()
     updateTypoStatus()
 }
+
+onBeforeUnmount(() => {
+    stopTypingSpeedCalc()
+})
 </script>
 
 <style lang="scss" module>
@@ -844,9 +865,15 @@ const switchTargetText = (quote: string, person: string) => {
 
                 animation: flash-box-shadow 1s;
 
-                & :hover {
-                    overflow: visible;
-                    white-space: normal;
+                position: relative;
+
+                > .hoverQuote {
+                    min-width: 100%;
+                    display: inline;
+                    position: absolute;
+
+                    background-color: blue;
+                    white-space: nowrap;
                     cursor: pointer;
                 }
 
