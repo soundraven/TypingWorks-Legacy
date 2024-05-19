@@ -266,8 +266,6 @@ const updateTypedText = (e) => {
 }
 
 const startTyping = (text: string) => {
-    console.log(text, "checkBackspace")
-
     parsingText.value = text
     // 시작시 startTime 체크
     if (startTime.value === 0) {
@@ -278,21 +276,8 @@ const startTyping = (text: string) => {
         startTypingSpeedCalc()
     }
 
-    calcElapsedTime()
     calcAccuracy()
     calcProgress()
-    // checkTypo()
-}
-
-// 마지막으로 타이핑한 시간 기준으로 경과시간을 계산
-//이거 이제 없어도 되지 않나?
-const calcElapsedTime = () => {
-    const date = new Date()
-
-    lastTypingTime.value = date.getTime()
-    elapsedTime.value = Math.floor(
-        (lastTypingTime.value - startTime.value) / 1000,
-    )
 }
 
 // 오타 확인을 위해 문장 글자단위로 분해
@@ -308,7 +293,6 @@ const updateTypoStatus = () => {
 
 const handleDeletion = (e: Event) => {
     const inputEvent = e as InputEvent
-    const splitedParsingText: string[] = parsingText.value.split("")
 
     const deleteTypes = [
         "deleteContentBackward",
@@ -318,26 +302,32 @@ const handleDeletion = (e: Event) => {
     ]
 
     if (deleteTypes.includes(inputEvent.inputType)) {
-        checkTypoArray.value = []
-        parsingText.value = typedText.value
+        refillTypoArrays()
+    }
+}
 
-        for (let i = 0; i < parsingText.value.length; i++) {
-            if (typeof targetText.value[i] === undefined) continue
-            //배열에 없는 인덱스 번호를 넣으면 다른 언어에선 터짐.
-            //typeof로 비교하면 Undefined가 string값으로 나온다고 함.추가로 알아보기
-            if (targetText.value[i] === splitedParsingText[i]) {
-                checkTypoArray.value[i] = TypoStatus.Correct
-            } else {
-                checkTypoArray.value[i] = TypoStatus.Error
-            }
+const refillTypoArrays = () => {
+    const splitedParsingText: string[] = parsingText.value.split("")
+
+    checkTypoArray.value = []
+    parsingText.value = typedText.value
+
+    for (let i = 0; i < parsingText.value.length; i++) {
+        if (typeof targetText.value[i] === undefined) continue
+        //배열에 없는 인덱스 번호를 넣으면 다른 언어에선 터짐.
+        //typeof로 비교하면 Undefined가 string값으로 나온다고 함.추가로 알아보기
+        if (targetText.value[i] === splitedParsingText[i]) {
+            checkTypoArray.value[i] = TypoStatus.Correct
+        } else {
+            checkTypoArray.value[i] = TypoStatus.Error
         }
+    }
 
-        //string타입에 [i] 써도 되는건지 확인
-        for (let i = 0; i < typoStatus.value.length; i++) {
-            //Typo 클래스 부여는 typoStatus가 하기때문에 동기화 필요
-            if (typoStatus.value[i] !== checkTypoArray.value[i]) {
-                typoStatus.value[i] = checkTypoArray.value[i]
-            }
+    //string타입에 [i] 써도 되는건지 확인
+    for (let i = 0; i < typoStatus.value.length; i++) {
+        //Typo 클래스 부여는 typoStatus가 하기때문에 동기화 필요
+        if (typoStatus.value[i] !== checkTypoArray.value[i]) {
+            typoStatus.value[i] = checkTypoArray.value[i]
         }
     }
 }
@@ -367,31 +357,6 @@ const checkTypo = () => {
         }
     }
 }
-// const checkTypo = () => {
-//     const splitedParsingText: string[] = parsingText.value.split("")
-
-//     for (let i = 0; i + 1 < parsingText.value.length; i++) {
-//         //오타 관리 배열에 TypoStatus 채우기
-//         if (splitedParsingText[i] === undefined) {
-//             typoStatus.value[i] = TypoStatus.NotInput
-//         }
-
-//         if (targetText.value[i] === splitedParsingText[i]) {
-//             typoStatus.value[i] = TypoStatus.Correct //한박자 늦게 따라오는 오타 체크 배열 - 조합문자 이슈
-//         } else {
-//             typoStatus.value[i] = TypoStatus.Error
-//         }
-//     }
-
-//     for (let i = 0; i < parsingText.value.length; i++) {
-//         if (targetText.value[i] === undefined) continue
-//         if (targetText.value[i] === splitedParsingText[i]) {
-//             checkTypoArray.value[i] = TypoStatus.Correct //입력받는대로 따라오는 오타 체크 배열
-//         } else {
-//             checkTypoArray.value[i] = TypoStatus.Error
-//         }
-//     }
-// }
 
 const getTypoClass = (index: number): string => {
     //오타와 정타에 클래스 부여
@@ -463,7 +428,7 @@ const keepCheckElapsedTime = () => {
 }
 
 const stopTypingSpeedCalc = () => {
-    clearInterval(elapsedTimerId.value) //unMounted될때도 함수 호출해줘야함. 안그러면 계속돌아갈수있음
+    clearInterval(elapsedTimerId.value)
 }
 
 const raiseTypingCount = () => {
@@ -493,11 +458,11 @@ const calcTypingInfo = () => {
         typingProgressArray.value.length
     entireElapsedtime.value = ElapsedTimeArray.value.reduce(
         (acc, cur) => acc + cur,
-        0,
     )
-    ;(typingInfo.maxWpm = Math.max(...wpmArray.value)),
-        (typingInfo.maxCpm = Math.max(...cpmArray.value)),
-        (typingInfo.avgWpm = avgWpm.value)
+
+    typingInfo.maxWpm = Math.max(...wpmArray.value)
+    typingInfo.maxCpm = Math.max(...cpmArray.value)
+    typingInfo.avgWpm = avgWpm.value
     typingInfo.avgCpm = avgCpm.value
     typingInfo.avgTypingAccuracy = avgTypingAccuracy.value
     typingInfo.avgTypingProgress = avgTypingProgress.value
@@ -505,7 +470,7 @@ const calcTypingInfo = () => {
 }
 
 const readyQuote = () => {
-    const [target, nextTarget] = getTargetText()
+    const [nextTarget] = getTargetText()
 
     targetText.value = nextText.value
     targetPerson.value = nextPerson.value
@@ -675,56 +640,12 @@ const toggleShow = () => {
 watch(parsingText, (newValue) => {
     //타이밍은 parsingText기준으로
     if (newValue === "") {
-        console.log("watch void")
         //이건 일단 작동하니까 잠깐 두고
         resetInfo()
-        // parsingText.value = ""
-        // checkTypoArray.value = []
-
-        const splitedParsingText: string[] = parsingText.value.split("")
-
-        for (let i = 0; i + 1 < parsingText.value.length; i++) {
-            if (typeof targetText.value[i] === undefined) continue
-            //배열에 없는 인덱스 번호를 넣으면 다른 언어에선 터짐.
-            //typeof로 비교하면 Undefined가 string값으로 나온다고 함.추가로 알아보기
-            if (targetText.value[i] === splitedParsingText[i]) {
-                checkTypoArray.value[i] = TypoStatus.Correct
-            } else {
-                checkTypoArray.value[i] = TypoStatus.Error
-            }
-        }
-
-        //string타입에 [i] 써도 되는건지 확인
-        for (let i = 0; i < typoStatus.value.length; i++) {
-            //Typo 클래스 부여는 typoStatus가 하기때문에 동기화 필요
-            if (typoStatus.value[i] !== checkTypoArray.value[i]) {
-                typoStatus.value[i] = checkTypoArray.value[i]
-            }
-        }
+        refillTypoArrays()
     }
 
     checkTypo()
-
-    // const splitedTypedText: string[] = typedText.value.split("")
-
-    // for (let i = 0; i + 1 < typedText.value.length; i++) {
-    //     if (typeof typedText.value[i] === undefined) continue
-    //     //배열에 없는 인덱스 번호를 넣으면 다른 언어에선 터짐.
-    //     //typeof로 비교하면 Undefined가 string값으로 나온다고 함.추가로 알아보기
-    //     if (typedText.value[i] === splitedTypedText[i]) {
-    //         checkTypoArray.value[i] = TypoStatus.Correct
-    //     } else {
-    //         checkTypoArray.value[i] = TypoStatus.Error
-    //     }
-    // }
-
-    // //string타입에 [i] 써도 되는건지 확인
-    // for (let i = 0; i < typoStatus.value.length; i++) {
-    //     //Typo 클래스 부여는 typoStatus가 하기때문에 동기화 필요
-    //     if (typoStatus.value[i] !== checkTypoArray.value[i]) {
-    //         typoStatus.value[i] = checkTypoArray.value[i]
-    //     }
-    // }
 })
 
 const switchTargetText = (quote: string, person: string) => {
