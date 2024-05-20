@@ -12,10 +12,12 @@
                     @mouseenter="setHoverIndex(index)"
                     @mouseleave="setHoverIndex(null)"
                 >
-                    <div :class="$style.hoverQuote" v-if="isHovered(index)">
-                        {{ typedQuote.quote }}
-                    </div>
                     <div :class="$style.list">{{ typedQuote.quote }}</div>
+                    <teleport to="body">
+                        <div :class="$style.hoverQuote" v-if="isHovered(index)">
+                            {{ typedQuote.quote }}
+                        </div>
+                    </teleport>
                 </div>
             </div>
             <div :class="[$style.language, $style.gridItem]" v-auto-animate>
@@ -193,11 +195,9 @@ const hoverIndex: Ref<number | null> = ref(null)
 
 const setHoverIndex = (index) => {
     hoverIndex.value = index
-    console.log(hoverIndex.value)
 }
 
 const isHovered = (index) => {
-    console.log(hoverIndex.value)
     return hoverIndex.value === index
 }
 
@@ -508,15 +508,12 @@ const endTyping = () => {
 }
 
 const resetInfo = () => {
-    console.log("reset!!")
     typedText.value = ""
     parsingText.value = ""
     startTime.value = 0
     elapsedTime.value = 0
-    console.log(elapsedTime.value, elapsedTimerId.value)
     clearInterval(elapsedTimerId.value)
     elapsedTimerId.value = undefined
-    console.log(elapsedTime.value, elapsedTimerId.value)
 
     wpm.value = 0
     cpm.value = 0
@@ -788,16 +785,6 @@ onBeforeUnmount(() => {
 
                 position: relative;
 
-                > .hoverQuote {
-                    min-width: 100%;
-                    display: inline;
-                    position: absolute;
-
-                    background-color: blue;
-                    white-space: nowrap;
-                    cursor: pointer;
-                }
-
                 > .list {
                     width: 100%;
                     height: 100%;
@@ -1064,5 +1051,25 @@ onBeforeUnmount(() => {
             }
         }
     }
+}
+
+.hoverQuote {
+    // min-width: 100%;
+    // display: inline;
+    // position: absolute;
+
+    // background-color: blue;
+    // white-space: nowrap;
+    // cursor: pointer;
+    background-color: yellow;
+    padding: 10px;
+
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000; // 다른 요소 위에 나타나도록 z-index 설정
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // 그림자 추가
+    border-radius: 8px; // 모서리 둥글게
 }
 </style>
