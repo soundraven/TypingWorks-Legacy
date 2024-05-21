@@ -13,7 +13,7 @@
                     @mouseleave="setHoverIndex(null)"
                 >
                     <div :class="$style.list">{{ typedQuote.quote }}</div>
-                    <teleport to="body">
+                    <teleport to="#targetText">
                         <div :class="$style.hoverQuote" v-if="isHovered(index)">
                             {{ typedQuote.quote }}
                         </div>
@@ -83,13 +83,15 @@
                 {{ targetPerson }}
             </div>
             <div :class="[$style.textArea, $style.gridItem]">
-                <div :class="$style.text">
-                    <div
-                        v-for="(char, index) in splitedTargetText"
-                        :key="index"
-                        :class="[getTypoClass(index), getLastTyped(index)]"
-                    >
-                        {{ char }}
+                <div :class="$style.targetText" id="targetText">
+                    <div :class="$style.text">
+                        <div
+                            v-for="(char, index) in splitedTargetText"
+                            :key="index"
+                            :class="[getTypoClass(index), getLastTyped(index)]"
+                        >
+                            {{ char }}
+                        </div>
                     </div>
                 </div>
                 <div :class="$style.inputs">
@@ -198,11 +200,14 @@ const setHoverIndex = (index) => {
 }
 
 const isHovered = (index) => {
-    return hoverIndex.value === index
+    if (index !== null) {
+        console.log("Teleport!!")
+        return hoverIndex.value === index
+    }
+    return
 }
 
 const startTime: Ref<number> = ref(0)
-const lastTypingTime: Ref<number> = ref(0)
 // 현재 경과시간만 초로 나오고 나머지는 타임스탬프 형식
 const elapsedTime: Ref<number> = ref(0) //추후 인풋창 비워지는거 감지해서 시간 초기화 및 함수 정지
 const endTime: Ref<number> = ref(0)
@@ -785,6 +790,10 @@ onBeforeUnmount(() => {
 
                 position: relative;
 
+                &:hover {
+                    cursor: pointer;
+                }
+
                 > .list {
                     width: 100%;
                     height: 100%;
@@ -965,63 +974,72 @@ onBeforeUnmount(() => {
             display: flex;
             justify-content: center;
             align-items: center;
+
             padding: 30px;
 
-            > .text {
-                height: 30px;
-
-                display: flex;
-
-                font-size: 20px;
-                line-height: 30px;
-
+            > .targetText {
+                width: 100%;
+                height: 100%;
+                position: relative;
                 margin-right: auto;
 
-                > div {
-                    min-width: 5px;
-                    transition-property: color;
-                    transition-duration: 0.2s;
-                    transition-timing-function: ease-out;
-                    position: relative;
-                }
+                > .text {
+                    height: 30px;
 
-                > .typo {
-                    color: rgb(255, 0, 0, 0.8);
-                    animation: shake 0.2s;
-                }
+                    display: flex;
 
-                > .success {
-                    color: var(--color-primary);
-                }
+                    font-size: 20px;
+                    line-height: 30px;
 
-                > .lastTyped {
-                    animation: flash-box-shadow 1s;
-                }
+                    margin-right: auto;
 
-                > .lastTyped::after {
-                    content: "";
-                    height: 80%;
+                    > div {
+                        min-width: 7px;
+                        transition-property: color;
+                        transition-duration: 0.2s;
+                        transition-timing-function: ease-out;
+                        position: relative;
+                    }
 
-                    border-right: 2px solid var(--color-secondary);
+                    > .typo {
+                        color: rgb(255, 0, 0, 0.8);
+                        animation: shake 0.2s;
+                    }
 
-                    animation: flash-border 1.2s infinite;
+                    > .success {
+                        color: var(--color-primary);
+                    }
 
-                    position: absolute;
-                    right: -1px;
-                    top: 50%;
-                    transform: translateY(-50%);
+                    > .lastTyped {
+                        animation: flash-box-shadow 1s;
+                    }
+
+                    > .lastTyped::after {
+                        content: "";
+                        height: 80%;
+
+                        border-right: 2px solid var(--color-secondary);
+
+                        animation: flash-border 1.2s infinite;
+
+                        position: absolute;
+                        right: -1px;
+                        top: 50%;
+                        transform: translateY(-50%);
+                    }
                 }
             }
 
             > .inputs {
                 width: 100%;
                 text-align: left;
+                position: relative;
                 padding: 30px;
 
                 > input {
                     width: 100%;
 
-                    background-color: var(--bg-primary);
+                    background-color: var(--bg);
 
                     font-size: 20px;
                     color: var(--color-secondary);
@@ -1061,15 +1079,16 @@ onBeforeUnmount(() => {
     // background-color: blue;
     // white-space: nowrap;
     // cursor: pointer;
-    background-color: yellow;
-    padding: 10px;
-
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 30px;
+    font-size: 20px;
+    line-height: 30px;
+    background-color: var(--bg);
+    left: 0;
+    top: 0;
+    position: absolute;
     z-index: 1000; // 다른 요소 위에 나타나도록 z-index 설정
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // 그림자 추가
-    border-radius: 8px; // 모서리 둥글게
+
+    animation: flash-box-shadow 0.8s;
 }
 </style>
