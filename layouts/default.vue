@@ -1,7 +1,7 @@
 <template>
     <div :class="$style.index">
         <div :class="$style.header" @click="navigateTo('/')">
-            TypingWorks Legacy
+            Typingworks.Legacy
         </div>
     </div>
     <slot />
