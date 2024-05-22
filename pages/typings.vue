@@ -130,10 +130,14 @@ import {
     Language,
     Direction,
     type Quote,
+    QuoteType,
     type TypingInfo,
 } from "~/structure/quotes"
 import EnQuotes from "@/assets/quotes/quotesEn.json"
-import KrQuotes from "@/assets/quotes/quotesKo.json"
+import KoQuotes from "@/assets/quotes/quotesKo.json"
+import EnPangram from "@/assets/quotes/pangramEn.json"
+import KoPangram from "@/assets/quotes/pangramKo.json"
+
 import { vAutoAnimate } from "@formkit/auto-animate"
 import { useTypedQuote } from "~/store/typedQuote"
 
@@ -147,6 +151,8 @@ const targetText: Ref<string> = ref("")
 const nextPerson: Ref<string> = ref("")
 const nextText: Ref<string> = ref("")
 const targetLanguage: Ref<Language> = ref(Language.Korean)
+const toggleLangBtn: Ref<Language[]> = ref([Language.Korean, Language.English])
+const quoteType: Ref<QuoteType> = ref(QuoteType.LifeQuote)
 const splitedTargetText: Ref<string[]> = ref([])
 
 const typingCount: Ref<number> = ref(0)
@@ -182,14 +188,16 @@ const typingProgressArray: Ref<number[]> = ref([])
 const ElapsedTimeArray: Ref<number[]> = ref([])
 
 const typingInfo: TypingInfo = reactive({
-    avgWpm: avgWpm.value,
-    avgCpm: avgCpm.value,
-    maxWpm: maxWpm.value,
-    maxCpm: maxCpm.value,
-    avgTypingAccuracy: avgTypingAccuracy.value,
-    avgTypingProgress: avgTypingProgress.value,
-    count: typingCount.value,
-    entireElapsedtime: entireElapsedtime.value,
+    targetLanguage: targetLanguage,
+    quoteType: quoteType,
+    avgWpm: avgWpm,
+    avgCpm: avgCpm,
+    maxWpm: maxWpm,
+    maxCpm: maxCpm,
+    avgTypingAccuracy: avgTypingAccuracy,
+    avgTypingProgress: avgTypingProgress,
+    count: typingCount,
+    entireElapsedtime: entireElapsedtime,
 })
 const showResult: Ref<boolean> = ref(false)
 
@@ -201,7 +209,6 @@ const setHoverIndex = (index) => {
 
 const isHovered = (index) => {
     if (index !== null) {
-        console.log("Teleport!!")
         return hoverIndex.value === index
     }
     return
@@ -209,17 +216,15 @@ const isHovered = (index) => {
 
 const startTime: Ref<number> = ref(0)
 // 현재 경과시간만 초로 나오고 나머지는 타임스탬프 형식
-const elapsedTime: Ref<number> = ref(0) //추후 인풋창 비워지는거 감지해서 시간 초기화 및 함수 정지
+const elapsedTime: Ref<number> = ref(0)
 const endTime: Ref<number> = ref(0)
 const totalTime: Ref<number> = ref(0)
-
-let toggleLangBtn: Language[] = [Language.Korean, Language.English]
 
 // 경과시간 계산 반복하는 setTimeOut Id
 const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
 
 onMounted(() => {
-    if (process.server) return //서버사이드렌더링이기 때문
+    if (process.server) return //서버사이드렌더링
     // runtime.public.API
     const [currentQuote, nextQuote]: Quote[] = getTargetText()
 
@@ -436,11 +441,7 @@ const stopTypingSpeedCalc = () => {
     clearInterval(elapsedTimerId.value)
 }
 
-const raiseTypingCount = () => {
-    typingCount.value++
-}
-
-const pushTypingInfo = () => {
+const pushCalculatedArray = () => {
     wpmArray.value.push(wpm.value)
     cpmArray.value.push(cpm.value)
     typingAccuracyArray.value.push(typingAccuracy.value)
@@ -488,25 +489,23 @@ const endTyping = () => {
 
     stopTypingSpeedCalc()
 
+    typingCount.value++
     store.addList(targetText.value, targetPerson.value)
-
-    pushTypingInfo()
-    raiseTypingCount()
+    pushCalculatedArray()
 
     const date = new Date()
     endTime.value = date.getTime()
     totalTime.value = (endTime.value - startTime.value) / 1000
 
     calcTypingSpeed(totalTime.value)
-
     calcTypingInfo()
 
     if (typingCount.value >= goalCount.value) {
         toggleShow()
+        return
     }
 
     readyQuote()
-
     splitText()
     updateTypoStatus()
     resetInfo()
@@ -545,7 +544,6 @@ const resetInfo = () => {
 const finishCycle = () => {
     resetInfo()
     typingCount.value = 0
-
     toggleShow()
 }
 
@@ -573,7 +571,7 @@ const calcTypingSpeed = (takenTime: number) => {
 
 const toggleLanguage = (lang: Language) => {
     if (lang !== targetLanguage.value) {
-        toggleLangBtn.reverse()
+        toggleLangBtn.value.reverse()
     }
 
     switch (lang) {
@@ -594,6 +592,7 @@ const toggleLanguage = (lang: Language) => {
 
     splitText()
     resetInfo()
+    console.log("now lang", targetLanguage.value, quoteType.value)
 }
 
 const getTargetText = (): Quote[] => {
@@ -601,10 +600,30 @@ const getTargetText = (): Quote[] => {
 
     switch (targetLanguage.value) {
         case Language.Korean:
-            targetDatas = KrQuotes
+            switch (quoteType.value) {
+                case QuoteType.LifeQuote:
+                    targetDatas = KoQuotes
+                    console.log(targetText)
+                    break
+
+                case QuoteType.Pangram:
+                    targetDatas = KoPangram
+                    console.log(targetText)
+                    break
+            }
             break
+
         case Language.English:
-            targetDatas = EnQuotes
+            switch (quoteType.value) {
+                case QuoteType.LifeQuote:
+                    targetDatas = EnQuotes
+                    console.log(targetText)
+                    break
+                case QuoteType.Pangram:
+                    targetDatas = EnPangram
+                    console.log(targetText)
+                    break
+            }
             break
     }
 
@@ -822,7 +841,7 @@ onBeforeUnmount(() => {
 
             display: flex;
             flex-direction: column;
-            justify-content: space-around;
+            justify-content: space-evenly;
             align-items: center;
 
             > .langBtn {

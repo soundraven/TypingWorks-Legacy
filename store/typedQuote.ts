@@ -1,10 +1,18 @@
 import { defineStore } from "pinia"
-import type { TypingInfo, Quote } from "~/structure/quotes"
+import {
+    type TypingInfo,
+    type Quote,
+    Language,
+    QuoteType,
+} from "~/structure/quotes"
 
 export const useTypedQuote = defineStore("typingStack", () => {
-    const typedQuote: Ref<Quote[]> = ref([])
+    const showResult: Ref<boolean> = ref(false)
 
     let typingInfo: TypingInfo = reactive({
+        targetLanguage: Language.Korean,
+        quoteType: QuoteType.LifeQuote,
+        targetText: "",
         avgWpm: 0,
         avgCpm: 0,
         maxWpm: 0,
@@ -15,7 +23,7 @@ export const useTypedQuote = defineStore("typingStack", () => {
         entireElapsedtime: 0,
     })
 
-    const showResult: Ref<boolean> = ref(false)
+    const typedQuote: Ref<Quote[]> = ref([])
 
     const addList = (quote: string, person: string) => {
         typedQuote.value.push({ quote: quote, person: person })
@@ -23,6 +31,7 @@ export const useTypedQuote = defineStore("typingStack", () => {
 
     const sendTypingInfo = (info: TypingInfo) => {
         typingInfo = info
+        console.log(info, typingInfo)
     }
 
     const toggleShow = () => {

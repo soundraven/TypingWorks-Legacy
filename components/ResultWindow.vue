@@ -1,11 +1,13 @@
 <template>
     <div :class="$style.index">
         <div :class="$style.infos">
-            <div :class="$style.pageName">Typing.Works.Legacy</div>
+            <div :class="$style.pageName">Typingworks.Legacy</div>
             <div></div>
             <div :class="$style.currentTime">{{ formattedTime }}</div>
             <div :class="$style.typingMode">Typing Mode</div>
             <div :class="$style.typingModeInfo">
+                Lang: {{ props.typingInfo.targetLanguage }}, Type:
+                {{ props.typingInfo.quoteType }}, Goal:
                 {{ props.typingInfo.count }}
             </div>
             <div :class="$style.wpm">Max/Avg WPM</div>
@@ -40,6 +42,7 @@ const store = useTypedQuote()
 
 const emits = defineEmits()
 const props = defineProps(["typingInfo"])
+console.log(props.typingInfo)
 
 const closeResult = (e: KeyboardEvent) => {
     if (e.key === "Enter" || e.key === "Escape") {
