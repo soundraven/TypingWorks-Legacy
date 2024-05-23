@@ -1,10 +1,4 @@
 <template>
-    <!-- <ExampleComponent />
-        <p>main index page</p>
-        <p>utils index: {{ indexNumberFormat(123456) }}</p>
-        <p>utils named: {{ numberFormat(123456) }}</p>
-        <p>lodash: {{ $_.join(array, "") }}</p>
-        <p>vueuse useMouse: {{ x }}, {{ y }}</p> -->
     <div :class="$style.index">
         <div :class="$style.text">
             <div
@@ -15,57 +9,58 @@
                 {{ text }}
             </div>
         </div>
-
-        <div :class="$style.explain">Press Enter to start!!</div>
-        <!-- <div>
-            <NuxtLink to="/">랜딩페이지</NuxtLink>
-            <NuxtLink to="/typings" style="margin: 20px">타이핑페이지</NuxtLink>
-        </div> -->
+        <div :class="$style.explain">
+            Press <span :class="$style.enter">Enter</span> to start!!
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
+const router = useRouter()
+
 const title: Ref<string> = ref("Typingworks.Legacy")
 const splitedTitle: Ref<string[]> = ref([])
 const animatedTitle: Ref<string[]> = ref([])
-
 const animatedTitleId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
-
-let characterCount = 0
 
 const animateTitle = () => {
     splitedTitle.value = title.value.split("")
-    // splitedTitle.value.reverse()
     animatedTitleId.value = setInterval(addCharacter, 200)
 }
 
-// const splitTitle = () => {
-//     splitedTitle.value.pop()
-// }
-
 const addCharacter = () => {
     if (splitedTitle.value.length > 0) {
-        animatedTitle.value.push(splitedTitle.value.shift())
-        console.log(animatedTitle.value, splitedTitle.value)
+        const char = splitedTitle.value.shift()
+
+        if (char !== undefined) {
+            animatedTitle.value.push(char)
+        }
     } else {
         clearInterval(animatedTitleId.value)
         setTimeout(reset, 2000)
     }
 }
+
 const reset = () => {
     splitedTitle.value = []
     animatedTitle.value = []
     setTimeout(animateTitle, 1000)
 }
+
 onMounted(() => {
     animateTitle()
+    window.addEventListener("keydown", handleKeyDown)
 })
-// definePageMeta({
-//     middleware: ["auth"],
-// })
 
-// const array = ref([1, 2, 3])
-// const { x, y } = useMouse()
+const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+        navigateTo("/typings")
+    }
+}
+
+onBeforeUnmount(() => {
+    window.removeEventListener("keydown", handleKeyDown)
+})
 </script>
 
 <style lang="scss" module>
@@ -78,6 +73,20 @@ onMounted(() => {
     }
     100% {
         border-right-color: var(--color-secondary);
+    }
+}
+
+@keyframes flash-text {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
     }
 }
 
@@ -94,9 +103,13 @@ onMounted(() => {
 
     > .text {
         height: 120px;
+
         display: flex;
+
         font-size: 90px;
+
         margin-top: 400px;
+
         position: relative;
     }
 
@@ -117,8 +130,12 @@ onMounted(() => {
     > .explain {
         font-size: 40px;
         margin-top: 1200px;
-
         position: fixed;
+        animation: flash-text 2s infinite;
+
+        > .enter {
+            color: var(--color-primary);
+        }
     }
 }
 </style>

@@ -466,6 +466,7 @@ const calcTypingInfo = () => {
         (acc, cur) => acc + cur,
     )
 
+    console.log(wpmArray.value, cpmArray.value)
     typingInfo.maxWpm = Math.max(...wpmArray.value)
     typingInfo.maxCpm = Math.max(...cpmArray.value)
     typingInfo.avgWpm = avgWpm.value
@@ -524,6 +525,12 @@ const resetInfo = () => {
     typingAccuracy.value = 0
     typingProgress.value = 0
 
+    typoStatus.value = []
+}
+
+const finishCycle = () => {
+    resetInfo()
+
     avgWpm.value = 0
     avgCpm.value = 0
     maxWpm.value = 0
@@ -538,12 +545,8 @@ const resetInfo = () => {
     typingProgressArray.value = []
     ElapsedTimeArray.value = []
 
-    typoStatus.value = []
-}
-
-const finishCycle = () => {
-    resetInfo()
     typingCount.value = 0
+
     toggleShow()
 }
 
@@ -592,7 +595,6 @@ const toggleLanguage = (lang: Language) => {
 
     splitText()
     resetInfo()
-    console.log("now lang", targetLanguage.value, quoteType.value)
 }
 
 const getTargetText = (): Quote[] => {
@@ -603,12 +605,12 @@ const getTargetText = (): Quote[] => {
             switch (quoteType.value) {
                 case QuoteType.LifeQuote:
                     targetDatas = KoQuotes
-                    console.log(targetText)
+
                     break
 
                 case QuoteType.Pangram:
                     targetDatas = KoPangram
-                    console.log(targetText)
+
                     break
             }
             break
@@ -617,11 +619,11 @@ const getTargetText = (): Quote[] => {
             switch (quoteType.value) {
                 case QuoteType.LifeQuote:
                     targetDatas = EnQuotes
-                    console.log(targetText)
+
                     break
                 case QuoteType.Pangram:
                     targetDatas = EnPangram
-                    console.log(targetText)
+
                     break
             }
             break

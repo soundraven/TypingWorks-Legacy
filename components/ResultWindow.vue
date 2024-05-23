@@ -42,7 +42,6 @@ const store = useTypedQuote()
 
 const emits = defineEmits()
 const props = defineProps(["typingInfo"])
-console.log(props.typingInfo)
 
 const closeResult = (e: KeyboardEvent) => {
     if (e.key === "Enter" || e.key === "Escape") {
