@@ -1,5 +1,5 @@
 <template>
-    <div :class="$style.index">
+    <div :class="$style.index" v-if="route.path !== '/'">
         <div :class="$style.header" @click="navigateTo('/')">
             Typingworks.Legacy
         </div>
@@ -7,7 +7,9 @@
     <slot />
 </template>
 
-<script setup></script>
+<script setup>
+const route = useRoute()
+</script>
 
 <style lang="scss" module>
 .index {

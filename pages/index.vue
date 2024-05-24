@@ -91,8 +91,8 @@ onBeforeUnmount(() => {
 }
 
 .index {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
 
     display: flex;
     flex-direction: column;
@@ -108,7 +108,7 @@ onBeforeUnmount(() => {
 
         font-size: 90px;
 
-        margin-top: 400px;
+        // margin-top: 400px;
 
         position: relative;
     }
@@ -129,8 +129,7 @@ onBeforeUnmount(() => {
 
     > .explain {
         font-size: 40px;
-        margin-top: 1200px;
-        position: fixed;
+        margin-top: 150px;
         animation: flash-text 2s infinite;
 
         > .enter {
