@@ -9,8 +9,9 @@
                 {{ text }}
             </div>
         </div>
-        <div :class="$style.explain">
-            Press <span :class="$style.enter">Enter</span> to start!!
+        <div :class="$style.explain" @click="navigateTo('/typings')">
+            Press <span :class="$style.enter">Enter</span> to start or Click
+            this letters
         </div>
     </div>
 </template>
@@ -47,19 +48,19 @@ const reset = () => {
     setTimeout(animateTitle, 1000)
 }
 
-onMounted(() => {
-    animateTitle()
-    window.addEventListener("keydown", handleKeyDown)
-})
-
-const handleKeyDown = (e) => {
+const startTyping = (e) => {
     if (e.key === "Enter") {
         navigateTo("/typings")
     }
 }
 
+onMounted(() => {
+    animateTitle()
+    window.addEventListener("keydown", startTyping)
+})
+
 onBeforeUnmount(() => {
-    window.removeEventListener("keydown", handleKeyDown)
+    window.removeEventListener("keydown", startTyping)
 })
 </script>
 
@@ -131,6 +132,7 @@ onBeforeUnmount(() => {
         font-size: 40px;
         margin-top: 150px;
         animation: flash-text 2s infinite;
+        cursor: pointer;
 
         > .enter {
             color: var(--color-primary);
