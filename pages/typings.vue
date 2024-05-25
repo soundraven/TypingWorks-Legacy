@@ -22,9 +22,9 @@
             </div>
             <div :class="[$style.language, $style.gridItem]" v-auto-animate>
                 <div
+                    :class="[$style.langBtn, getActiveClass(btn)]"
                     v-for="btn in toggleLangBtn"
                     :key="btn"
-                    :class="[$style.langBtn, getActiveClass(btn)]"
                     @click="toggleLanguage(btn)"
                 >
                     <div>{{ btn }}</div>
@@ -36,7 +36,16 @@
             <div :class="[$style.blinkBox, $style.gridItem]">
                 <TypingBlink />
             </div>
-            <div :class="[$style.sentence, $style.gridItem]">문장변경</div>
+            <div :class="[$style.quoteType, $style.gridItem]" v-auto-animate>
+                <div
+                    :class="[$style.quoteTypeBtn, getActiveClass(btn)]"
+                    v-for="btn in toggleQuoteTypeBtn"
+                    :key="btn"
+                    @click="toggleQuoteType(btn)"
+                >
+                    {{ btn }}
+                </div>
+            </div>
             <div :class="[$style.wpm, $style.gridItem]">WPM: {{ wpm }}</div>
             <div :class="[$style.cpm, $style.gridItem]">CPM: {{ cpm }}</div>
             <div :class="[$style.accuracy, $style.gridItem]">
@@ -152,7 +161,12 @@ const nextPerson: Ref<string> = ref("")
 const nextText: Ref<string> = ref("")
 const targetLanguage: Ref<Language> = ref(Language.Korean)
 const toggleLangBtn: Ref<Language[]> = ref([Language.Korean, Language.English])
-const quoteType: Ref<QuoteType> = ref(QuoteType.LifeQuote)
+const targetQuoteType: Ref<QuoteType> = ref(QuoteType.LifeQuote)
+const toggleQuoteTypeBtn: Ref<QuoteType[]> = ref([
+    QuoteType.LifeQuote,
+    QuoteType.Pangram,
+])
+
 const splitedTargetText: Ref<string[]> = ref([])
 
 const typingCount: Ref<number> = ref(0)
@@ -189,7 +203,7 @@ const ElapsedTimeArray: Ref<number[]> = ref([])
 
 const typingInfo: TypingInfo = reactive({
     targetLanguage: targetLanguage,
-    quoteType: quoteType,
+    targetQuoteType: targetQuoteType,
     avgWpm: avgWpm,
     avgCpm: avgCpm,
     maxWpm: maxWpm,
@@ -594,12 +608,37 @@ const toggleLanguage = (lang: Language) => {
     resetInfo()
 }
 
+const toggleQuoteType = (type: QuoteType) => {
+    if (type !== targetQuoteType.value) {
+        toggleQuoteTypeBtn.value.reverse()
+    }
+
+    switch (type) {
+        case QuoteType.LifeQuote:
+            if (type === targetQuoteType.value) return
+            targetQuoteType.value = QuoteType.LifeQuote
+            break
+        case QuoteType.Pangram:
+            if (type === targetQuoteType.value) return
+            targetQuoteType.value = QuoteType.Pangram
+            break
+    }
+
+    const [currentQuote, nextQuote] = getTargetText()
+    targetText.value = currentQuote.quote
+    targetPerson.value = currentQuote.person
+    nextText.value = nextQuote.quote
+
+    splitText()
+    resetInfo()
+}
+
 const getTargetText = (): Quote[] => {
     let targetDatas: Quote[] = []
 
     switch (targetLanguage.value) {
         case Language.Korean:
-            switch (quoteType.value) {
+            switch (targetQuoteType.value) {
                 case QuoteType.LifeQuote:
                     targetDatas = KoQuotes
 
@@ -613,7 +652,7 @@ const getTargetText = (): Quote[] => {
             break
 
         case Language.English:
-            switch (quoteType.value) {
+            switch (targetQuoteType.value) {
                 case QuoteType.LifeQuote:
                     targetDatas = EnQuotes
 
@@ -645,8 +684,8 @@ const getElapsedTime = (): string => {
     return `${min}분 ${sec}초`
 }
 
-const getActiveClass = (lang: Language): string => {
-    if (lang === targetLanguage.value) {
+const getActiveClass = (lang: Language | QuoteType): string => {
+    if (lang === targetLanguage.value || lang === targetQuoteType.value) {
         return $style.active
     } else {
         return ""
@@ -748,8 +787,8 @@ onBeforeUnmount(() => {
         grid-template-areas:
             "i i i n nl l m b b b"
             "i i i kt kt l m b b b"
-            "i i i s s w c b b b"
-            "i i i s s a p t t t"
+            "i i i q q w c b b b"
+            "i i i q q a p t t t"
             "x x x x x x x x x x"
             "x x x x x x x x x x"
             "x x x x x x x x x x"
@@ -858,8 +897,6 @@ onBeforeUnmount(() => {
                 border-radius: 7px;
                 box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.15);
 
-                transition-duration: 0.5s;
-
                 &:hover {
                     cursor: pointer;
                     top: -3px;
@@ -869,8 +906,6 @@ onBeforeUnmount(() => {
                     width: 50px;
                     height: 25px;
                     line-height: 25px;
-
-                    transition: all 0.5s;
                 }
             }
 
@@ -903,8 +938,42 @@ onBeforeUnmount(() => {
             padding-block: 30px;
         }
 
-        > .sentence {
-            grid-area: s;
+        > .quoteType {
+            grid-area: q;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-evenly;
+
+            > .quoteTypeBtn {
+                width: 90px;
+                height: 80px;
+
+                position: relative;
+
+                text-align: center;
+                line-height: 80px;
+
+                background-color: var(--bg-secondary);
+
+                border: 2px solid var(--border-color);
+                border-radius: 7px;
+                box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.15);
+
+                &:hover {
+                    cursor: pointer;
+                    top: -3px;
+                }
+
+                &:active {
+                    width: 60px;
+                    height: 40px;
+                    line-height: 40px;
+                }
+            }
+
+            > .active {
+                background-color: var(--color-primary);
+            }
         }
 
         > .wpm {

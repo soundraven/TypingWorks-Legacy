@@ -11,7 +11,7 @@ export const useTypedQuote = defineStore("typingStack", () => {
 
     let typingInfo: TypingInfo = reactive({
         targetLanguage: Language.Korean,
-        quoteType: QuoteType.LifeQuote,
+        targetQuoteType: QuoteType.LifeQuote,
         targetText: "",
         avgWpm: 0,
         avgCpm: 0,

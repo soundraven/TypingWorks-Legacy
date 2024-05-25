@@ -5,7 +5,7 @@ export interface Quote {
 
 export interface TypingInfo {
     targetLanguage: Language
-    quoteType: QuoteType
+    targetQuoteType: QuoteType
     avgWpm: number
     avgCpm: number
     maxWpm: number

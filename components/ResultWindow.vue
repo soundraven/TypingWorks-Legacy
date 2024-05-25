@@ -7,7 +7,7 @@
             <div :class="$style.typingMode">Typing Mode</div>
             <div :class="$style.typingModeInfo">
                 Lang: {{ props.typingInfo.targetLanguage }}, Type:
-                {{ props.typingInfo.quoteType }}, Goal:
+                {{ props.typingInfo.targetQuoteType }}, Goal:
                 {{ props.typingInfo.count }}
             </div>
             <div :class="$style.wpm">Max/Avg WPM</div>
