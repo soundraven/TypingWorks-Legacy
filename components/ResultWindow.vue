@@ -20,15 +20,15 @@
             </div>
             <div :class="$style.accuracy">Accuracy</div>
             <div :class="$style.accuracyInfo">
-                {{ props.typingInfo.avgTypingAccuracy }} %
+                {{ props.typingInfo.avgAccuracy }} %
             </div>
             <div :class="$style.progress">Progress</div>
             <div :class="$style.progressInfo">
-                {{ props.typingInfo.avgTypingProgress }} %
+                {{ props.typingInfo.avgProgress }} %
             </div>
-            <div :class="$style.explanation">
-                Press&nbsp;<span>Enter</span>&nbsp;or&nbsp;<span>Esc</span>&nbsp;to
-                continue
+            <div :class="$style.explanation" @click="closeResult">
+                Press&nbsp;<span>Enter</span>&nbsp;or&nbsp;<span>Esc</span>&nbsp;or&nbsp;<span>Click</span>&nbsp;
+                this letters
             </div>
         </div>
     </div>
@@ -43,8 +43,12 @@ const store = useTypedQuote()
 const emits = defineEmits()
 const props = defineProps(["typingInfo"])
 
-const closeResult = (e: KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === "Escape") {
+const closeResult = (e: Event) => {
+    if (
+        (e as KeyboardEvent).key === "Enter" ||
+        (e as KeyboardEvent).key === "Escape" ||
+        (e as MouseEvent).type === "click"
+    ) {
         store.resetList()
         emits("closeResult")
     }
@@ -164,6 +168,10 @@ onBeforeUnmount(() => {
 
         .explanation {
             grid-area: 8 / 1 / 9 / 4;
+
+            &:hover {
+                cursor: pointer;
+            }
         }
     }
 }

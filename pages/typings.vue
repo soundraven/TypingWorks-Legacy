@@ -40,10 +40,10 @@
             <div :class="[$style.wpm, $style.gridItem]">WPM: {{ wpm }}</div>
             <div :class="[$style.cpm, $style.gridItem]">CPM: {{ cpm }}</div>
             <div :class="[$style.accuracy, $style.gridItem]">
-                정확도: {{ typingAccuracy }}
+                정확도: {{ accuracy }}
             </div>
             <div :class="[$style.progress, $style.gridItem]">
-                진행도: {{ typingProgress }}
+                진행도: {{ progress }}
             </div>
             <div :class="[$style.typingCount, $style.gridItem]">
                 count: {{ typingCount }}
@@ -169,22 +169,22 @@ const parsingText: Ref<string> = ref("")
 const typoStatus: Ref<TypoStatus[]> = ref([])
 const checkTypoArray: Ref<TypoStatus[]> = ref([])
 
-const typingAccuracy: Ref<number> = ref(0)
-const typingProgress: Ref<number> = ref(0)
+const accuracy: Ref<number> = ref(0)
+const progress: Ref<number> = ref(0)
 const wpm: Ref<number> = ref(0)
 const cpm: Ref<number> = ref(0)
 const avgWpm: Ref<number> = ref(0)
 const avgCpm: Ref<number> = ref(0)
 const maxWpm: Ref<number> = ref(0)
 const maxCpm: Ref<number> = ref(0)
-const avgTypingAccuracy: Ref<number> = ref(0)
-const avgTypingProgress: Ref<number> = ref(0)
+const avgAccuracy: Ref<number> = ref(0)
+const avgProgress: Ref<number> = ref(0)
 const entireElapsedtime: Ref<number> = ref(0)
 
 const wpmArray: Ref<number[]> = ref([])
 const cpmArray: Ref<number[]> = ref([])
-const typingAccuracyArray: Ref<number[]> = ref([])
-const typingProgressArray: Ref<number[]> = ref([])
+const accuracyArray: Ref<number[]> = ref([])
+const progressArray: Ref<number[]> = ref([])
 const ElapsedTimeArray: Ref<number[]> = ref([])
 
 const typingInfo: TypingInfo = reactive({
@@ -194,8 +194,8 @@ const typingInfo: TypingInfo = reactive({
     avgCpm: avgCpm,
     maxWpm: maxWpm,
     maxCpm: maxCpm,
-    avgTypingAccuracy: avgTypingAccuracy,
-    avgTypingProgress: avgTypingProgress,
+    avgAccuracy: avgAccuracy,
+    avgProgress: avgProgress,
     count: typingCount,
     entireElapsedtime: entireElapsedtime,
 })
@@ -411,14 +411,14 @@ const calcAccuracy = () => {
         (value: TypoStatus) => value === TypoStatus.Error,
     ).length
 
-    typingAccuracy.value = getPercentage(
+    accuracy.value = getPercentage(
         typoStatus.value.length - typoCount,
         typoStatus.value.length,
     )
 }
 
 const calcProgress = () => {
-    typingProgress.value = getPercentage(
+    progress.value = getPercentage(
         parsingText.value.split("").length,
         targetText.value.split("").length,
     )
@@ -444,35 +444,32 @@ const stopTypingSpeedCalc = () => {
 const pushCalculatedArray = () => {
     wpmArray.value.push(wpm.value)
     cpmArray.value.push(cpm.value)
-    typingAccuracyArray.value.push(typingAccuracy.value)
-    typingProgressArray.value.push(typingProgress.value)
+    accuracyArray.value.push(accuracy.value)
+    progressArray.value.push(progress.value)
     ElapsedTimeArray.value.push(elapsedTime.value)
 }
-
+const getAvgValue = (array: number[]) => {
+    const avg = Math.floor(
+        array.reduce((acc, cur) => acc + cur, 0) / array.length,
+    )
+    return avg
+}
 const calcTypingInfo = () => {
-    avgWpm.value =
-        wpmArray.value.reduce((acc, cur) => acc + cur, 0) /
-        wpmArray.value.length
-    avgCpm.value =
-        cpmArray.value.reduce((acc, cur) => acc + cur, 0) /
-        cpmArray.value.length
-    avgTypingAccuracy.value =
-        typingAccuracyArray.value.reduce((acc, cur) => acc + cur, 0) /
-        typingAccuracyArray.value.length
-    avgTypingProgress.value =
-        typingProgressArray.value.reduce((acc, cur) => acc + cur, 0) /
-        typingProgressArray.value.length
+    avgWpm.value = getAvgValue(wpmArray.value)
+    avgCpm.value = getAvgValue(cpmArray.value)
+    avgAccuracy.value = getAvgValue(accuracyArray.value)
+    avgProgress.value = getAvgValue(progressArray.value)
+
     entireElapsedtime.value = ElapsedTimeArray.value.reduce(
         (acc, cur) => acc + cur,
     )
 
-    console.log(wpmArray.value, cpmArray.value)
     typingInfo.maxWpm = Math.max(...wpmArray.value)
     typingInfo.maxCpm = Math.max(...cpmArray.value)
     typingInfo.avgWpm = avgWpm.value
     typingInfo.avgCpm = avgCpm.value
-    typingInfo.avgTypingAccuracy = avgTypingAccuracy.value
-    typingInfo.avgTypingProgress = avgTypingProgress.value
+    typingInfo.avgAccuracy = avgAccuracy.value
+    typingInfo.avgProgress = avgProgress.value
     typingInfo.entireElapsedtime = entireElapsedtime.value
 }
 
@@ -522,8 +519,8 @@ const resetInfo = () => {
 
     wpm.value = 0
     cpm.value = 0
-    typingAccuracy.value = 0
-    typingProgress.value = 0
+    accuracy.value = 0
+    progress.value = 0
 
     typoStatus.value = []
 }
@@ -535,14 +532,14 @@ const finishCycle = () => {
     avgCpm.value = 0
     maxWpm.value = 0
     maxCpm.value = 0
-    avgTypingAccuracy.value = 0
-    avgTypingProgress.value = 0
+    avgAccuracy.value = 0
+    avgProgress.value = 0
     entireElapsedtime.value = 0
 
     wpmArray.value = []
     cpmArray.value = []
-    typingAccuracyArray.value = []
-    typingProgressArray.value = []
+    accuracyArray.value = []
+    progressArray.value = []
     ElapsedTimeArray.value = []
 
     typingCount.value = 0

@@ -17,8 +17,8 @@ export const useTypedQuote = defineStore("typingStack", () => {
         avgCpm: 0,
         maxWpm: 0,
         maxCpm: 0,
-        avgTypingAccuracy: 0,
-        avgTypingProgress: 0,
+        avgAccuracy: 0,
+        avgProgress: 0,
         count: 0,
         entireElapsedtime: 0,
     })
