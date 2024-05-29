@@ -618,6 +618,7 @@ const toggleQuoteType = (type: QuoteType) => {
             if (type === targetQuoteType.value) return
             targetQuoteType.value = QuoteType.LifeQuote
             break
+
         case QuoteType.Pangram:
             if (type === targetQuoteType.value) return
             targetQuoteType.value = QuoteType.Pangram
@@ -641,12 +642,10 @@ const getTargetText = (): Quote[] => {
             switch (targetQuoteType.value) {
                 case QuoteType.LifeQuote:
                     targetDatas = KoQuotes
-
                     break
 
                 case QuoteType.Pangram:
                     targetDatas = KoPangram
-
                     break
             }
             break
@@ -655,11 +654,10 @@ const getTargetText = (): Quote[] => {
             switch (targetQuoteType.value) {
                 case QuoteType.LifeQuote:
                     targetDatas = EnQuotes
-
                     break
+
                 case QuoteType.Pangram:
                     targetDatas = EnPangram
-
                     break
             }
             break
@@ -787,8 +785,8 @@ onBeforeUnmount(() => {
         grid-template-areas:
             "i i i n nl l m b b b"
             "i i i kt kt l m b b b"
-            "i i i q q w c b b b"
-            "i i i q q a p t t t"
+            "i i i w c q q b b b"
+            "i i i a p q q t t t"
             "x x x x x x x x x x"
             "x x x x x x x x x x"
             "x x x x x x x x x x"
@@ -949,6 +947,7 @@ onBeforeUnmount(() => {
                 height: 80px;
 
                 position: relative;
+                display: inline-block;
 
                 text-align: center;
                 line-height: 80px;
@@ -967,6 +966,7 @@ onBeforeUnmount(() => {
                 &:active {
                     width: 60px;
                     height: 40px;
+                    font-size: 9px;
                     line-height: 40px;
                 }
             }

@@ -20,9 +20,14 @@ const route = useRoute()
     > .header {
         width: 300px;
         height: 100%;
+
         font-size: 25px;
+        text-align: center;
         line-height: 60px;
+
         margin-inline: auto;
+
+        cursor: pointer;
     }
 }
 </style>

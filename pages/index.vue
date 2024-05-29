@@ -10,8 +10,8 @@
             </div>
         </div>
         <div :class="$style.explain" @click="navigateTo('/typings')">
-            Press <span :class="$style.enter">Enter</span> to start or Click
-            this letters
+            Press <span :class="$style.highlighted">Enter</span> or
+            <span :class="$style.highlighted">Click</span> this letters to start
         </div>
     </div>
 </template>
@@ -134,7 +134,7 @@ onBeforeUnmount(() => {
         animation: flash-text 2s infinite;
         cursor: pointer;
 
-        > .enter {
+        > .highlighted {
             color: var(--color-primary);
         }
     }
