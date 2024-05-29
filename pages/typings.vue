@@ -36,6 +36,9 @@
             <div :class="[$style.blinkBox, $style.gridItem]">
                 <TypingBlink />
             </div>
+            <div :class="[$style.keyThemeName, $style.gridItem]">
+                modern dolch
+            </div>
             <div :class="[$style.quoteType, $style.gridItem]" v-auto-animate>
                 <div
                     :class="[$style.quoteTypeBtn, getActiveClass(btn)]"
@@ -695,9 +698,7 @@ const toggleShow = () => {
 }
 
 watch(parsingText, (newValue) => {
-    //타이밍은 parsingText기준으로
     if (newValue === "") {
-        //이건 일단 작동하니까 잠깐 두고
         resetInfo()
         refillTypoArrays()
     }
@@ -708,6 +709,7 @@ watch(parsingText, (newValue) => {
 const switchTargetText = (quote: string, person: string) => {
     targetText.value = quote
     targetPerson.value = person
+
     splitText()
     updateTypoStatus()
 }
@@ -783,10 +785,10 @@ onBeforeUnmount(() => {
         display: grid;
         grid-template: repeat(8, 1fr) / repeat(10, 1fr);
         grid-template-areas:
-            "i i i n nl l m b b b"
-            "i i i kt kt l m b b b"
-            "i i i w c q q b b b"
-            "i i i a p q q t t t"
+            "i i i n nl a m b b b"
+            "i i i w c p m b b b"
+            "i i i kt kt q l b b b"
+            "i i i t t q l tn tn tn"
             "x x x x x x x x x x"
             "x x x x x x x x x x"
             "x x x x x x x x x x"
@@ -895,6 +897,12 @@ onBeforeUnmount(() => {
                 border-radius: 7px;
                 box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.15);
 
+                transition:
+                    width 0.2s,
+                    height 0.2s,
+                    font-size 0.2s,
+                    line-height 0.2s;
+
                 &:hover {
                     cursor: pointer;
                     top: -3px;
@@ -903,6 +911,7 @@ onBeforeUnmount(() => {
                 &:active {
                     width: 50px;
                     height: 25px;
+                    font-size: 9px;
                     line-height: 25px;
                 }
             }
@@ -936,21 +945,27 @@ onBeforeUnmount(() => {
             padding-block: 30px;
         }
 
+        > .keyThemeName {
+            grid-area: tn;
+            text-align: center;
+            line-height: 100%;
+        }
+
         > .quoteType {
             grid-area: q;
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             justify-content: space-evenly;
 
             > .quoteTypeBtn {
-                width: 90px;
-                height: 80px;
+                width: 80px;
+                height: 40px;
 
                 position: relative;
                 display: inline-block;
 
                 text-align: center;
-                line-height: 80px;
+                line-height: 40px;
 
                 background-color: var(--bg-secondary);
 
@@ -958,16 +973,22 @@ onBeforeUnmount(() => {
                 border-radius: 7px;
                 box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.15);
 
+                transition:
+                    width 0.2s,
+                    height 0.2s,
+                    font-size 0.2s,
+                    line-height 0.2s;
+
                 &:hover {
                     cursor: pointer;
                     top: -3px;
                 }
 
                 &:active {
-                    width: 60px;
-                    height: 40px;
+                    width: 50px;
+                    height: 25px;
                     font-size: 9px;
-                    line-height: 40px;
+                    line-height: 25px;
                 }
             }
 
