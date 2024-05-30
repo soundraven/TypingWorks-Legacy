@@ -158,9 +158,7 @@ import { useTypedQuote } from "~/store/typedQuote"
 const $style = useCssModule()
 const store = useTypedQuote()
 const colorMode = useColorMode()
-//NuxtApp 사용해야함
 
-//v-memo 확인해보기
 const targetPerson: Ref<string> = ref("")
 const targetText: Ref<string> = ref("")
 const nextPerson: Ref<string> = ref("")
@@ -245,7 +243,7 @@ const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
 
 onMounted(() => {
     if (process.server) return //서버사이드렌더링
-    // runtime.public.API
+
     const [currentQuote, nextQuote]: Quote[] = getTargetText()
 
     targetText.value = currentQuote.quote
@@ -254,6 +252,10 @@ onMounted(() => {
 
     splitText()
     updateTypoStatus()
+})
+
+onBeforeUnmount(() => {
+    stopTypingSpeedCalc()
 })
 
 const editGoalCount = (direction: Direction) => {
@@ -280,7 +282,6 @@ const editGoalCount = (direction: Direction) => {
     }
 }
 
-//타입캐스팅
 const keyupEventHandler = (e: KeyboardEvent) => {
     if (e.code === "Enter") return
 
@@ -322,6 +323,7 @@ const updateTypoStatus = () => {
     )
 }
 
+//백스페이스 및 글자 제거 기능 사용시 오타 체크
 const handleDeletion = (e: Event) => {
     const inputEvent = e as InputEvent
 
@@ -344,9 +346,8 @@ const refillTypoArrays = () => {
     parsingText.value = typedText.value
 
     for (let i = 0; i < parsingText.value.length; i++) {
-        if (typeof targetText.value[i] === undefined) continue
-        //배열에 없는 인덱스 번호를 넣으면 다른 언어에선 터짐.
-        //typeof로 비교하면 Undefined가 string값으로 나온다고 함.추가로 알아보기
+        if (typeof targetText.value[i] === "undefined") continue
+
         if (targetText.value[i] === splitedParsingText[i]) {
             checkTypoArray.value[i] = TypoStatus.Correct
         } else {
@@ -354,7 +355,6 @@ const refillTypoArrays = () => {
         }
     }
 
-    //string타입에 [i] 써도 되는건지 확인
     for (let i = 0; i < typoStatus.value.length; i++) {
         //Typo 클래스 부여는 typoStatus가 하기때문에 동기화 필요
         if (typoStatus.value[i] !== checkTypoArray.value[i]) {
@@ -426,7 +426,6 @@ const getLastTyped = (index: number): string | string[] => {
     }
 }
 
-// 입력 텍스트의 정확도 계산
 const calcAccuracy = () => {
     const typoCount: number = typoStatus.value.filter(
         (value: TypoStatus) => value === TypoStatus.Error,
@@ -644,31 +643,21 @@ const toggleQuoteType = (type: QuoteType) => {
 const getTargetText = (): Quote[] => {
     let targetDatas: Quote[] = []
 
-    switch (targetLanguage.value) {
-        case Language.Korean:
-            switch (targetQuoteType.value) {
-                case QuoteType.LifeQuote:
-                    targetDatas = KoQuotes
-                    break
-
-                case QuoteType.Pangram:
-                    targetDatas = KoPangram
-                    break
-            }
-            break
-
-        case Language.English:
-            switch (targetQuoteType.value) {
-                case QuoteType.LifeQuote:
-                    targetDatas = EnQuotes
-                    break
-
-                case QuoteType.Pangram:
-                    targetDatas = EnPangram
-                    break
-            }
-            break
+    const category = {
+        [Language.Korean]: {
+            [QuoteType.LifeQuote]: KoQuotes,
+            [QuoteType.Pangram]: KoPangram,
+        },
+        [Language.English]: {
+            [QuoteType.LifeQuote]: EnQuotes,
+            [QuoteType.Pangram]: EnPangram,
+        },
     }
+
+    targetDatas =
+        (category[targetLanguage.value] &&
+            category[targetLanguage.value][targetQuoteType.value]) ||
+        KoQuotes
 
     const randomIndex: number = Math.floor(Math.random() * targetDatas.length)
 
@@ -697,10 +686,6 @@ const getActiveClass = (lang: Language | QuoteType): string => {
     }
 }
 
-const toggleShow = () => {
-    showResult.value = !showResult.value
-}
-
 watch(parsingText, (newValue) => {
     if (newValue === "") {
         resetInfo()
@@ -709,6 +694,10 @@ watch(parsingText, (newValue) => {
 
     checkTypo()
 })
+
+const toggleShow = () => {
+    showResult.value = !showResult.value
+}
 
 const switchTargetText = (quote: string, person: string) => {
     targetText.value = quote
@@ -742,10 +731,6 @@ const getKeyThemeName = () => {
             return systemMode ? "Modern Dolch" : "Dolch"
     }
 }
-
-onBeforeUnmount(() => {
-    stopTypingSpeedCalc()
-})
 </script>
 
 <style lang="scss" module>
