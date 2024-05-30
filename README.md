@@ -1,5 +1,5 @@
 ## nuxt3-Starting
 
--   Node Version 21
+-   Node Version v21.0.0
 
 -   `npm i`
