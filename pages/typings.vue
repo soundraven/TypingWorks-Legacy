@@ -37,7 +37,7 @@
                 <TypingBlink />
             </div>
             <div :class="[$style.keyThemeName, $style.gridItem]">
-                modern dolch
+                {{ getKeyThemeName() }}
             </div>
             <div :class="[$style.quoteType, $style.gridItem]" v-auto-animate>
                 <div
@@ -145,6 +145,8 @@ import {
     QuoteType,
     type TypingInfo,
 } from "~/structure/quotes"
+import { ThemeColor } from "~/structure/theme"
+
 import EnQuotes from "@/assets/quotes/quotesEn.json"
 import KoQuotes from "@/assets/quotes/quotesKo.json"
 import EnPangram from "@/assets/quotes/pangramEn.json"
@@ -155,6 +157,7 @@ import { useTypedQuote } from "~/store/typedQuote"
 
 const $style = useCssModule()
 const store = useTypedQuote()
+const colorMode = useColorMode()
 //NuxtApp 사용해야함
 
 //v-memo 확인해보기
@@ -294,9 +297,10 @@ const updateTypedText = (e) => {
 
 const startTyping = (text: string) => {
     parsingText.value = text
-    // 시작시 startTime 체크
+
     if (startTime.value === 0) {
         if (text === "") return
+
         const date = new Date()
         startTime.value = date.getTime()
 
@@ -712,6 +716,31 @@ const switchTargetText = (quote: string, person: string) => {
 
     splitText()
     updateTypoStatus()
+}
+
+const getKeyThemeName = () => {
+    switch (colorMode.preference) {
+        case ThemeColor.Light:
+            return "Modern Dolch"
+
+        case ThemeColor.Dark:
+            return "Dolch"
+
+        case ThemeColor.Sepia:
+            return "Soyamilk"
+
+        case ThemeColor.System:
+            let systemMode: boolean | null = null
+
+            if (process.client) {
+                systemMode = window.matchMedia(
+                    "(prefers-color-scheme: light)",
+                ).matches
+            } else return ""
+
+            if ((systemMode = null)) return ""
+            return systemMode ? "Modern Dolch" : "Dolch"
+    }
 }
 
 onBeforeUnmount(() => {
@@ -1141,7 +1170,6 @@ onBeforeUnmount(() => {
             > .inputs {
                 width: 100%;
                 text-align: left;
-                position: relative;
                 padding: 30px;
 
                 > input {
@@ -1160,6 +1188,11 @@ onBeforeUnmount(() => {
 
                     &::placeholder {
                         color: var(--border-color);
+                    }
+
+                    &:focus {
+                        border-bottom-color: var(--color-primary);
+                        box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.08);
                     }
                 }
             }
@@ -1180,23 +1213,19 @@ onBeforeUnmount(() => {
 }
 
 .hoverQuote {
-    // min-width: 100%;
-    // display: inline;
-    // position: absolute;
-
-    // background-color: blue;
-    // white-space: nowrap;
-    // cursor: pointer;
     width: 100%;
     height: 30px;
+
     font-size: 20px;
     line-height: 30px;
+
     background-color: var(--bg);
+
+    position: absolute;
     left: 0;
     top: 0;
-    position: absolute;
-    z-index: 1000; // 다른 요소 위에 나타나도록 z-index 설정
+    z-index: 1000;
 
-    animation: flash-box-shadow 0.8s;
+    animation: flash-box-shadow 0.5s;
 }
 </style>
