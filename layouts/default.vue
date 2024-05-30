@@ -1,26 +1,33 @@
 <template>
-    <div :class="$style.index">
+    <div :class="$style.index" v-if="route.path !== '/'">
         <div :class="$style.header" @click="navigateTo('/')">
-            TypingWorks Legacy
+            Typingworks.Legacy
         </div>
     </div>
     <slot />
 </template>
 
-<script setup></script>
+<script setup>
+const route = useRoute()
+</script>
 
 <style lang="scss" module>
 .index {
     width: 100%;
-    height: 50px;
-    border-bottom: 1px solid red;
+    height: 60px;
+    border-bottom: 3px solid var(--color-primary);
 
     > .header {
         width: 300px;
-        height: 50px;
-        border: 1px solid blue;
-        font-size: 30px;
+        height: 100%;
+
+        font-size: 25px;
+        text-align: center;
+        line-height: 60px;
+
         margin-inline: auto;
+
+        cursor: pointer;
     }
 }
 </style>

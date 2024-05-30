@@ -1,52 +1,12 @@
 <template>
-    <div :class="$style.R4">
+    <div
+        v-for="(row, rowIndex) in keyArray"
+        :key="'row_' + rowIndex"
+        :class="$style['R' + (keyArray.length - 1 - rowIndex)]"
+    >
         <div
-            v-for="(key, index) in keyArray[4]"
-            :key="'key' + index"
-            :class="[
-                getPressedKeyClass(key),
-                $style.key,
-                { [$style.blink]: pressedKey === key },
-            ]"
-        ></div>
-    </div>
-    <div :class="$style.R3">
-        <div
-            v-for="(key, index) in keyArray[3]"
-            :key="'key' + index"
-            :class="[
-                getPressedKeyClass(key),
-                $style.key,
-                { [$style.blink]: pressedKey === key },
-            ]"
-        ></div>
-    </div>
-    <div :class="$style.R2">
-        <div
-            v-for="(key, index) in keyArray[2]"
-            :key="'key' + index"
-            :class="[
-                getPressedKeyClass(key),
-                $style.key,
-                { [$style.blink]: pressedKey === key },
-            ]"
-        ></div>
-    </div>
-    <div :class="$style.R1">
-        <div
-            v-for="(key, index) in keyArray[1]"
-            :key="'key' + index"
-            :class="[
-                getPressedKeyClass(key),
-                $style.key,
-                { [$style.blink]: pressedKey === key },
-            ]"
-        ></div>
-    </div>
-    <div :class="$style.R0">
-        <div
-            v-for="(key, index) in keyArray[0]"
-            :key="'key_' + index"
+            v-for="(key, keyIndex) in row"
+            :key="'key_' + keyIndex"
             :class="[
                 getPressedKeyClass(key),
                 $style.key,
@@ -65,11 +25,8 @@ const pressedKey: Ref<string> = ref("")
 
 onMounted(() => {
     if (process.server) return
-    // runtime.public.API
-    // console.log(TypoStatus.NotInput)
-
-    window.addEventListener("keydown", handleKeyDown)
-    window.addEventListener("keyup", handleKeyUp)
+    window.addEventListener("keydown", handleKeyDown) //누를시 반짝임
+    window.addEventListener("keyup", handleKeyUp) //뗄시 없어짐
 })
 
 onBeforeUnmount(() => {
@@ -91,7 +48,36 @@ const getPressedKeyClass = (key: string): string => {
 </script>
 
 <style lang="scss" module>
+@keyframes flash-box-shadow {
+    0% {
+        box-shadow:
+            inset 0px 0px 35px var(--color-primary-shadow-inset-start),
+            0px 0px 35px var(--color-primary-shadow-start);
+    }
+    25% {
+        box-shadow:
+            inset 0px 0px 30px var(--color-primary-shadow-inset-start),
+            0px 0px 30px var(--color-primary-shadow-start);
+    }
+    50% {
+        box-shadow:
+            inset 0px 0px 25px var(--color-primary-shadow-inset-mid),
+            0px 0px 25px var(--color-primary-shadow-mid);
+    }
+    75% {
+        box-shadow:
+            inset 0px 0px 30px var(--color-primary-shadow-inset-mid),
+            0px 0px 30px var(--color-primary-shadow-mid);
+    }
+    100% {
+        box-shadow:
+            inset 0px 0px 35px var(--color-primary-shadow-inset-start),
+            0px 0px 35px var(--color-primary-shadow-inset-start);
+    }
+}
+
 $u: 18px;
+
 .R0,
 .R1,
 .R2,
@@ -107,17 +93,16 @@ $u: 18px;
         width: $u;
         height: $u;
 
-        background-color: white;
+        background-color: var(--alpah-row);
 
-        border: 1px solid rgb(58, 58, 60, 0.09);
+        border: 1px solid var(--border-color);
         border-radius: 5px;
-        box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
 
         margin: auto;
     }
 
     > .Escape {
-        background-color: pink;
+        background-color: var(--accent-esc);
     }
 
     > .ControlLeft,
@@ -128,63 +113,59 @@ $u: 18px;
     .Fn,
     .ControlRight {
         width: $u * 1.25;
-        background-color: #e1e1e1;
+        background-color: var(--modi-row);
     }
 
     > .Tab,
     .Backslash {
         width: $u * 1.5;
-        background-color: #e1e1e1;
+        background-color: var(--modi-row);
     }
 
     > .Backslash {
-        background-color: white;
+        background-color: var(--alpah-row);
     }
 
     > .CapsLock {
         width: $u * 1.75;
-        background-color: #e1e1e1;
+        background-color: var(--modi-row);
     }
 
     > .Backspace {
         width: $u * 2;
-        background-color: #e1e1e1;
+        background-color: var(--modi-row);
     }
 
     > .ShiftLeft,
     .Enter {
         width: $u * 2.25;
-        background-color: #e1e1e1;
+        background-color: var(--modi-row);
     }
 
     > .Enter {
-        background-color: #a2f5e6;
+        background-color: var(--accent-enter);
     }
 
     > .ShiftRight {
         width: $u * 2.75;
-        background-color: #e1e1e1;
+        background-color: var(--modi-row);
     }
 
     > .Space {
         width: $u * 6.25;
-        background-color: white;
+        background-color: var(--alpah-row);
     }
 
     > .key {
-        transition-property: background-color;
         transition-timing-function: ease-out;
-        transition-duration: 0.5s;
+        transition-duration: 0.7s;
 
         &.blink {
-            background-color: grey;
+            background-color: var(--color-primary);
             transition-duration: 0s;
+            box-shadow: 0px 0px 20px var(--color-primary);
+            opacity: 0.8;
         }
-    }
-
-    > .blink {
-        // transition: ease-out;
-        // transition-duration: 0.5s;
     }
 }
 </style>

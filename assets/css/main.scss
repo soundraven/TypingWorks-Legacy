@@ -8,28 +8,52 @@
 .light-mode {
     --color: #243746;
     --color-primary: #41b883;
+    --color-primary-shadow-start: rgba(65, 184, 131, 1);
+    --color-primary-shadow-mid: rgba(65, 184, 131, 0.5);
+    --color-primary-shadow-inset-start: rgba(65, 184, 131, 0.3);
+    --color-primary-shadow-inset-mid: rgba(65, 184, 131, 0.15);
     --color-secondary: #0e2233;
     --bg: #fff;
     --bg-secondary: #f3f5f4;
     --border-color: #ddd;
+    --alpah-row: #ffffff;
+    --modi-row: #e1e1e1;
+    --accent-esc: #ffc0cb;
+    --accent-enter: #a2f5e6;
 }
 
 .dark-mode {
     --color: #ebf4f1;
     --color-primary: #41b38a;
+    --color-primary-shadow-start: rgba(65, 179, 138, 1);
+    --color-primary-shadow-mid: rgba(65, 179, 138, 0.5);
+    --color-primary-shadow-inset-start: rgba(65, 179, 138, 0.3);
+    --color-primary-shadow-inset-mid: rgba(65, 179, 138, 0.15);
     --color-secondary: #fdf9f3;
     --bg: #091a28;
     --bg-secondary: #071521;
-    --border-color: #0d2538;
+    --border-color: #5050506b;
+    --alpah-row: #696969;
+    --modi-row: #3b3b3b;
+    --accent-esc: red;
+    --accent-enter: #a2f5e6;
 }
 
 .sepia-mode {
     --color: #433422;
     --color-primary: #d5bb95;
+    --color-primary-shadow-start: rgba(213, 187, 149, 1);
+    --color-primary-shadow-mid: rgba(213, 187, 149, 0.9);
+    --color-primary-shadow-inset-start: rgba(213, 187, 149, 0.3);
+    --color-primary-shadow-inset-mid: rgba(213, 187, 149, 0.15);
     --color-secondary: #504231;
-    --bg: #f1e7d0;
+    --bg: #f8f5f0;
     --bg-secondary: #eae0c9;
     --border-color: #ded0bf;
+    --alpah-row: #f7f2ea;
+    --modi-row: #e6d2b5;
+    --accent-esc: #bc251e;
+    --accent-enter: #222d5a;
 }
 
 body {
@@ -51,10 +75,13 @@ body {
         Noto Color Emoji;
     background-color: var(--bg);
 
+    box-sizing: border-box;
+
     // transition: background-color 0.3s;
     transition: all 0.4s;
 
     margin: 0;
+    padding: 0;
 }
 a {
     color: var(--color-primary);

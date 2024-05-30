@@ -3,14 +3,36 @@ export interface Quote {
     quote: string
 }
 
+export interface TypingInfo {
+    targetLanguage: Language
+    targetQuoteType: QuoteType
+    avgWpm: number
+    avgCpm: number
+    maxWpm: number
+    maxCpm: number
+    avgAccuracy: number
+    avgProgress: number
+    count: number
+    entireElapsedtime: number
+}
+
 export enum TypoStatus {
     NotInput = 0,
     Correct = 1,
     Error = 2,
 }
 
-//enum첫글자대문자
 export enum Language {
-    korean = "ko",
-    english = "en",
+    Korean = "Ko",
+    English = "En",
+}
+
+export enum QuoteType {
+    LifeQuote = "LifeQuote",
+    Pangram = "Pangram",
+}
+
+export enum Direction {
+    Raise = "raise",
+    Reduce = "reduce",
 }
