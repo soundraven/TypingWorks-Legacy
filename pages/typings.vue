@@ -141,8 +141,8 @@ import {
     TypoStatus,
     Language,
     Direction,
-    type Quote,
     QuoteType,
+    type Quote,
     type TypingInfo,
 } from "~/structure/quotes"
 import { ThemeColor } from "~/structure/theme"
@@ -708,6 +708,8 @@ const switchTargetText = (quote: string, person: string) => {
 }
 
 const getKeyThemeName = () => {
+    let systemMode: boolean = false
+
     switch (colorMode.preference) {
         case ThemeColor.Light:
             return "Modern Dolch"
@@ -719,16 +721,20 @@ const getKeyThemeName = () => {
             return "Soyamilk"
 
         case ThemeColor.System:
-            let systemMode: boolean | null = null
+            systemMode = true
 
             if (process.client) {
                 systemMode = window.matchMedia(
                     "(prefers-color-scheme: light)",
                 ).matches
-            } else return ""
 
-            if ((systemMode = null)) return ""
-            return systemMode ? "Modern Dolch" : "Dolch"
+                return systemMode ? "Modern Dolch" : "Dolch"
+            } else {
+                return ""
+            }
+
+        default:
+            return ""
     }
 }
 </script>
