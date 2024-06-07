@@ -104,13 +104,8 @@ onBeforeUnmount(() => {
 
     > .text {
         height: 120px;
-
         display: flex;
-
         font-size: 90px;
-
-        // margin-top: 400px;
-
         position: relative;
     }
 
@@ -136,6 +131,46 @@ onBeforeUnmount(() => {
 
         > .highlighted {
             color: var(--color-primary);
+        }
+    }
+}
+
+@media (max-width: 800px) {
+    .index {
+        > .text {
+            height: auto;
+            margin-bottom: 30vh;
+
+            > .animatedText {
+                font-size: 9vw;
+            }
+        }
+
+        > .text::after {
+            content: "";
+            height: 80%;
+
+            border-right: 5px solid var(--color-secondary);
+
+            animation: flash-border 1.2s infinite;
+
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        > .explain {
+            font-size: 7vw;
+
+            text-align: center;
+            word-wrap: break-word;
+            word-break: normal;
+
+            margin-top: 30vh;
+            padding: 20vw;
+
+            position: absolute;
         }
     }
 }
