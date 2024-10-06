@@ -109,8 +109,6 @@ onBeforeUnmount(() => {
 
         font-size: 90px;
 
-        // margin-top: 400px;
-
         position: relative;
     }
 

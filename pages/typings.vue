@@ -589,56 +589,28 @@ const calcTypingSpeed = (takenTime: number) => {
     }
 }
 
-const toggleLanguage = (lang: Language) => {
-    if (lang !== targetLanguage.value) {
-        toggleLangBtn.value.reverse()
+const toggleOption = (
+    current: Ref<any>,
+    toggleList: Ref<any[]>,
+    option: any,
+) => {
+    if (option !== current.value) {
+        toggleList.value.reverse()
+        current.value = option
+        const [currentQuote, nextQuote] = getTargetText()
+        targetText.value = currentQuote.quote
+        targetPerson.value = currentQuote.person
+        nextText.value = nextQuote.quote
+        splitText()
+        resetInfo()
     }
-
-    switch (lang) {
-        case Language.Korean:
-            if (lang === targetLanguage.value) return
-            targetLanguage.value = Language.Korean
-            break
-        case Language.English:
-            if (lang === targetLanguage.value) return
-            targetLanguage.value = Language.English
-            break
-    }
-
-    const [currentQuote, nextQuote] = getTargetText()
-    targetText.value = currentQuote.quote
-    targetPerson.value = currentQuote.person
-    nextText.value = nextQuote.quote
-
-    splitText()
-    resetInfo()
 }
 
-const toggleQuoteType = (type: QuoteType) => {
-    if (type !== targetQuoteType.value) {
-        toggleQuoteTypeBtn.value.reverse()
-    }
+const toggleLanguage = (lang: Language) =>
+    toggleOption(targetLanguage, toggleLangBtn, lang)
 
-    switch (type) {
-        case QuoteType.LifeQuote:
-            if (type === targetQuoteType.value) return
-            targetQuoteType.value = QuoteType.LifeQuote
-            break
-
-        case QuoteType.Pangram:
-            if (type === targetQuoteType.value) return
-            targetQuoteType.value = QuoteType.Pangram
-            break
-    }
-
-    const [currentQuote, nextQuote] = getTargetText()
-    targetText.value = currentQuote.quote
-    targetPerson.value = currentQuote.person
-    nextText.value = nextQuote.quote
-
-    splitText()
-    resetInfo()
-}
+const toggleQuoteType = (type: QuoteType) =>
+    toggleOption(targetQuoteType, toggleQuoteTypeBtn, type)
 
 const getTargetText = (): Quote[] => {
     let targetDatas: Quote[] = []
