@@ -506,16 +506,25 @@ const calcTypingInfo = () => {
   typingInfo.entireElapsedtime = entireElapsedtime.value
 }
 
-const readyNextQuote = async () => {
-  const randomSentences = await getRandomSentence()
+const readyNextSentence = async () => {
+  const nextSentence = oneCycleSentence.value?.shift()
+  console.log(oneCycleSentence.value)
 
-  const currentSentence = randomSentences.shift()
-  const nextSentence = randomSentences[0] || null
+  if (nextSentence) {
+    targetText.value = nextSentence.content
+    targetPerson.value = nextSentence.source
+  }
 
-  targetText.value = nextText.value
-  targetPerson.value = nextPerson.value
-  nextText.value = randomSentences.quote
-  nextPerson.value = randomSentences.person
+  // 배열이 비어있지 않다면, 다음 문장에 접근
+  if (oneCycleSentence.value && oneCycleSentence.value.length > 0) {
+    nextText.value = oneCycleSentence.value[0].content
+    nextPerson.value = oneCycleSentence.value[0].source
+  } else {
+    nextText.value = ""
+    nextPerson.value = ""
+  }
+
+  console.log(nextText.value)
 }
 
 const endTyping = () => {
@@ -539,7 +548,7 @@ const endTyping = () => {
     return
   }
 
-  readyQuote()
+  readyNextSentence()
   splitText()
   updateTypoStatus()
   resetInfo()
