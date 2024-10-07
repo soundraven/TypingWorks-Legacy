@@ -9,7 +9,7 @@
                 {{ text }}
             </div>
         </div>
-        <div :class="$style.explain" @click="navigateTo('/typings')">
+        <div :class="$style.explain" @click="navigateTo('/typing/typewriter')">
             Press <span :class="$style.highlighted">Enter</span> or
             <span :class="$style.highlighted">Click</span> this letters to start
         </div>
@@ -50,7 +50,7 @@ const reset = () => {
 
 const startTyping = (e) => {
     if (e.key === "Enter") {
-        navigateTo("/typings")
+        navigateTo("/typing/typewriter")
     }
 }
 

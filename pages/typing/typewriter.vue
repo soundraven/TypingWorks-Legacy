@@ -217,6 +217,7 @@ const typingInfo: TypingInfo = reactive({
     count: typingCount,
     entireElapsedtime: entireElapsedtime,
 })
+
 const showResult: Ref<boolean> = ref(false)
 
 const hoverIndex: Ref<number | null> = ref(null)
@@ -242,7 +243,7 @@ const totalTime: Ref<number> = ref(0)
 const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
 
 onMounted(() => {
-    if (process.server) return //서버사이드렌더링
+    if (process.server) return
 
     const [currentQuote, nextQuote]: Quote[] = getTargetText()
 

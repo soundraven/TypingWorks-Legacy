@@ -16,6 +16,8 @@
         "@formkit/auto-animate": "^0.8.2",
         "@nuxt/ui": "^2.15.0",
         "@pinia/nuxt": "^0.5.1",
+        "@types/axios": "^0.14.0",
+        "axios": "^1.7.7",
         "hangul-js": "^0.2.6",
         "lodash": "^4.17.21",
         "nuxt": "^3.10.2",
