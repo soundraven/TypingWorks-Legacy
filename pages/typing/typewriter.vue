@@ -6,12 +6,12 @@
           :class="[$style.listBox]"
           v-for="(typedQuote, index) in store.typedQuote"
           :key="'quote_' + index"
-          @click="switchTargetText(typedQuote.quote, typedQuote.person)"
+          @click="switchtargetSentence(typedQuote.quote, typedQuote.person)"
           @mouseenter="setHoverIndex(index)"
           @mouseleave="setHoverIndex(null)"
         >
           <div :class="$style.list">{{ typedQuote.quote }}</div>
-          <teleport to="#targetText">
+          <teleport to="#targetSentence">
             <div :class="$style.hoverQuote" v-if="isHovered(index)">
               {{ typedQuote.quote }}
             </div>
@@ -78,13 +78,13 @@
         {{ getElapsedTime() }}
       </div>
       <div :class="[$style.person, $style.gridItem]">
-        {{ targetPerson }}
+        {{ targetSource }}
       </div>
       <div :class="[$style.textArea, $style.gridItem]">
-        <div :class="$style.targetText" id="targetText">
+        <div :class="$style.targetSentence" id="targetSentence">
           <div :class="$style.text">
             <div
-              v-for="(char, index) in splitedTargetText"
+              v-for="(char, index) in splitedtargetSentence"
               :key="index"
               :class="[getTypoClass(index), getLastTyped(index)]"
             >
@@ -109,7 +109,7 @@
             @paste="preventPaste"
           />
         </div>
-        <div :class="$style.nextText">{{ nextText }}</div>
+        <div :class="$style.nextSentence">{{ nextSentence }}</div>
       </div>
     </div>
     <ResultWindow
@@ -128,15 +128,10 @@ import {
   Language,
   Direction,
   QuoteType,
-  type Quote,
   type TypingInfo,
-} from "~/structure/quotes"
+  type Sentence,
+} from "~/structure/sentence"
 import { ThemeColor } from "~/structure/theme"
-
-import EnQuotes from "@/assets/quotes/quotesEn.json"
-import KoQuotes from "@/assets/quotes/quotesKo.json"
-import EnPangram from "@/assets/quotes/pangramEn.json"
-import KoPangram from "@/assets/quotes/pangramKo.json"
 
 import { vAutoAnimate } from "@formkit/auto-animate"
 import { useTypedQuote } from "~/store/typedQuote"
@@ -146,10 +141,10 @@ const $style = useCssModule()
 const store = useTypedQuote()
 const colorMode = useColorMode()
 
-const targetPerson: Ref<string> = ref("")
-const targetText: Ref<string> = ref("")
-const nextPerson: Ref<string> = ref("")
-const nextText: Ref<string> = ref("")
+const targetSource: Ref<string> = ref("")
+const targetSentence: Ref<string> = ref("")
+const nextSource: Ref<string> = ref("")
+const nextSentence: Ref<string> = ref("")
 const targetLanguage: Ref<Language> = ref(Language.Korean)
 const toggleLangBtn: Ref<Language[]> = ref([Language.Korean, Language.English])
 const targetQuoteType: Ref<QuoteType> = ref(QuoteType.LifeQuote)
@@ -158,7 +153,7 @@ const toggleQuoteTypeBtn: Ref<QuoteType[]> = ref([
   QuoteType.Pangram,
 ])
 
-const splitedTargetText: Ref<string[]> = ref([])
+const splitedtargetSentence: Ref<string[]> = ref([])
 
 const typingCount: Ref<number> = ref(0)
 const goalCount: Ref<number> = ref(5)
@@ -232,44 +227,43 @@ const elapsedTimerId: Ref<NodeJS.Timeout | undefined> = ref(undefined)
 //한 사이클의 문장을 저장하는 배열
 const oneCycleSentence: Ref<Sentence[] | undefined> = ref(undefined)
 
-interface Sentence {
-  id: number
-  content: string
-  source: string
-}
-
 onMounted(async () => {
   if (process.server) return
-
-  oneCycleSentence.value = await getRandomSentence()
-
-  if (oneCycleSentence.value) {
-    const currentSentence: Sentence | undefined = oneCycleSentence.value.shift()
-
-    const nextSentence =
-      oneCycleSentence.value.length > 0 ? oneCycleSentence.value[0] : null
-
-    if (currentSentence) {
-      targetText.value = currentSentence.content
-      targetPerson.value = currentSentence.source
-    }
-
-    if (nextSentence) {
-      nextText.value = nextSentence.content
-      nextPerson.value = nextSentence.source
-    } else {
-      nextText.value = ""
-      nextPerson.value = ""
-    }
-
-    splitText()
-    updateTypoStatus()
-  }
+  readySentence()
 })
 
 onBeforeUnmount(() => {
   stopTypingSpeedCalc()
 })
+
+const readySentence = async (): Promise<void> => {
+  if (oneCycleSentence.value === undefined) {
+    oneCycleSentence.value = await getRandomSentence()
+  }
+
+  if (oneCycleSentence.value) {
+    const shiftedSentence: Sentence | undefined = oneCycleSentence.value.shift()
+
+    const secondSentence =
+      oneCycleSentence.value.length > 0 ? oneCycleSentence.value[0] : null
+
+    if (shiftedSentence) {
+      targetSentence.value = shiftedSentence.content
+      targetSource.value = shiftedSentence.source
+    }
+
+    if (secondSentence) {
+      nextSentence.value = secondSentence.content
+      nextSource.value = secondSentence.source
+    } else {
+      nextSentence.value = ""
+      nextSource.value = ""
+    }
+
+    splitText()
+    updateTypoStatus()
+  }
+}
 
 const editGoalCount = (direction: Direction) => {
   //한 사이클당 문장 몇 회 타이핑할지 선택
@@ -327,11 +321,11 @@ const startTyping = (text: string) => {
 
 // 오타 확인을 위해 문장 글자단위로 분해
 const splitText = () => {
-  splitedTargetText.value = targetText.value.split("")
+  splitedtargetSentence.value = targetSentence.value.split("")
 }
 
 const updateTypoStatus = () => {
-  typoStatus.value = new Array(splitedTargetText.value.length).fill(
+  typoStatus.value = new Array(splitedtargetSentence.value.length).fill(
     TypoStatus.NotInput,
   )
 }
@@ -359,9 +353,9 @@ const refillTypoArrays = () => {
   parsingText.value = typedText.value
 
   for (let i = 0; i < parsingText.value.length; i++) {
-    if (typeof targetText.value[i] === "undefined") continue
+    if (typeof targetSentence.value[i] === "undefined") continue
 
-    if (targetText.value[i] === splitedParsingText[i]) {
+    if (targetSentence.value[i] === splitedParsingText[i]) {
       checkTypoArray.value[i] = TypoStatus.Correct
     } else {
       checkTypoArray.value[i] = TypoStatus.Error
@@ -385,7 +379,7 @@ const checkTypo = () => {
       typoStatus.value[i] = TypoStatus.NotInput
     }
 
-    if (targetText.value[i] === splitedParsingText[i]) {
+    if (targetSentence.value[i] === splitedParsingText[i]) {
       typoStatus.value[i] = TypoStatus.Correct //한박자 늦게 따라오는 오타 체크 배열 - 조합문자 이슈
     } else {
       typoStatus.value[i] = TypoStatus.Error
@@ -393,8 +387,8 @@ const checkTypo = () => {
   }
 
   for (let i = 0; i < parsingText.value.length; i++) {
-    if (targetText.value[i] === undefined) continue
-    if (targetText.value[i] === splitedParsingText[i]) {
+    if (targetSentence.value[i] === undefined) continue
+    if (targetSentence.value[i] === splitedParsingText[i]) {
       checkTypoArray.value[i] = TypoStatus.Correct //입력받는대로 따라오는 오타 체크 배열
     } else {
       checkTypoArray.value[i] = TypoStatus.Error
@@ -453,7 +447,7 @@ const calcAccuracy = () => {
 const calcProgress = () => {
   progress.value = getPercentage(
     parsingText.value.split("").length,
-    targetText.value.split("").length,
+    targetSentence.value.split("").length,
   )
 }
 
@@ -481,12 +475,14 @@ const pushCalculatedArray = () => {
   progressArray.value.push(progress.value)
   ElapsedTimeArray.value.push(elapsedTime.value)
 }
+
 const getAvgValue = (array: number[]) => {
   const avg = Math.floor(
     array.reduce((acc, cur) => acc + cur, 0) / array.length,
   )
   return avg
 }
+
 const calcTypingInfo = () => {
   avgWpm.value = getAvgValue(wpmArray.value)
   avgCpm.value = getAvgValue(cpmArray.value)
@@ -506,34 +502,13 @@ const calcTypingInfo = () => {
   typingInfo.entireElapsedtime = entireElapsedtime.value
 }
 
-const readyNextSentence = async () => {
-  const nextSentence = oneCycleSentence.value?.shift()
-  console.log(oneCycleSentence.value)
-
-  if (nextSentence) {
-    targetText.value = nextSentence.content
-    targetPerson.value = nextSentence.source
-  }
-
-  // 배열이 비어있지 않다면, 다음 문장에 접근
-  if (oneCycleSentence.value && oneCycleSentence.value.length > 0) {
-    nextText.value = oneCycleSentence.value[0].content
-    nextPerson.value = oneCycleSentence.value[0].source
-  } else {
-    nextText.value = ""
-    nextPerson.value = ""
-  }
-
-  console.log(nextText.value)
-}
-
 const endTyping = () => {
   if (showResult.value) return
 
   stopTypingSpeedCalc()
 
   typingCount.value++
-  store.addList(targetText.value, targetPerson.value)
+  store.addList(targetSentence.value, targetSource.value)
   pushCalculatedArray()
 
   const date = new Date()
@@ -548,9 +523,7 @@ const endTyping = () => {
     return
   }
 
-  readyNextSentence()
-  splitText()
-  updateTypoStatus()
+  readySentence()
   resetInfo()
 }
 
@@ -622,10 +595,10 @@ const toggleOption = async (
   if (option !== current.value) {
     toggleList.value.reverse()
     current.value = option
-    const [currentQuote, nextQuote] = await getRandomSentence()
-    targetText.value = currentQuote.quote
-    targetPerson.value = currentQuote.person
-    nextText.value = nextQuote.quote
+
+    oneCycleSentence.value = undefined
+    readySentence()
+
     splitText()
     resetInfo()
   }
@@ -687,9 +660,9 @@ const toggleShow = () => {
   showResult.value = !showResult.value
 }
 
-const switchTargetText = (quote: string, person: string) => {
-  targetText.value = quote
-  targetPerson.value = person
+const switchtargetSentence = (quote: string, person: string) => {
+  targetSentence.value = quote
+  targetSource.value = person
 
   splitText()
   updateTypoStatus()
@@ -1091,7 +1064,7 @@ const getKeyThemeName = () => {
 
       padding: 30px;
 
-      > .targetText {
+      > .targetSentence {
         width: 100%;
         height: 100%;
         position: relative;
@@ -1174,7 +1147,7 @@ const getKeyThemeName = () => {
         }
       }
 
-      > .nextText {
+      > .nextSentence {
         width: 100%;
         text-align: left;
         color: var(--border-color);
