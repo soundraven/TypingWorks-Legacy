@@ -1,7 +1,15 @@
 {
-    "extends": "./.nuxt/tsconfig.json",
-    "compilerOptions": {
-        "noImplicitAny": false,
-        "resolveJsonModule": true
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./*"],
+      "@/*": ["./*"],
+      "#app": ["./.nuxt/types/app"],
+      "#imports": ["./.nuxt/imports"],
+      "#build": ["./.nuxt/types/build"]
     }
+  }
 }

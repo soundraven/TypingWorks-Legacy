@@ -4,9 +4,9 @@
       <div :class="[$style.typedText, $style.gridItem]" v-auto-animate>
         <div
           :class="[$style.listBox]"
-          v-for="(typedQuote, index) in store.typedQuote"
+          v-for="(typedQuote, index) in $indexStore.typing().typedSentenceList"
           :key="'quote_' + index"
-          @click="switchtargetSentence(typedQuote.quote, typedQuote.person)"
+          @click="switchtargetSentence(targetSentence, targetSource)"
           @mouseenter="setHoverIndex(index)"
           @mouseleave="setHoverIndex(null)"
         >
@@ -37,12 +37,12 @@
       <div :class="[$style.keyThemeName, $style.gridItem]">
         {{ getKeyThemeName() }}
       </div>
-      <div :class="[$style.quoteType, $style.gridItem]" v-auto-animate>
+      <div :class="[$style.sentenceType, $style.gridItem]" v-auto-animate>
         <div
-          :class="[$style.quoteTypeBtn, getActiveClass(btn)]"
-          v-for="btn in toggleQuoteTypeBtn"
+          :class="[$style.sentenceTypeBtn, getActiveClass(btn)]"
+          v-for="btn in toggleSentenceTypeBtn"
           :key="btn"
-          @click="toggleQuoteType(btn)"
+          @click="toggleSentenceType(btn)"
         >
           {{ btn }}
         </div>
@@ -123,35 +123,31 @@
 
 <script setup lang="ts">
 import { disassemble } from "hangul-js"
-import {
-  TypoStatus,
-  Language,
-  Direction,
-  QuoteType,
-  type TypingInfo,
-  type Sentence,
-} from "~/structure/sentence"
-import { ThemeColor } from "~/structure/theme"
+
+import { ThemeColor } from "~/types/theme"
 
 import { vAutoAnimate } from "@formkit/auto-animate"
-import { useTypedQuote } from "~/store/typedQuote"
 import axios from "axios"
+import {
+  TypoStatus,
+  type Sentence,
+  type TypingInfo,
+  Direction,
+} from "~/types/sentence"
+
+const { $indexStore } = useNuxtApp()
 
 const $style = useCssModule()
-const store = useTypedQuote()
 const colorMode = useColorMode()
 
 const targetSource: Ref<string> = ref("")
 const targetSentence: Ref<string> = ref("")
 const nextSource: Ref<string> = ref("")
 const nextSentence: Ref<string> = ref("")
-const targetLanguage: Ref<Language> = ref(Language.Korean)
-const toggleLangBtn: Ref<Language[]> = ref([Language.Korean, Language.English])
-const targetQuoteType: Ref<QuoteType> = ref(QuoteType.LifeQuote)
-const toggleQuoteTypeBtn: Ref<QuoteType[]> = ref([
-  QuoteType.LifeQuote,
-  QuoteType.Pangram,
-])
+const targetLanguage: Ref<string> = ref("kr")
+const toggleLangBtn: Ref<string[]> = ref(["kr", "en"])
+const targetSentenceType: Ref<string> = ref("quote")
+const toggleSentenceTypeBtn: Ref<string[]> = ref(["string", "pangram"])
 
 const splitedtargetSentence: Ref<string[]> = ref([])
 
@@ -189,7 +185,7 @@ const ElapsedTimeArray: Ref<number[]> = ref([])
 
 const typingInfo: TypingInfo = reactive({
   targetLanguage: targetLanguage,
-  targetQuoteType: targetQuoteType,
+  targetSentenceType: targetSentenceType,
   avgWpm: avgWpm,
   avgCpm: avgCpm,
   maxWpm: maxWpm,
@@ -243,7 +239,6 @@ const readySentence = async (): Promise<void> => {
 
   if (oneCycleSentence.value) {
     const shiftedSentence: Sentence | undefined = oneCycleSentence.value.shift()
-
     const secondSentence =
       oneCycleSentence.value.length > 0 ? oneCycleSentence.value[0] : null
 
@@ -508,7 +503,7 @@ const endTyping = () => {
   stopTypingSpeedCalc()
 
   typingCount.value++
-  store.addList(targetSentence.value, targetSource.value)
+  $indexStore.typing().setTypedList(targetSentence.value)
   pushCalculatedArray()
 
   const date = new Date()
@@ -573,12 +568,12 @@ const calcTypingSpeed = (takenTime: number) => {
     totalWords === "" ? 0 : totalWords.split(" ").length
 
   switch (targetLanguage.value) {
-    case Language.English: {
+    case "en": {
       wpm.value = calcSpeed(splitByWords, takenTime)
       cpm.value = calcSpeed(totalWords.length, takenTime)
     }
 
-    case Language.Korean: {
+    case "kr": {
       const disassembleText: string[] = disassemble(parsingText.value)
 
       wpm.value = calcSpeed(splitByWords, takenTime)
@@ -604,11 +599,11 @@ const toggleOption = async (
   }
 }
 
-const toggleLanguage = (lang: Language) =>
+const toggleLanguage = (lang: string) =>
   toggleOption(targetLanguage, toggleLangBtn, lang)
 
-const toggleQuoteType = (type: QuoteType) =>
-  toggleOption(targetQuoteType, toggleQuoteTypeBtn, type)
+const toggleSentenceType = (type: string) =>
+  toggleOption(targetSentenceType, toggleSentenceTypeBtn, type)
 
 const getRandomSentence = async (): Promise<Sentence[] | undefined> => {
   try {
@@ -639,8 +634,8 @@ const getElapsedTime = (): string => {
   return `${min}분 ${sec}초`
 }
 
-const getActiveClass = (lang: Language | QuoteType): string => {
-  if (lang === targetLanguage.value || lang === targetQuoteType.value) {
+const getActiveClass = (lang: string): string => {
+  if (lang === targetLanguage.value || lang === targetSentenceType.value) {
     return $style.active
   } else {
     return ""
@@ -930,13 +925,13 @@ const getKeyThemeName = () => {
       line-height: 100%;
     }
 
-    > .quoteType {
+    > .sentenceType {
       grid-area: q;
       display: flex;
       flex-direction: column;
       justify-content: space-evenly;
 
-      > .quoteTypeBtn {
+      > .sentenceTypeBtn {
         width: 80px;
         height: 40px;
 
