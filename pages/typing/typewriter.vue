@@ -4,16 +4,17 @@
       <div :class="[$style.typedText, $style.gridItem]" v-auto-animate>
         <div
           :class="[$style.listBox]"
-          v-for="(typedQuote, index) in $indexStore.typing().typedSentenceList"
+          v-for="(typedSentence, index) in $indexStore.typing()
+            .typedSentenceList"
           :key="'quote_' + index"
-          @click="switchtargetSentence(targetSentence, targetSource)"
+          @click="switchtargetSentence(targetSentence)"
           @mouseenter="setHoverIndex(index)"
           @mouseleave="setHoverIndex(null)"
         >
-          <div :class="$style.list">{{ typedQuote.quote }}</div>
+          <div :class="$style.list">{{ typedSentence.content }}</div>
           <teleport to="#targetSentence">
             <div :class="$style.hoverQuote" v-if="isHovered(index)">
-              {{ typedQuote.quote }}
+              {{ typedSentence.content }}
             </div>
           </teleport>
         </div>
@@ -78,7 +79,7 @@
         {{ getElapsedTime() }}
       </div>
       <div :class="[$style.person, $style.gridItem]">
-        {{ targetSource }}
+        {{ targetSentence.source }}
       </div>
       <div :class="[$style.textArea, $style.gridItem]">
         <div :class="$style.targetSentence" id="targetSentence">
@@ -109,7 +110,7 @@
             @paste="preventPaste"
           />
         </div>
-        <div :class="$style.nextSentence">{{ nextSentence }}</div>
+        <div :class="$style.nextSentence">{{ nextSentence.content }}</div>
       </div>
     </div>
     <ResultWindow
@@ -140,10 +141,20 @@ const { $indexStore } = useNuxtApp()
 const $style = useCssModule()
 const colorMode = useColorMode()
 
-const targetSource: Ref<string> = ref("")
-const targetSentence: Ref<string> = ref("")
-const nextSource: Ref<string> = ref("")
-const nextSentence: Ref<string> = ref("")
+// const targetSource: Ref<string> = ref("")
+// const targetSentence: Ref<string> = ref("")
+const targetSentence: Ref<Sentence> = ref({
+  id: 0,
+  content: "",
+  source: "",
+})
+const nextSentence: Ref<Sentence> = ref({
+  id: 0,
+  content: "",
+  source: "",
+})
+// const nextSource: Ref<string> = ref("")
+// const nextSentence: Ref<string> = ref("")
 const targetLanguage: Ref<string> = ref("kr")
 const toggleLangBtn: Ref<string[]> = ref(["kr", "en"])
 const targetSentenceType: Ref<string> = ref("quote")
@@ -243,16 +254,13 @@ const readySentence = async (): Promise<void> => {
       oneCycleSentence.value.length > 0 ? oneCycleSentence.value[0] : null
 
     if (shiftedSentence) {
-      targetSentence.value = shiftedSentence.content
-      targetSource.value = shiftedSentence.source
+      targetSentence.value = shiftedSentence
     }
 
     if (secondSentence) {
-      nextSentence.value = secondSentence.content
-      nextSource.value = secondSentence.source
+      nextSentence.value = secondSentence
     } else {
-      nextSentence.value = ""
-      nextSource.value = ""
+      nextSentence.value = { id: 0, content: "", source: "" }
     }
 
     splitText()
@@ -316,7 +324,8 @@ const startTyping = (text: string) => {
 
 // 오타 확인을 위해 문장 글자단위로 분해
 const splitText = () => {
-  splitedtargetSentence.value = targetSentence.value.split("")
+  splitedtargetSentence.value = targetSentence.value.content.split("")
+  console.log(splitedtargetSentence.value)
 }
 
 const updateTypoStatus = () => {
@@ -374,7 +383,7 @@ const checkTypo = () => {
       typoStatus.value[i] = TypoStatus.NotInput
     }
 
-    if (targetSentence.value[i] === splitedParsingText[i]) {
+    if (targetSentence.value.content[i] === splitedParsingText[i]) {
       typoStatus.value[i] = TypoStatus.Correct //한박자 늦게 따라오는 오타 체크 배열 - 조합문자 이슈
     } else {
       typoStatus.value[i] = TypoStatus.Error
@@ -442,7 +451,7 @@ const calcAccuracy = () => {
 const calcProgress = () => {
   progress.value = getPercentage(
     parsingText.value.split("").length,
-    targetSentence.value.split("").length,
+    targetSentence.value.content.split("").length,
   )
 }
 
@@ -655,9 +664,8 @@ const toggleShow = () => {
   showResult.value = !showResult.value
 }
 
-const switchtargetSentence = (quote: string, person: string) => {
-  targetSentence.value = quote
-  targetSource.value = person
+const switchtargetSentence = (switchedTargetSentence: Sentence) => {
+  targetSentence.value = switchedTargetSentence
 
   splitText()
   updateTypoStatus()
