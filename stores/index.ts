@@ -1,4 +1,3 @@
-import { defineStore } from "pinia"
 import { useTypingStore } from "./typing"
 
 export const useIndexStore = defineStore("index", () => {
@@ -6,7 +5,12 @@ export const useIndexStore = defineStore("index", () => {
     return useTypingStore()
   }
 
+  const language = () => {
+    return useLanguageStore()
+  }
+
   return {
     typing,
+    language,
   }
 })

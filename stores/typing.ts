@@ -1,4 +1,3 @@
-import { defineStore } from "pinia"
 import { type Sentence, type TypingInfo } from "~/types/sentence"
 
 export const useTypingStore = defineStore("typing", () => {
@@ -21,6 +20,7 @@ export const useTypingStore = defineStore("typing", () => {
   // Actions
   const setTypedList = (typedSentence: Sentence) => {
     typedSentenceList.value.push(typedSentence)
+    console.log(typedSentenceList.value)
   }
 
   return {

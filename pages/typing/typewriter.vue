@@ -1,5 +1,8 @@
 <template>
   <div :class="$style.index">
+    <div @click="openSidebar" :class="$style.setting">
+      <el-icon><Setting /></el-icon>&nbsp;Setting
+    </div>
     <div :class="$style.typing">
       <div :class="[$style.typedText, $style.gridItem]" v-auto-animate>
         <div
@@ -12,22 +15,10 @@
           @mouseleave="setHoverIndex(null)"
         >
           <div :class="$style.list">{{ typedSentence.content }}</div>
-          <teleport to="#targetSentence">
-            <div :class="$style.hoverQuote" v-if="isHovered(index)">
-              {{ typedSentence.content }}
-            </div>
-          </teleport>
         </div>
       </div>
       <div :class="[$style.language, $style.gridItem]" v-auto-animate>
-        <div
-          :class="[$style.langBtn, getActiveClass(btn)]"
-          v-for="btn in toggleLangBtn"
-          :key="btn"
-          @click="toggleLanguage(btn)"
-        >
-          <div>{{ btn }}</div>
-        </div>
+        {{ targetSentence.language === "kr" ? "Korean" : "English" }}
       </div>
       <div :class="[$style.screenMode, $style.gridItem]">
         <ColorModePicker />
@@ -39,14 +30,7 @@
         {{ getKeyThemeName() }}
       </div>
       <div :class="[$style.sentenceType, $style.gridItem]" v-auto-animate>
-        <div
-          :class="[$style.sentenceTypeBtn, getActiveClass(btn)]"
-          v-for="btn in toggleSentenceTypeBtn"
-          :key="btn"
-          @click="toggleSentenceType(btn)"
-        >
-          {{ btn }}
-        </div>
+        {{ targetSentence.type }}
       </div>
       <div :class="[$style.wpm, $style.gridItem]">WPM: {{ wpm }}</div>
       <div :class="[$style.cpm, $style.gridItem]">CPM: {{ cpm }}</div>
@@ -82,7 +66,7 @@
         {{ targetSentence.source }}
       </div>
       <div :class="[$style.textArea, $style.gridItem]">
-        <div :class="$style.targetSentence" id="targetSentence">
+        <div :class="$style.targetSentence">
           <div :class="$style.text">
             <div
               v-for="(char, index) in splitedtargetSentence"
@@ -120,6 +104,10 @@
       @closeResult="finishCycle"
     />
   </div>
+  <div>
+    <el-button @click="openSidebar">사이드바</el-button>
+  </div>
+  <Sidebar ref="sidebar" />
 </template>
 
 <script setup lang="ts">
@@ -128,36 +116,45 @@ import { disassemble } from "hangul-js"
 import { ThemeColor } from "~/types/theme"
 
 import { vAutoAnimate } from "@formkit/auto-animate"
-import axios from "axios"
 import {
   TypoStatus,
   type Sentence,
   type TypingInfo,
   Direction,
+  type Language,
 } from "~/types/sentence"
+import { $apiGet } from "~/services/api"
+import Sidebar from "~/components/Sidebar.vue"
 
 const { $indexStore } = useNuxtApp()
 
 const $style = useCssModule()
 const colorMode = useColorMode()
 
-// const targetSource: Ref<string> = ref("")
-// const targetSentence: Ref<string> = ref("")
+const sidebar: Ref<InstanceType<typeof Sidebar> | null> = ref(null)
+
+const openSidebar = () => {
+  sidebar.value?.openSidebar()
+}
+
 const targetSentence: Ref<Sentence> = ref({
   id: 0,
   content: "",
   source: "",
+  language: "",
+  type: "",
 })
 const nextSentence: Ref<Sentence> = ref({
   id: 0,
   content: "",
   source: "",
+  language: "",
+  type: "",
 })
-// const nextSource: Ref<string> = ref("")
-// const nextSentence: Ref<string> = ref("")
-const targetLanguage: Ref<string> = ref("kr")
-const toggleLangBtn: Ref<string[]> = ref(["kr", "en"])
-const targetSentenceType: Ref<string> = ref("quote")
+
+const currentLanguage: Ref<string> = ref("")
+const toggleLangBtn: Ref<Language[]> = ref([])
+const targetSentenceType: Ref<string> = ref("")
 const toggleSentenceTypeBtn: Ref<string[]> = ref(["string", "pangram"])
 
 const splitedtargetSentence: Ref<string[]> = ref([])
@@ -195,7 +192,7 @@ const progressArray: Ref<number[]> = ref([])
 const ElapsedTimeArray: Ref<number[]> = ref([])
 
 const typingInfo: TypingInfo = reactive({
-  targetLanguage: targetLanguage,
+  targetLanguage: "",
   targetSentenceType: targetSentenceType,
   avgWpm: avgWpm,
   avgCpm: avgCpm,
@@ -236,7 +233,10 @@ const oneCycleSentence: Ref<Sentence[] | undefined> = ref(undefined)
 
 onMounted(async () => {
   if (process.server) return
+  $indexStore.language().getLanguages
+
   readySentence()
+  currentLanguage.value = targetSentence.value.language
 })
 
 onBeforeUnmount(() => {
@@ -260,7 +260,13 @@ const readySentence = async (): Promise<void> => {
     if (secondSentence) {
       nextSentence.value = secondSentence
     } else {
-      nextSentence.value = { id: 0, content: "", source: "" }
+      nextSentence.value = {
+        id: 0,
+        content: "",
+        source: "",
+        language: "",
+        type: "",
+      }
     }
 
     splitText()
@@ -325,7 +331,6 @@ const startTyping = (text: string) => {
 // 오타 확인을 위해 문장 글자단위로 분해
 const splitText = () => {
   splitedtargetSentence.value = targetSentence.value.content.split("")
-  console.log(splitedtargetSentence.value)
 }
 
 const updateTypoStatus = () => {
@@ -576,7 +581,7 @@ const calcTypingSpeed = (takenTime: number) => {
   const splitByWords: number =
     totalWords === "" ? 0 : totalWords.split(" ").length
 
-  switch (targetLanguage.value) {
+  switch (targetSentence.value.language) {
     case "en": {
       wpm.value = calcSpeed(splitByWords, takenTime)
       cpm.value = calcSpeed(totalWords.length, takenTime)
@@ -592,13 +597,13 @@ const calcTypingSpeed = (takenTime: number) => {
 }
 
 const toggleOption = async (
-  current: Ref<any>,
+  current: string,
   toggleList: Ref<any[]>,
   option: any,
 ) => {
-  if (option !== current.value) {
+  if (option !== current) {
     toggleList.value.reverse()
-    current.value = option
+    current = option
 
     oneCycleSentence.value = undefined
     readySentence()
@@ -608,27 +613,22 @@ const toggleOption = async (
   }
 }
 
-const toggleLanguage = (lang: string) =>
-  toggleOption(targetLanguage, toggleLangBtn, lang)
+const toggleLanguage = (language: string) =>
+  toggleOption(targetSentence.value.language, toggleLangBtn, language)
 
 const toggleSentenceType = (type: string) =>
-  toggleOption(targetSentenceType, toggleSentenceTypeBtn, type)
+  toggleOption(targetSentence.value.type, toggleSentenceTypeBtn, type)
 
 const getRandomSentence = async (): Promise<Sentence[] | undefined> => {
   try {
-    const result = await axios.get(
-      "http://localhost:8001/api/typing/sentence",
-      {
-        params: {
-          oneCycle: oneCycle,
-        },
-      },
-    )
-    console.log("Success:", result.data.data)
+    const result = await $apiGet<Sentence[]>("/typing/sentence", {
+      oneCycle: oneCycle,
+    })
 
-    return result.data.data
+    return result
   } catch (error: any) {
     console.error("Error:", error.message)
+    return undefined
   }
 }
 
@@ -644,7 +644,10 @@ const getElapsedTime = (): string => {
 }
 
 const getActiveClass = (lang: string): string => {
-  if (lang === targetLanguage.value || lang === targetSentenceType.value) {
+  if (
+    lang === targetSentence.value.language ||
+    lang === targetSentence.value.type
+  ) {
     return $style.active
   } else {
     return ""
@@ -750,7 +753,7 @@ const getKeyThemeName = () => {
 }
 
 .index {
-  width: 100%;
+  width: 1340px;
   min-height: 100dvh;
 
   display: flex;
@@ -758,7 +761,25 @@ const getKeyThemeName = () => {
   align-items: center;
   justify-content: center;
 
+  margin-inline: auto;
+
   transition: all 0.5s;
+
+  > .setting {
+    height: auto;
+
+    display: flex;
+    align-items: center;
+
+    font-size: 20px;
+
+    margin-left: auto;
+    margin-bottom: 12px;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
 
   > .typing {
     width: 1300px;
@@ -769,8 +790,8 @@ const getKeyThemeName = () => {
     grid-template-areas:
       "i i i n nl a m b b b"
       "i i i w c p m b b b"
-      "i i i kt kt q l b b b"
-      "i i i t t q l tn tn tn"
+      "i i i kt kt l l b b b"
+      "i i i t t q q tn tn tn"
       "x x x x x x x x x x"
       "x x x x x x x x x x"
       "x x x x x x x x x x"
@@ -865,13 +886,10 @@ const getKeyThemeName = () => {
       align-items: center;
 
       > .langBtn {
-        width: 80px;
-        height: 40px;
+        width: 100%;
+        height: 100%;
 
         position: relative;
-
-        text-align: center;
-        line-height: 40px;
 
         background-color: var(--bg-secondary);
 
@@ -890,12 +908,12 @@ const getKeyThemeName = () => {
           top: -3px;
         }
 
-        &:active {
-          width: 50px;
-          height: 25px;
-          font-size: 9px;
-          line-height: 25px;
-        }
+        // &:active {
+        //   width: 50px;
+        //   height: 25px;
+        //   font-size: 9px;
+        //   line-height: 25px;
+        // }
       }
 
       > .active {
@@ -1145,7 +1163,7 @@ const getKeyThemeName = () => {
 
           &:focus {
             border-bottom-color: var(--color-primary);
-            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.08);
+            box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.08);
           }
         }
       }

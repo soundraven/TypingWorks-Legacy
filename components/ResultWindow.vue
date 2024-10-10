@@ -27,8 +27,8 @@
         {{ props.typingInfo.avgProgress }} %
       </div>
       <div :class="$style.explanation" @click="closeResult">
-        Press&nbsp;<span>Enter</span>&nbsp;or&nbsp;<span>Esc</span>&nbsp;or&nbsp;<span>Click</span>&nbsp;
-        this letters
+        Press&nbsp;<span>Enter</span>&nbsp;or&nbsp;<span>Esc</span>&nbsp;or&nbsp;<span>Click</span>&nbsp;this
+        letters
       </div>
     </div>
   </div>

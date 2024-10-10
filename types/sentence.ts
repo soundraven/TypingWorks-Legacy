@@ -26,4 +26,12 @@ export interface Sentence {
   id: number
   content: string
   source: string
+  language: "kr" | "en" | ""
+  type: "quote" | "pangram" | ""
+}
+
+export interface Language {
+  id: number
+  name: string
+  code: string
 }
