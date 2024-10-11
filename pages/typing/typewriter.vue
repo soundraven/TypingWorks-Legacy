@@ -104,7 +104,7 @@
   <Sidebar
     ref="sidebar"
     v-model:selectedLanguage="targetLanguage"
-    v-model:selectedType="targetSentenceType"
+    v-model:selectedSentenceType="targetSentenceType"
     @triggerReadySentence="readySentence"
   />
 </template>
@@ -226,7 +226,7 @@ const oneCycleSentence: Ref<Sentence[] | undefined> = ref(undefined)
 
 onMounted(async () => {
   if (process.server) return
-  $indexStore.sentenceInfo().getSentenceInfo
+  $indexStore.sentenceInfo().getSentenceInfo()
 
   await getSentence()
   targetLanguage.value = targetSentence.value.language
@@ -245,12 +245,9 @@ const readySentence = async (): Promise<void> => {
 const shiftSentence = () => {
   if (oneCycleSentence.value) {
     const shiftedSentence: Sentence | undefined = oneCycleSentence.value.shift()
-    console.log(oneCycleSentence.value)
     const secondSentence = oneCycleSentence.value
       ? oneCycleSentence.value[0]
       : null
-
-    console.log(secondSentence)
 
     if (shiftedSentence) {
       targetSentence.value = shiftedSentence
