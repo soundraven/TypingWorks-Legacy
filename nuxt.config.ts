@@ -10,6 +10,10 @@ export default defineNuxtConfig({
     },
   },
 
+  build: {
+    transpile: ["@popperjs/core"],
+  },
+
   // serverMiddleware: [{ path: "/api", handler: "~/api/index.js" }],
   nitro: {
     compressPublicAssets: true, // 빌드시 정적파일을 압축하여 파일의 크기를 줄여서, 페이지 로딩 개선
