@@ -4,25 +4,25 @@
     <div :class="$style.settingContainer">
       <div :class="$style.menuText">Language</div>
       <div :class="$style.radioGroup">
-        <el-radio-group v-model="internalSelectedLanguage" size="large">
+        <el-radio-group v-model="selectLanguage" size="large">
           <el-radio-button
-            v-for="language in $indexStore.sentenceInfo().languages"
-            :key="language.code"
-            :label="language.code"
+            v-for="languageName in LanguageNameGroup"
+            :key="languageName"
+            :label="languageName"
           >
-            {{ language.name }}
+            {{ languageName }}
           </el-radio-button>
         </el-radio-group>
       </div>
       <div :class="$style.menuText">Type of Sentence</div>
       <div :class="$style.radioGroup">
-        <el-radio-group v-model="internalSelectedType" size="large">
+        <el-radio-group v-model="selectLanguage" size="large">
           <el-radio-button
-            v-for="type in $indexStore.sentenceInfo().types"
-            :key="type.code"
-            :label="type.code"
+            v-for="languageName in LanguageNameGroup"
+            :key="languageName"
+            :label="languageName"
           >
-            {{ type.name }}
+            {{ languageName }}
           </el-radio-button>
         </el-radio-group>
       </div>
@@ -44,53 +44,17 @@ const closeSidebar = () => {
   isOpen.value = false
 }
 
-const props = defineProps({
-  selectedLanguage: String,
-  selectedType: String,
-})
-
-const emit = defineEmits([
-  "update:selectedLanguage",
-  "update:selectedType",
-  "triggerReadySentence",
-])
-
 defineExpose({
   openSidebar,
   closeSidebar,
 })
 
-const internalSelectedLanguage = ref(props.selectedLanguage)
-const internalSelectedType = ref(props.selectedType)
+const selectLanguage: Ref<string> = ref("Korean")
+const LanguageNameGroup: Ref<string[]> = ref([])
 
-onMounted(async () => {})
-
-const handleLanguageChange = (newLanguage: string | undefined) => {
-  internalSelectedLanguage.value = newLanguage
-  emit("update:selectedLanguage", newLanguage)
-}
-const handleTypeChange = (newType: string | undefined) => {
-  internalSelectedType.value = newType
-  emit("update:selectedType", newType)
-}
-
-const triggerReadySentence = () => {
-  emit("triggerReadySentence")
-}
-
-watch(
-  () => internalSelectedLanguage.value,
-  (newVal) => {
-    handleLanguageChange(newVal), triggerReadySentence()
-  },
-)
-
-watch(
-  () => internalSelectedType.value,
-  (newVal) => {
-    handleTypeChange(newVal), triggerReadySentence()
-  },
-)
+onMounted(async () => {
+  LanguageNameGroup.value = $indexStore.sentenceInfo().languageNames
+})
 </script>
 
 <style lang="scss" module>
