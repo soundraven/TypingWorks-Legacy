@@ -152,7 +152,7 @@ const nextSentence: Ref<Sentence> = ref({
   type: "",
 })
 
-const currentLanguage: Ref<string> = ref("")
+const targetLanguage: Ref<string> = ref("kr")
 const toggleLangBtn: Ref<Language[]> = ref([])
 const targetSentenceType: Ref<string> = ref("")
 const toggleSentenceTypeBtn: Ref<string[]> = ref(["string", "pangram"])
@@ -236,7 +236,7 @@ onMounted(async () => {
   $indexStore.language().getLanguages
 
   readySentence()
-  currentLanguage.value = targetSentence.value.language
+  targetLanguage.value = targetSentence.value.language
 })
 
 onBeforeUnmount(() => {
@@ -245,7 +245,7 @@ onBeforeUnmount(() => {
 
 const readySentence = async (): Promise<void> => {
   if (oneCycleSentence.value === undefined) {
-    oneCycleSentence.value = await getRandomSentence()
+    oneCycleSentence.value = await getSentence()
   }
 
   if (oneCycleSentence.value) {
@@ -596,38 +596,17 @@ const calcTypingSpeed = (takenTime: number) => {
   }
 }
 
-const toggleOption = async (
-  current: string,
-  toggleList: Ref<any[]>,
-  option: any,
-) => {
-  if (option !== current) {
-    toggleList.value.reverse()
-    current = option
-
-    oneCycleSentence.value = undefined
-    readySentence()
-
-    splitText()
-    resetInfo()
-  }
-}
-
-const toggleLanguage = (language: string) =>
-  toggleOption(targetSentence.value.language, toggleLangBtn, language)
-
-const toggleSentenceType = (type: string) =>
-  toggleOption(targetSentence.value.type, toggleSentenceTypeBtn, type)
-
-const getRandomSentence = async (): Promise<Sentence[] | undefined> => {
+const getSentence = async (): Promise<Sentence[] | undefined> => {
   try {
     const result = await $apiGet<Sentence[]>("/typing/sentence", {
       oneCycle: oneCycle,
+      language: targetLanguage.value,
+      type: targetSentenceType.value,
     })
 
     return result
   } catch (error: any) {
-    console.error("Error:", error.message)
+    ElMessage({ message: `"Error:", ${error.message}`, type: "error" })
     return undefined
   }
 }

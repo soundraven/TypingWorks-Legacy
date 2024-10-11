@@ -35,3 +35,9 @@ export interface Language {
   name: string
   code: string
 }
+
+export interface Type {
+  id: number
+  name: string
+  code: string
+}

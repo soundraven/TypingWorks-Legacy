@@ -3,7 +3,7 @@
     <div :class="$style.header">Typing Setting</div>
     <div :class="$style.settingContainer">
       <div :class="$style.menuText">Language</div>
-      <div :class="$style.language">
+      <div :class="$style.radioGroup">
         <el-radio-group v-model="selectLanguage" size="large">
           <el-radio-button
             v-for="languageName in LanguageNameGroup"
@@ -14,12 +14,18 @@
           </el-radio-button>
         </el-radio-group>
       </div>
-      <div>설정들</div>
-      <div>설정들</div>
-      <div>설정들</div>
-      <div>설정들</div>
-      <div>설정들</div>
-      <div>설정들</div>
+      <div :class="$style.menuText">Type of Sentence</div>
+      <div :class="$style.radioGroup">
+        <el-radio-group v-model="selectLanguage" size="large">
+          <el-radio-button
+            v-for="languageName in LanguageNameGroup"
+            :key="languageName"
+            :label="languageName"
+          >
+            {{ languageName }}
+          </el-radio-button>
+        </el-radio-group>
+      </div>
     </div>
   </div>
   <div v-if="isOpen" :class="$style.overlay" @click="closeSidebar"></div>
@@ -89,13 +95,14 @@ onMounted(async () => {
       text-align: center;
       line-height: 20px;
 
-      margin-bottom: 12px;
+      margin-bottom: 24px;
     }
 
-    > .language {
+    > .radioGroup {
       width: 100%;
       display: flex;
       justify-content: center;
+      margin-bottom: 24px;
     }
   }
 }

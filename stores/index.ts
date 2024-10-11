@@ -6,7 +6,7 @@ export const useIndexStore = defineStore("index", () => {
   }
 
   const language = () => {
-    return useLanguageStore()
+    return useSentenceInfoStore()
   }
 
   return {
