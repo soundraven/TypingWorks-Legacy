@@ -5,12 +5,12 @@ export const useIndexStore = defineStore("index", () => {
     return useTypingStore()
   }
 
-  const language = () => {
+  const sentenceInfo = () => {
     return useSentenceInfoStore()
   }
 
   return {
     typing,
-    language,
+    sentenceInfo,
   }
 })

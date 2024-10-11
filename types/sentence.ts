@@ -41,3 +41,8 @@ export interface Type {
   name: string
   code: string
 }
+
+export interface SentenceInfo {
+  languageInfo: Language[]
+  typeInfo: Type[]
+}

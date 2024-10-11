@@ -233,7 +233,7 @@ const oneCycleSentence: Ref<Sentence[] | undefined> = ref(undefined)
 
 onMounted(async () => {
   if (process.server) return
-  $indexStore.language().getLanguages
+  $indexStore.sentenceInfo().getSentenceInfo
 
   readySentence()
   targetLanguage.value = targetSentence.value.language

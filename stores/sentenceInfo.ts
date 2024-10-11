@@ -1,44 +1,33 @@
 import { $apiGet } from "~/services/api"
-import type { Language, Type } from "~/types/sentence"
+import type { Language, SentenceInfo, Type } from "~/types/sentence"
 
 export const useSentenceInfoStore = defineStore("sentenceInfo", () => {
   const languages: Ref<Language[]> = ref([])
   const languageNames: Ref<string[]> = ref([])
-  const lnaguageCodes: Ref<string[]> = ref([])
+  const languageCodes: Ref<string[]> = ref([])
 
   const type: Ref<Type[]> = ref([])
   const typeNames: Ref<string[]> = ref([])
   const typeCodes: Ref<string[]> = ref([])
 
-  const getLanguages = async () => {
+  const getSentenceInfo = async () => {
     try {
-      const result = await $apiGet<Language[]>("/typing/language")
-      languages.value = result
-      languageNames.value = result.map((langauge) => langauge.name)
-      lnaguageCodes.value = result.map((language) => language.code)
-      console.log(languages.value)
-      console.log(languageNames.value)
-      console.log(lnaguageCodes.value)
-    } catch (error: any) {
-      ElMessage({
-        message: `"Failed to fetch languages:", ${error.message}`,
-        type: "error",
-      })
-    }
-  }
+      const sentenceInfo = await $apiGet<SentenceInfo>("/typing/language")
 
-  const getTypes = async () => {
-    try {
-      const result = await $apiGet<Type[]>("typing/type")
-      type.value = result
-      typeNames.value = result.map((type) => type.name)
-      typeCodes.value = result.map((type) => type.code)
-      console.log(type.value)
-      console.log(typeNames.value)
-      console.log(typeCodes.value)
+      languages.value = sentenceInfo.languageInfo
+      languageNames.value = sentenceInfo.languageInfo.map(
+        (language) => language.name,
+      )
+      languageCodes.value = sentenceInfo.languageInfo.map(
+        (language) => language.code,
+      )
+
+      type.value = sentenceInfo.typeInfo
+      typeNames.value = sentenceInfo.typeInfo.map((type) => type.name)
+      typeCodes.value = sentenceInfo.typeInfo.map((type) => type.code)
     } catch (error: any) {
       ElMessage({
-        message: `"Failed to fetch types:", ${error.message}`,
+        message: `"Failed to fetch sentence info:", ${error.message}`,
         type: "error",
       })
     }
@@ -47,9 +36,8 @@ export const useSentenceInfoStore = defineStore("sentenceInfo", () => {
   return {
     languages,
     languageNames,
-    getLanguages,
     type,
     typeNames,
-    getTypes,
+    getSentenceInfo,
   }
 })

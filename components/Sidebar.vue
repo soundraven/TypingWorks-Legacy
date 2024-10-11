@@ -53,8 +53,7 @@ const selectLanguage: Ref<string> = ref("Korean")
 const LanguageNameGroup: Ref<string[]> = ref([])
 
 onMounted(async () => {
-  $indexStore.language().getLanguages()
-  LanguageNameGroup.value = $indexStore.language().languageNames
+  LanguageNameGroup.value = $indexStore.sentenceInfo().languageNames
 })
 </script>
 
