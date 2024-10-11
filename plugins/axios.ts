@@ -3,7 +3,7 @@ import axios, { type AxiosInstance } from "axios"
 
 export default defineNuxtPlugin((nuxtApp) => {
   const api: AxiosInstance = axios.create({
-    baseURL: "http://localhost:8001/api",
+    baseURL: "process.env.API_URL",
     timeout: 5000,
     headers: {
       "Content-Type": "application/json",
