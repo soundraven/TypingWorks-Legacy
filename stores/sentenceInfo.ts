@@ -6,13 +6,13 @@ export const useSentenceInfoStore = defineStore("sentenceInfo", () => {
   const languageNames: Ref<string[]> = ref([])
   const languageCodes: Ref<string[]> = ref([])
 
-  const type: Ref<Type[]> = ref([])
+  const types: Ref<Type[]> = ref([])
   const typeNames: Ref<string[]> = ref([])
   const typeCodes: Ref<string[]> = ref([])
 
   const getSentenceInfo = async () => {
     try {
-      const sentenceInfo = await $apiGet<SentenceInfo>("/typing/language")
+      const sentenceInfo = await $apiGet<SentenceInfo>("/typing/sentenceInfo")
 
       languages.value = sentenceInfo.languageInfo
       languageNames.value = sentenceInfo.languageInfo.map(
@@ -22,7 +22,7 @@ export const useSentenceInfoStore = defineStore("sentenceInfo", () => {
         (language) => language.code,
       )
 
-      type.value = sentenceInfo.typeInfo
+      types.value = sentenceInfo.typeInfo
       typeNames.value = sentenceInfo.typeInfo.map((type) => type.name)
       typeCodes.value = sentenceInfo.typeInfo.map((type) => type.code)
     } catch (error: any) {
@@ -36,7 +36,7 @@ export const useSentenceInfoStore = defineStore("sentenceInfo", () => {
   return {
     languages,
     languageNames,
-    type,
+    types,
     typeNames,
     getSentenceInfo,
   }

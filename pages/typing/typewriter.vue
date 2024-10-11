@@ -47,13 +47,7 @@
         <div :class="$style.arrowBox" @click="editGoalCount(Direction.Reduce)">
           <Icon name="ic:baseline-arrow-circle-left" :class="$style.arrow" />
         </div>
-        <div
-          :class="[$style.arrowBox, $style.count]"
-          v-if="goalCount !== Infinity"
-        >
-          {{ goalCount }}회
-        </div>
-        <div :class="[$style.arrowBox, $style.infinity]" v-else>∞</div>
+        <div :class="[$style.arrowBox, $style.count]">{{ oneCycle }}회</div>
         <div :class="$style.arrowBox" @click="editGoalCount(Direction.Raise)">
           <Icon name="ic:baseline-arrow-circle-right" :class="$style.arrow" />
         </div>
@@ -107,21 +101,23 @@
   <div>
     <el-button @click="openSidebar">사이드바</el-button>
   </div>
-  <Sidebar ref="sidebar" />
+  <Sidebar
+    ref="sidebar"
+    v-model:selectedLanguage="targetLanguage"
+    v-model:selectedType="targetSentenceType"
+    @triggerReadySentence="readySentence"
+  />
 </template>
 
 <script setup lang="ts">
 import { disassemble } from "hangul-js"
-
 import { ThemeColor } from "~/types/theme"
-
 import { vAutoAnimate } from "@formkit/auto-animate"
 import {
   TypoStatus,
   type Sentence,
   type TypingInfo,
   Direction,
-  type Language,
 } from "~/types/sentence"
 import { $apiGet } from "~/services/api"
 import Sidebar from "~/components/Sidebar.vue"
@@ -152,18 +148,13 @@ const nextSentence: Ref<Sentence> = ref({
   type: "",
 })
 
-const targetLanguage: Ref<string> = ref("kr")
-const toggleLangBtn: Ref<Language[]> = ref([])
+const targetLanguage: Ref<string> = ref("")
 const targetSentenceType: Ref<string> = ref("")
-const toggleSentenceTypeBtn: Ref<string[]> = ref(["string", "pangram"])
 
 const splitedtargetSentence: Ref<string[]> = ref([])
 
 const typingCount: Ref<number> = ref(0)
-const goalCount: Ref<number> = ref(5)
-const oneCycle: number = 5
-const minCycle: number = 1
-const maxCycle: number = 15
+const oneCycle: Ref<number> = ref(5)
 
 // 유저가 타이핑한 문장
 const typedText: Ref<string> = ref("")
@@ -235,8 +226,9 @@ onMounted(async () => {
   if (process.server) return
   $indexStore.sentenceInfo().getSentenceInfo
 
-  readySentence()
+  await getSentence()
   targetLanguage.value = targetSentence.value.language
+  targetSentenceType.value = targetSentence.value.type
 })
 
 onBeforeUnmount(() => {
@@ -244,14 +236,19 @@ onBeforeUnmount(() => {
 })
 
 const readySentence = async (): Promise<void> => {
-  if (oneCycleSentence.value === undefined) {
-    oneCycleSentence.value = await getSentence()
-  }
+  oneCycleSentence.value = await getSentence()
+  shiftSentence()
+}
 
+const shiftSentence = () => {
   if (oneCycleSentence.value) {
     const shiftedSentence: Sentence | undefined = oneCycleSentence.value.shift()
-    const secondSentence =
-      oneCycleSentence.value.length > 0 ? oneCycleSentence.value[0] : null
+    console.log(oneCycleSentence.value)
+    const secondSentence = oneCycleSentence.value
+      ? oneCycleSentence.value[0]
+      : null
+
+    console.log(secondSentence)
 
     if (shiftedSentence) {
       targetSentence.value = shiftedSentence
@@ -275,26 +272,13 @@ const readySentence = async (): Promise<void> => {
 }
 
 const editGoalCount = (direction: Direction) => {
-  //한 사이클당 문장 몇 회 타이핑할지 선택
-  switch (direction) {
-    case Direction.Raise:
-      if (goalCount.value === maxCycle) {
-        goalCount.value = Infinity
-      } else if (goalCount.value === minCycle) {
-        goalCount.value = oneCycle
-      } else {
-        goalCount.value += oneCycle
-      }
-      break
-    case Direction.Reduce:
-      if (goalCount.value === Infinity) {
-        goalCount.value = maxCycle
-      } else if (goalCount.value > oneCycle) {
-        goalCount.value -= oneCycle
-      } else {
-        goalCount.value = minCycle
-      }
-      break
+  if (direction === "raise") {
+    ++oneCycle.value
+    readySentence()
+  } else {
+    if (oneCycle.value <= 1) return
+    --oneCycle.value
+    readySentence()
   }
 }
 
@@ -527,12 +511,12 @@ const endTyping = () => {
   calcTypingSpeed(totalTime.value)
   calcTypingInfo()
 
-  if (typingCount.value >= goalCount.value) {
+  if (typingCount.value >= oneCycle.value) {
     toggleShow()
     return
   }
 
-  readySentence()
+  shiftSentence()
   resetInfo()
 }
 
@@ -572,6 +556,7 @@ const finishCycle = () => {
   typingCount.value = 0
 
   toggleShow()
+  getSentence()
 }
 
 const calcTypingSpeed = (takenTime: number) => {
@@ -599,12 +584,13 @@ const calcTypingSpeed = (takenTime: number) => {
 const getSentence = async (): Promise<Sentence[] | undefined> => {
   try {
     const result = await $apiGet<Sentence[]>("/typing/sentence", {
-      oneCycle: oneCycle,
+      oneCycle: oneCycle.value,
       language: targetLanguage.value,
       type: targetSentenceType.value,
     })
 
-    return result
+    await (oneCycleSentence.value = result)
+    shiftSentence()
   } catch (error: any) {
     ElMessage({ message: `"Error:", ${error.message}`, type: "error" })
     return undefined
