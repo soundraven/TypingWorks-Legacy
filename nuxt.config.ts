@@ -2,6 +2,19 @@
 // https://nuxt.com/docs/getting-started/configuration#nuxt-configuration
 // import type { MyEnv } from "~/structure/env"
 export default defineNuxtConfig({
+  app: {
+    head: {
+      link: [
+        {
+          rel: "stylesheet",
+          as: "style",
+          crossorigin: "anonymous",
+          href: "https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css",
+        },
+      ],
+    },
+  },
+
   devtools: { enabled: true },
 
   build: {

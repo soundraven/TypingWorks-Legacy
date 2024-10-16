@@ -1,7 +1,12 @@
 <template>
   <div :class="$style.index">
     <div @click="openSidebar" :class="$style.setting">
-      <el-icon><Setting /></el-icon>&nbsp;Setting
+      <span>
+        <el-icon @click="openSidebar"><Setting /></el-icon>&nbsp;Setting
+      </span>
+      <span>
+        <el-icon @click="openSidebar"><Setting /></el-icon>&nbsp;Request
+      </span>
     </div>
     <div :class="$style.typing">
       <div :class="[$style.typedText, $style.gridItem]" v-auto-animate>
@@ -718,7 +723,7 @@ const getKeyThemeName = () => {
 
 .index {
   width: 1340px;
-  min-height: 100dvh;
+  height: 100dvh;
 
   display: flex;
   flex-direction: column;
@@ -730,15 +735,20 @@ const getKeyThemeName = () => {
   transition: all 0.5s;
 
   > .setting {
-    height: auto;
+    height: 24px;
 
     display: flex;
     align-items: center;
+    justify-content: center;
+    align-content: center;
 
-    font-size: 20px;
+    font-size: 18px;
+    text-align: center;
 
     margin-left: auto;
     margin-bottom: 12px;
+
+    gap: 12px;
 
     &:hover {
       cursor: pointer;
