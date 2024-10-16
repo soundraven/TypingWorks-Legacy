@@ -129,23 +129,13 @@
 <script lang="ts" setup>
 import type { FormInstance, FormRules } from "element-plus"
 import { $apiPost } from "~/services/api"
+import type { RuleForm } from "~/types/request"
 
 const { $indexStore } = useNuxtApp()
 
 onMounted(async () => {
   $indexStore.sentenceInfo().getSentenceInfo()
 })
-
-interface RuleForm {
-  name: string
-  language: string
-  sentenceType: string
-  otherSentenceType: boolean
-  comment?: string
-  source: string
-  sentence: string
-  explanation: string
-}
 
 const ruleFormRef = ref<FormInstance>()
 
