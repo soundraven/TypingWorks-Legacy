@@ -7,6 +7,7 @@ export const $apiPost = async <T>(
 
   try {
     const result = await $axios.post<T>(url, data, config)
+    console.log(result)
     return result.data
   } catch (error: any) {
     throw new Error(error.result?.data?.message || error.message)

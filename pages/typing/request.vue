@@ -128,6 +128,7 @@
 
 <script lang="ts" setup>
 import type { FormInstance, FormRules } from "element-plus"
+import { $apiPost } from "~/services/api"
 
 const { $indexStore } = useNuxtApp()
 
@@ -215,11 +216,16 @@ const rules = computed(
 
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  await formEl.validate((valid, fields) => {
+
+  await formEl.validate(async (valid, fields) => {
     if (valid) {
-      console.log("submit!")
+      const result = await $apiPost("/typing/request", {
+        form: ruleForm,
+      })
+
+      ElMessage({ message: "Successfully send your request", type: "success" })
     } else {
-      console.log("error submit!", fields)
+      ElMessage({ message: "Please input valid infomation", type: "error" })
     }
   })
 }

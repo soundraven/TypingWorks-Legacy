@@ -1,11 +1,11 @@
 <template>
   <div :class="$style.index">
-    <div @click="openSidebar" :class="$style.setting">
-      <span>
-        <el-icon @click="openSidebar"><Setting /></el-icon>&nbsp;Setting
+    <div :class="$style.setting">
+      <span @click="openSidebar">
+        <el-icon><Setting /></el-icon>&nbsp;Setting
       </span>
-      <span>
-        <el-icon @click="openSidebar"><Setting /></el-icon>&nbsp;Request
+      <span @click="navigateTo('/typing/request')">
+        <el-icon> <document-add /> </el-icon>&nbsp;Request
       </span>
     </div>
     <div :class="$style.typing">
