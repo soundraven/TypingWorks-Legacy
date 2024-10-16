@@ -4,6 +4,7 @@ import axios, { type AxiosInstance } from "axios"
 export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
   const apiUrl = config.public.API
+  console.log(apiUrl)
   const api: AxiosInstance = axios.create({
     baseURL: apiUrl,
     timeout: 5000,
