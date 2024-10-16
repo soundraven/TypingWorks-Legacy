@@ -219,11 +219,16 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      const result = await $apiPost("/typing/request", {
+      const result = await $apiPost<boolean>("/typing/request", {
         form: ruleForm,
       })
 
-      ElMessage({ message: "Successfully send your request", type: "success" })
+      if (result) {
+        ElMessage({
+          message: "Successfully send your request",
+          type: "success",
+        })
+      }
     } else {
       ElMessage({ message: "Please input valid infomation", type: "error" })
     }
