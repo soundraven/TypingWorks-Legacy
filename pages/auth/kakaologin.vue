@@ -16,8 +16,13 @@ onMounted(async () => {
         { code },
       )
       console.log("로그인 성공:", response.data)
+      console.log("유저정보:", response.data.data.user.properties.nickname)
       ElMessage({ message: "로그인 성공", type: "success" })
-      localStorage.setItem("accessToken", response.data.data)
+      localStorage.setItem("accessToken", response.data.data.accessToken)
+      sessionStorage.setItem(
+        "user",
+        response.data.data.user.properties.nickname,
+      )
     } catch (error) {
       ElMessage({ message: "로그인 실패", type: "error" })
     }
