@@ -77,13 +77,11 @@ onMounted(async () => {
 
 const kakaoLogin = () => {
   const config = useRuntimeConfig()
-  const clientId = config.public.KAKAO_REST_API_KEY // 카카오에서 발급받은 REST API 키
-  const redirectUri = config.public.REDIRECT_URI // 인증 후 리디렉션될 프론트엔드 URL
-  console.log(clientId, redirectUri)
+  const clientId = config.public.KAKAO_REST_API_KEY
+  const redirectUri = config.public.REDIRECT_URI
 
   const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`
 
-  // 카카오 인증 페이지로 이동
   window.location.href = kakaoAuthUrl
 }
 
@@ -116,6 +114,9 @@ watch(internalSelectedSentenceType, (newVal) => {
 .index {
   width: 300px;
   height: 100%;
+
+  display: flex;
+  flex-direction: column;
 
   background-color: var(--bg-secondary);
 
@@ -162,6 +163,9 @@ watch(internalSelectedSentenceType, (newVal) => {
 
   > .kakaoLoginBtn {
     cursor: pointer;
+    margin-top: auto;
+    margin-bottom: 12px;
+    margin-inline: 12px;
   }
 }
 
