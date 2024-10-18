@@ -79,6 +79,7 @@ const kakaoLogin = () => {
   const config = useRuntimeConfig()
   const clientId = config.public.KAKAO_REST_API_KEY // 카카오에서 발급받은 REST API 키
   const redirectUri = config.public.REDIRECT_URI // 인증 후 리디렉션될 프론트엔드 URL
+  console.log(clientId, redirectUri)
 
   const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`
 
