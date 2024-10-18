@@ -17,7 +17,6 @@ setTimeout(() => {
   loading.close()
 }, 1000)
 
-// 카카오 인증 코드 확인 후 백엔드에 액세스 토큰 요청
 onMounted(async () => {
   const code = route.query.code as string | undefined
   if (code) {
