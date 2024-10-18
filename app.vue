@@ -8,5 +8,7 @@
 
 <script setup lang="ts">
 const { $indexStore } = useNuxtApp()
-onMounted(() => {})
+onMounted(() => {
+  $indexStore.user().me()
+})
 </script>

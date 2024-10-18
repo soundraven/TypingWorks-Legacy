@@ -2,21 +2,21 @@ import Cookies from "js-cookie"
 import axios from "axios"
 
 export const useUserStore = defineStore("user", () => {
-  const user = {
+  const user = ref({
     id: 0,
     nickname: "",
     isAuthenticated: false,
-  }
+  })
 
   const login = (id: number, nickname: string) => {
-    user.id = id
-    user.nickname = nickname
-    user.isAuthenticated = true
+    user.value.id = id
+    user.value.nickname = nickname
+    user.value.isAuthenticated = true
   }
 
   const logout = () => {
-    user.nickname = ""
-    user.isAuthenticated = false
+    user.value.nickname = ""
+    user.value.isAuthenticated = false
   }
 
   const me = async () => {
@@ -25,7 +25,7 @@ export const useUserStore = defineStore("user", () => {
 
     if (accessToken) {
       try {
-        const user = await axios.post("/auth/me", {
+        const user = await axios.post("http://localhost:8001/api/auth/me", {
           accessToken: accessToken,
         })
 
@@ -39,9 +39,12 @@ export const useUserStore = defineStore("user", () => {
       }
     } else if (refreshToken) {
       try {
-        const getTokenResult = await axios.post("/auth/me", {
-          refreshToken: refreshToken,
-        })
+        const getTokenResult = await axios.post(
+          "http://localhost:8001/api/auth/me",
+          {
+            refreshToken: refreshToken,
+          },
+        )
 
         if (getTokenResult.data.data) {
           Cookies.set("accessToken", getTokenResult.data.data.accessToken, {
