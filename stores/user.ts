@@ -20,12 +20,15 @@ export const useUserStore = defineStore("user", () => {
   }
 
   const me = async () => {
+    const config = useRuntimeConfig()
+    const baseURL = config.public.API
+
     const accessToken = Cookies.get("accessToken")
     const refreshToken = Cookies.get("refreshToken")
 
     if (accessToken) {
       try {
-        const user = await axios.post("http://localhost:8001/api/auth/me", {
+        const user = await axios.post(`${baseURL}/auth/me`, {
           accessToken: accessToken,
         })
 
@@ -39,12 +42,9 @@ export const useUserStore = defineStore("user", () => {
       }
     } else if (refreshToken) {
       try {
-        const getTokenResult = await axios.post(
-          "http://localhost:8001/api/auth/me",
-          {
-            refreshToken: refreshToken,
-          },
-        )
+        const getTokenResult = await axios.post(`${baseURL}/auth/me`, {
+          refreshToken: refreshToken,
+        })
 
         if (getTokenResult.data.data) {
           Cookies.set("accessToken", getTokenResult.data.data.accessToken, {

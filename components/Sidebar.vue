@@ -27,9 +27,12 @@
         </el-radio-group>
       </div>
     </div>
-    <div style="background-color: red; cursor: pointer" @click="kakaoLogin">
-      kakao login test
-    </div>
+    <img
+      src="assets/images/kakao_login_medium_wide.png"
+      alt="kakaoLoginImage"
+      :class="$style.kakaoLoginBtn"
+      @click="kakaoLogin"
+    />
   </div>
   <div v-if="isOpen" :class="$style.overlay" @click="closeSidebar"></div>
 </template>
@@ -154,6 +157,10 @@ watch(internalSelectedSentenceType, (newVal) => {
       justify-content: center;
       margin-bottom: 24px;
     }
+  }
+
+  > .kakaoLoginBtn {
+    cursor: pointer;
   }
 }
 

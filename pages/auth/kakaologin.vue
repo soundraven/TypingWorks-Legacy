@@ -5,6 +5,8 @@ import Cookies from "js-cookie"
 
 const route = useRoute()
 const { $indexStore } = useNuxtApp()
+const config = useRuntimeConfig()
+const baseURL = config.public.API
 
 const loading = ElLoading.service({
   lock: true,
@@ -20,10 +22,7 @@ onMounted(async () => {
   const code = route.query.code as string | undefined
   if (code) {
     try {
-      const response = await axios.post(
-        "http://localhost:8001/api/auth/kakaoLogin",
-        { code },
-      )
+      const response = await axios.post(`${baseURL}/auth/kakaoLogin`, { code })
 
       ElMessage({ message: "로그인 성공", type: "success" })
 
@@ -34,7 +33,9 @@ onMounted(async () => {
         expires: 60,
       })
 
-      $indexStore.user().login(
+      $indexStore
+        .user()
+        .login(
           response.data.data.user.id,
           response.data.data.user.properties.nickname,
         )
