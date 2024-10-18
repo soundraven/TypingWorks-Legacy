@@ -34,7 +34,7 @@ export const useUserStore = defineStore("user", () => {
 
         if (user.data.data) {
           login(user.data.data.id, user.data.data.user.properties.nickname)
-          console.log("자동로그인성공")
+          console.log("액세스토큰으로자동로그인성공")
           return
         }
       } catch (error) {
@@ -54,7 +54,7 @@ export const useUserStore = defineStore("user", () => {
             getTokenResult.data.data.user.id,
             getTokenResult.data.data.user.properties.nickname,
           )
-          console.log("자동로그인성공")
+          console.log("액세스토큰생성자동로그인성공")
           return
         }
       } catch (error) {

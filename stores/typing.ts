@@ -20,7 +20,6 @@ export const useTypingStore = defineStore("typing", () => {
   // Actions
   const setTypedList = (typedSentence: Sentence) => {
     typedSentenceList.value.push(typedSentence)
-    console.log(typedSentenceList.value)
   }
 
   return {

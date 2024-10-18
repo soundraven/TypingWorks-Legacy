@@ -32,6 +32,8 @@ onMounted(async () => {
         expires: 60,
       })
 
+      console.log(response.data.data.user.properties.nickname)
+
       $indexStore
         .user()
         .login(

@@ -139,6 +139,7 @@ import { $apiGet } from "~/services/api"
 import Sidebar from "~/components/Sidebar.vue"
 import { calcSpeed, getPercentage } from "~/utils/number"
 import { ElMessage } from "element-plus"
+import Cookies from "js-cookie"
 
 const { $indexStore } = useNuxtApp()
 
@@ -242,6 +243,13 @@ const oneCycleSentence: Ref<Sentence[] | undefined> = ref(undefined)
 
 onMounted(async () => {
   if (process.server) return
+  const accessToken = Cookies.get("accessToken")
+  const refreshToken = Cookies.get("refreshToken")
+
+  if (accessToken || refreshToken) {
+    $indexStore.user().me()
+  }
+
   $indexStore.sentenceInfo().getSentenceInfo()
 
   await getSentence()
