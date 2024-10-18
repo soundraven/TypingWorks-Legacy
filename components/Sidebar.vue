@@ -32,6 +32,7 @@
       alt="kakaoLoginImage"
       :class="$style.kakaoLoginBtn"
       @click="kakaoLogin"
+      v-if="!$indexStore.user().user.isAuthenticated"
     />
   </div>
   <div v-if="isOpen" :class="$style.overlay" @click="closeSidebar"></div>

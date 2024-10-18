@@ -22,6 +22,7 @@ onMounted(async () => {
   if (code) {
     try {
       const response = await axios.post(`${baseURL}/auth/kakaoLogin`, { code })
+      console.log(response)
 
       ElMessage({ message: "로그인 성공", type: "success" })
 
@@ -31,8 +32,6 @@ onMounted(async () => {
       Cookies.set("refreshToken", response.data.data.refreshToken, {
         expires: 60,
       })
-
-      console.log(response.data.data.user.properties.nickname)
 
       $indexStore
         .user()

@@ -15,8 +15,11 @@ export const useUserStore = defineStore("user", () => {
   }
 
   const logout = () => {
+    user.value.id = 0
     user.value.nickname = ""
     user.value.isAuthenticated = false
+    Cookies.remove("accessToken")
+    Cookies.remove("refreshToken")
   }
 
   const me = async () => {
@@ -32,15 +35,8 @@ export const useUserStore = defineStore("user", () => {
           accessToken: accessToken,
         })
 
-        console.log(user)
-        console.log(user.data)
-        console.log(user.data.data.user)
-        console.log(user.data.data.user.properties)
-        console.log(user.data.data.user.properties.nickname)
-
         if (user.data.data) {
           login(user.data.data.id, user.data.data.user.properties.nickname)
-          console.log("액세스토큰으로자동로그인성공")
           return
         }
       } catch (error) {
@@ -60,7 +56,6 @@ export const useUserStore = defineStore("user", () => {
             getTokenResult.data.data.user.id,
             getTokenResult.data.data.user.properties.nickname,
           )
-          console.log("액세스토큰생성자동로그인성공")
           return
         }
       } catch (error) {
