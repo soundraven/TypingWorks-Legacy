@@ -21,7 +21,7 @@ onMounted(async () => {
   if (code) {
     try {
       const response = await axios.post(
-        "http://localhost:8001/api/auth/kakaoToken",
+        "http://localhost:8001/api/auth/kakaoLogin",
         { code },
       )
 
@@ -30,9 +30,11 @@ onMounted(async () => {
       Cookies.set("accessToken", response.data.data.accessToken, {
         expires: 0.25,
       })
-      $indexStore
-        .user()
-        .login(
+      Cookies.set("refreshToken", response.data.data.refreshToken, {
+        expires: 60,
+      })
+
+      $indexStore.user().login(
           response.data.data.user.id,
           response.data.data.user.properties.nickname,
         )
