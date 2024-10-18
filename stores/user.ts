@@ -32,6 +32,12 @@ export const useUserStore = defineStore("user", () => {
           accessToken: accessToken,
         })
 
+        console.log(user)
+        console.log(user.data)
+        console.log(user.data.data.user)
+        console.log(user.data.data.user.properties)
+        console.log(user.data.data.user.properties.nickname)
+
         if (user.data.data) {
           login(user.data.data.id, user.data.data.user.properties.nickname)
           console.log("액세스토큰으로자동로그인성공")
