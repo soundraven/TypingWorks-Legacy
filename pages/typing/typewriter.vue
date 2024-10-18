@@ -151,7 +151,7 @@ import {
   type Sentence,
   type TypingInfo,
   Direction,
-} from "~/types/sentence"
+} from "@/types/sentence"
 import { $apiGet } from "~/services/api"
 import Sidebar from "~/components/Sidebar.vue"
 import { calcSpeed, getPercentage } from "~/utils/number"
@@ -235,11 +235,11 @@ const showResult: Ref<boolean> = ref(false)
 
 const hoverIndex: Ref<number | null> = ref(null)
 
-const setHoverIndex = (index) => {
+const setHoverIndex = (index: number | null) => {
   hoverIndex.value = index
 }
 
-const isHovered = (index) => {
+const isHovered = (index: number) => {
   if (index !== null) {
     return hoverIndex.value === index
   }
@@ -332,7 +332,7 @@ const preventPaste = (e: ClipboardEvent) => {
   e.preventDefault()
 }
 
-const updateTypedText = (e) => {
+const updateTypedText = (e: any) => {
   typedText.value = (e.target as HTMLInputElement).value
 }
 
@@ -386,9 +386,9 @@ const refillTypoArrays = () => {
   parsingText.value = typedText.value
 
   for (let i = 0; i < parsingText.value.length; i++) {
-    if (typeof targetSentence.value[i] === "undefined") continue
+    if (typeof targetSentence.value.content[i] === "undefined") continue
 
-    if (targetSentence.value[i] === splitedParsingText[i]) {
+    if (targetSentence.value.content[i] === splitedParsingText[i]) {
       checkTypoArray.value[i] = TypoStatus.Correct
     } else {
       checkTypoArray.value[i] = TypoStatus.Error
@@ -420,8 +420,8 @@ const checkTypo = () => {
   }
 
   for (let i = 0; i < parsingText.value.length; i++) {
-    if (targetSentence.value[i] === undefined) continue
-    if (targetSentence.value[i] === splitedParsingText[i]) {
+    if (targetSentence.value.content[i] === undefined) continue
+    if (targetSentence.value.content[i] === splitedParsingText[i]) {
       checkTypoArray.value[i] = TypoStatus.Correct //입력받는대로 따라오는 오타 체크 배열
     } else {
       checkTypoArray.value[i] = TypoStatus.Error

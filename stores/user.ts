@@ -1,20 +1,21 @@
 import Cookies from "js-cookie"
 import axios from "axios"
+import type { User } from "~/types/user"
 
 export const useUserStore = defineStore("user", () => {
-  const user = ref({
+  const user: Ref<User> = ref({
     id: 0,
     nickname: "",
     isAuthenticated: false,
   })
 
-  const login = (id: number, nickname: string) => {
+  const login = (id: number, nickname: string): void => {
     user.value.id = id
     user.value.nickname = nickname
     user.value.isAuthenticated = true
   }
 
-  const logout = () => {
+  const logout = (): void => {
     user.value.id = 0
     user.value.nickname = ""
     user.value.isAuthenticated = false
@@ -22,7 +23,7 @@ export const useUserStore = defineStore("user", () => {
     Cookies.remove("refreshToken")
   }
 
-  const me = async () => {
+  const me = async (): Promise<void> => {
     const config = useRuntimeConfig()
     const baseURL = config.public.API
 

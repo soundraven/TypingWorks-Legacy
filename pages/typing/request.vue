@@ -115,7 +115,10 @@
             />
           </el-form-item>
           <div :class="$style.btn">
-            <el-button type="primary" @click="submitForm(ruleFormRef)">
+            <el-button
+              type="primary"
+              @click="submitForm(ruleFormRef, ruleForm)"
+            >
               Submit
             </el-button>
             <el-button @click="resetForm(ruleFormRef)">Reset</el-button>
@@ -128,8 +131,8 @@
 
 <script lang="ts" setup>
 import type { FormInstance, FormRules } from "element-plus"
-import { $apiPost } from "~/services/api"
 import type { RuleForm } from "~/types/request"
+import { submitForm } from "~/services/typing"
 
 const { $indexStore } = useNuxtApp()
 
@@ -203,27 +206,6 @@ const rules = computed(
     ],
   }),
 )
-
-const submitForm = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-
-  await formEl.validate(async (valid, fields) => {
-    if (valid) {
-      const result = await $apiPost<boolean>("/typing/request", {
-        form: ruleForm,
-      })
-
-      if (result) {
-        ElMessage({
-          message: "Successfully send your request",
-          type: "success",
-        })
-      }
-    } else {
-      ElMessage({ message: "Please input valid infomation", type: "error" })
-    }
-  })
-}
 
 const resetForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
