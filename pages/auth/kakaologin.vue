@@ -1,6 +1,7 @@
 <template></template>
 <script setup lang="ts">
 import axios from "axios"
+import Cookies from "js-cookie"
 
 const route = useRoute()
 const { $indexStore } = useNuxtApp()
@@ -23,21 +24,25 @@ onMounted(async () => {
         "http://localhost:8001/api/auth/kakaoToken",
         { code },
       )
-      console.log("로그인 성공:", response.data)
-      console.log("유저정보:", response.data.data.user.properties.nickname)
+
       ElMessage({ message: "로그인 성공", type: "success" })
-      localStorage.setItem("accessToken", response.data.data.accessToken)
-      sessionStorage.setItem(
-        "user",
-        response.data.data.user.properties.nickname,
-      )
-      $indexStore.user().login(response.data.data.user.properties.nickname)
-      navigateTo("/typing/typewriter")
+
+      Cookies.set("accessToken", response.data.data.accessToken, {
+        expires: 0.25,
+      })
+      $indexStore
+        .user()
+        .login(
+          response.data.data.user.id,
+          response.data.data.user.properties.nickname,
+        )
     } catch (error) {
       ElMessage({ message: "로그인 실패", type: "error" })
     }
   } else {
     ElMessage({ message: "인증 코드가 없습니다.", type: "error" })
   }
+
+  navigateTo("/typing/typewriter")
 })
 </script>

@@ -73,8 +73,9 @@ onMounted(async () => {
 })
 
 const kakaoLogin = () => {
-  const clientId = "ce7b69089aa5023470e6a5e5a89e5e48" // 카카오에서 발급받은 REST API 키
-  const redirectUri = "http://localhost:3000/auth/kakaologin" // 인증 후 리디렉션될 프론트엔드 URL
+  const config = useRuntimeConfig()
+  const clientId = config.public.KAKAO_REST_API_KEY // 카카오에서 발급받은 REST API 키
+  const redirectUri = config.public.REDIRECT_URI // 인증 후 리디렉션될 프론트엔드 URL
 
   const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`
 

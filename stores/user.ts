@@ -1,10 +1,12 @@
 export const useUserStore = defineStore("user", () => {
   const user = {
+    id: 0,
     nickname: "",
     isAuthenticated: false,
   }
 
-  const login = (nickname) => {
+  const login = (id: number, nickname: string) => {
+    user.id = id
     user.nickname = nickname
     user.isAuthenticated = true
   }
