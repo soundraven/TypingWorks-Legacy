@@ -27,6 +27,12 @@
         </el-radio-group>
       </div>
     </div>
+    <img
+      src="assets/images/kakao_login_medium_wide.png"
+      alt="kakaoLoginImage"
+      :class="$style.kakaoLoginBtn"
+      @click="kakaoLogin"
+    />
   </div>
   <div v-if="isOpen" :class="$style.overlay" @click="closeSidebar"></div>
 </template>
@@ -63,6 +69,23 @@ defineExpose({
   closeSidebar,
 })
 
+onMounted(async () => {
+  await $indexStore.sentenceInfo().getSentenceInfo()
+  internalSelectedLanguage.value = props.selectedLanguage || ""
+  internalSelectedSentenceType.value = props.selectedSentenceType || ""
+})
+
+const kakaoLogin = () => {
+  const config = useRuntimeConfig()
+  const clientId = config.public.KAKAO_REST_API_KEY // 카카오에서 발급받은 REST API 키
+  const redirectUri = config.public.REDIRECT_URI // 인증 후 리디렉션될 프론트엔드 URL
+
+  const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`
+
+  // 카카오 인증 페이지로 이동
+  window.location.href = kakaoAuthUrl
+}
+
 watch(
   () => props.selectedLanguage,
   (newVal) => {
@@ -85,12 +108,6 @@ watch(internalSelectedLanguage, (newVal) => {
 watch(internalSelectedSentenceType, (newVal) => {
   emit("update:selectedSentenceType", newVal)
   emit("triggerReadySentence")
-})
-
-onMounted(async () => {
-  await $indexStore.sentenceInfo().getSentenceInfo()
-  internalSelectedLanguage.value = props.selectedLanguage || ""
-  internalSelectedSentenceType.value = props.selectedSentenceType || ""
 })
 </script>
 
@@ -140,6 +157,10 @@ onMounted(async () => {
       justify-content: center;
       margin-bottom: 24px;
     }
+  }
+
+  > .kakaoLoginBtn {
+    cursor: pointer;
   }
 }
 

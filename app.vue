@@ -1,11 +1,14 @@
 <template>
-    <div>
-        <NuxtLayout>
-            <NuxtPage />
-        </NuxtLayout>
-    </div>
+  <div>
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </div>
 </template>
 
 <script setup lang="ts">
-onMounted(() => {})
+const { $indexStore } = useNuxtApp()
+onMounted(() => {
+  $indexStore.user().me()
+})
 </script>

@@ -1,12 +1,23 @@
 <template>
   <div :class="$style.index">
-    <div :class="$style.setting">
-      <span @click="openSidebar">
-        <el-icon><Setting /></el-icon>&nbsp;Setting
-      </span>
-      <span @click="navigateTo('/typing/request')">
-        <el-icon> <document-add /> </el-icon>&nbsp;Request
-      </span>
+    <div :class="$style.topMenu">
+      <div
+        v-if="$indexStore.user().user.isAuthenticated"
+        :class="$style.nickname"
+      >
+        <el-icon><user /></el-icon>{{ $indexStore.user().user.nickname }} 님
+      </div>
+      <div v-else :class="$style.nickname">
+        <el-icon><user /></el-icon>Guest
+      </div>
+      <div :class="$style.menuContainer">
+        <span @click="openSidebar" :class="$style.menu">
+          <el-icon><Setting /></el-icon>&nbsp;Setting
+        </span>
+        <span @click="navigateTo('/typing/request')" :class="$style.menu">
+          <el-icon> <document-add /> </el-icon>&nbsp;Request
+        </span>
+      </div>
     </div>
     <div :class="$style.typing">
       <div :class="[$style.typedText, $style.gridItem]" v-auto-animate>
@@ -734,24 +745,42 @@ const getKeyThemeName = () => {
 
   transition: all 0.5s;
 
-  > .setting {
+  > .topMenu {
+    width: 100%;
     height: 24px;
 
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     align-content: center;
 
     font-size: 18px;
     text-align: center;
 
-    margin-left: auto;
-    margin-bottom: 12px;
+    margin-bottom: 6px;
 
-    gap: 12px;
+    > .nickname {
+      display: flex;
+      align-items: center;
+      gap: 6px;
 
-    &:hover {
-      cursor: pointer;
+      &:hover {
+        cursor: pointer;
+      }
+    }
+
+    > .menuContainer {
+      display: flex;
+      gap: 6px;
+
+      &:hover {
+        cursor: pointer;
+      }
+
+      > .menu {
+        display: flex;
+        align-items: center;
+      }
     }
   }
 
@@ -777,7 +806,6 @@ const getKeyThemeName = () => {
     border-radius: 10px;
     box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
 
-    margin-inline: auto;
     padding: 20px;
 
     > .gridItem {

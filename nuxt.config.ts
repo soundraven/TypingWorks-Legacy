@@ -28,6 +28,8 @@ export default defineNuxtConfig({
     public: {
       API: process.env.API_URL,
       PUBLIC_PATH: "/_nuxt/",
+      KAKAO_REST_API_KEY: process.env.KAKAO_REST_API_KEY,
+      REDIRECT_URI: process.env.REDIRECT_URI,
     },
   },
 

@@ -9,7 +9,8 @@
       "@/*": ["./*"],
       "#app": ["./.nuxt/types/app"],
       "#imports": ["./.nuxt/imports"],
-      "#build": ["./.nuxt/types/build"]
+      "#build": ["./.nuxt/types/build"],
+      "typeRoots": ["./types", "node_modules/@types"]
     }
   }
 }

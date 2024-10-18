@@ -9,8 +9,13 @@ export const useIndexStore = defineStore("index", () => {
     return useSentenceInfoStore()
   }
 
+  const user = () => {
+    return useUserStore()
+  }
+
   return {
     typing,
     sentenceInfo,
+    user,
   }
 })
