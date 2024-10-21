@@ -8,3 +8,7 @@ export interface RuleForm {
   sentence: string
   explanation: string
 }
+
+export interface Success {
+  success: boolean
+}
