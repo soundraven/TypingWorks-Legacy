@@ -1,6 +1,7 @@
 import Cookies from "js-cookie"
-import axios from "axios"
 import type { User } from "~/types/user"
+import { $apiPost } from "~/services/api"
+import type { autoLoginResponse, refreshTokenResult } from "~/types/apiResponse"
 
 export const useUserStore = defineStore("user", () => {
   const user: Ref<User> = ref({
@@ -24,20 +25,19 @@ export const useUserStore = defineStore("user", () => {
   }
 
   const me = async (): Promise<void> => {
-    const config = useRuntimeConfig()
-    const baseURL = config.public.API
-
+    const { $indexStore } = useNuxtApp()
     const accessToken = Cookies.get("accessToken")
     const refreshToken = Cookies.get("refreshToken")
 
     if (accessToken) {
       try {
-        const user = await axios.post(`${baseURL}/auth/me`, {
+        const user = await $apiPost<autoLoginResponse>("/auth/me", {
           accessToken: accessToken,
         })
 
-        if (user.data.data) {
-          login(user.data.data.id, user.data.data.user.properties.nickname)
+        if (user) {
+          login(user.id, user.nickname)
+          console.log($indexStore.user().user)
           return
         }
       } catch (error) {
@@ -45,18 +45,19 @@ export const useUserStore = defineStore("user", () => {
       }
     } else if (refreshToken) {
       try {
-        const getTokenResult = await axios.post(`${baseURL}/auth/me`, {
-          refreshToken: refreshToken,
-        })
+        const refreshTokenResult = await $apiPost<refreshTokenResult>(
+          "/auth/me",
+          {
+            refreshToken: refreshToken,
+          },
+        )
 
-        if (getTokenResult.data.data) {
-          Cookies.set("accessToken", getTokenResult.data.data.accessToken, {
+        if (refreshTokenResult) {
+          Cookies.set("accessToken", refreshTokenResult.accessToken, {
             expires: 0.25,
           })
-          login(
-            getTokenResult.data.data.user.id,
-            getTokenResult.data.data.user.properties.nickname,
-          )
+
+          login(refreshTokenResult.user.id, refreshTokenResult.user.nickname)
           return
         }
       } catch (error) {
