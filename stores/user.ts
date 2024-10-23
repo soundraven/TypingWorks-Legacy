@@ -1,7 +1,10 @@
 import Cookies from "js-cookie"
 import type { User } from "~/types/user"
 import { $apiPost } from "~/services/api"
-import type { autoLoginResponse, refreshTokenResult } from "~/types/apiResponse"
+import type {
+  autoLoginResponse,
+  refreshTokenResponse,
+} from "~/types/apiResponse"
 
 export const useUserStore = defineStore("user", () => {
   const user: Ref<User> = ref({
@@ -45,19 +48,22 @@ export const useUserStore = defineStore("user", () => {
       }
     } else if (refreshToken) {
       try {
-        const refreshTokenResult = await $apiPost<refreshTokenResult>(
+        const refreshTokenResponse = await $apiPost<refreshTokenResponse>(
           "/auth/me",
           {
             refreshToken: refreshToken,
           },
         )
 
-        if (refreshTokenResult) {
-          Cookies.set("accessToken", refreshTokenResult.accessToken, {
+        if (refreshTokenResponse) {
+          Cookies.set("accessToken", refreshTokenResponse.accessToken, {
             expires: 0.25,
           })
 
-          login(refreshTokenResult.user.id, refreshTokenResult.user.nickname)
+          login(
+            refreshTokenResponse.user.id,
+            refreshTokenResponse.user.nickname,
+          )
           return
         }
       } catch (error) {

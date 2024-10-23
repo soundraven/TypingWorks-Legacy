@@ -9,9 +9,17 @@
 </template>
 
 <script lang="ts" setup>
+import { $apiGet } from "~/services/api"
+import type { RequestListResponse } from "~/types/apiResponse"
+import type { Request } from "~/types/sentence"
 const { $indexStore } = useNuxtApp()
 
-onMounted(async () => {})
+const requestList: Ref<Request[]> = ref([])
+
+onMounted(async () => {
+  const response = await $apiGet<RequestListResponse>("/auth/admin")
+  requestList.value = response.requestList
+})
 </script>
 
 <style lang="scss" module>
