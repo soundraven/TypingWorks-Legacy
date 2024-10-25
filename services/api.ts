@@ -27,6 +27,8 @@ export const $apiGet = async <T>(
       ...config,
     })
 
+    console.log("$apiGet결과", result)
+
     return result.data
   } catch (error: any) {
     throw new Error(error.response?.data?.message || error.message)

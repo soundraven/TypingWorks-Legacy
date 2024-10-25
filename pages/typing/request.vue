@@ -13,7 +13,7 @@
           >
             <el-form-item label="Contributor" prop="name" label-position="left">
               <el-input
-                v-model="ruleForm.name"
+                v-model="ruleForm.requester"
                 type="textarea"
                 resize="none"
                 :rows="1"
@@ -153,7 +153,7 @@ onMounted(async () => {
 const ruleFormRef = ref<FormInstance>()
 
 const ruleForm = reactive<RuleForm>({
-  name: "",
+  requester: "",
   language: "",
   sentenceType: "",
   otherSentenceType: false,
@@ -165,7 +165,7 @@ const ruleForm = reactive<RuleForm>({
 
 const rules = computed(
   (): FormRules<RuleForm> => ({
-    name: [
+    requester: [
       { required: true, message: "Please input your name", trigger: "blur" },
       { min: 2, max: 12, message: "Length should be 2 to 12", trigger: "blur" },
     ],
