@@ -2,7 +2,7 @@
   <div :class="$style.index">
     <div :class="$style.container">
       <ClientOnly>
-        <el-table :data="requestList" :highlight-current-row="true">
+        <el-table :data="paginatedRequestList" :highlight-current-row="true">
           <el-table-column type="expand">
             <template #default="props">
               <div style="margin: 12px">
@@ -55,30 +55,62 @@
             </template>
           </el-table-column>
           <el-table-column label="확인" align="center">
-            <div>
-              <el-button type="success" icon="Check" circle />
+            <template #default="props">
+              <el-button
+                type="success"
+                icon="Check"
+                circle
+                @click="confirm('accept', props.row.id)"
+              />
               <el-button type="danger" icon="Delete" circle />
-            </div>
+            </template>
           </el-table-column>
         </el-table>
+        <el-pagination
+          :current-page="currentPage"
+          :page-size="pageSize"
+          :total="requestList.length"
+          @current-change="handlePageChange"
+          layout="prev, pager, next"
+          :class="$style.pagination"
+        />
       </ClientOnly>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { $apiGet } from "~/services/api"
-import type { RequestListResponse } from "~/types/apiResponse"
+import { $apiGet, $apiPost } from "~/services/api"
+import type { ConfirmResponse, RequestListResponse } from "~/types/apiResponse"
 import type { Request } from "~/types/sentence"
 const { $indexStore } = useNuxtApp()
 
 const requestList: Ref<Request[]> = ref([])
+const currentPage: Ref<number> = ref(1)
+const pageSize: Ref<number> = ref(20)
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+}
+
+const paginatedRequestList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return requestList.value.slice(start, start + pageSize.value)
+})
 
 onMounted(async () => {
   const response = await $apiGet<RequestListResponse>("/auth/admin")
   console.log("API결과", response)
   requestList.value = response.requestList
 })
+
+type Status = "accept" | "reject"
+
+const confirm = async (status: Status, id: number) => {
+  const response = await $apiPost<ConfirmResponse>("/auth/confirm", {
+    requestId: id,
+  })
+}
 </script>
 
 <style lang="scss" module>
@@ -90,10 +122,11 @@ onMounted(async () => {
 
   > .container {
     width: 650px;
-    min-height: 100dvh;
 
     display: flex;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
 
     background-color: var(--bg-secondary);
 
@@ -102,6 +135,10 @@ onMounted(async () => {
 
     padding: 12px;
     margin-block: auto;
+
+    > .pagination {
+      margin-top: 12px;
+    }
   }
 }
 </style>

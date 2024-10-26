@@ -13,3 +13,7 @@ export interface refreshTokenResponse {
 export interface RequestListResponse {
   requestList: Request[]
 }
+
+export interface ConfirmResponse {
+  success: boolean
+}
