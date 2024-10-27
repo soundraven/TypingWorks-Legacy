@@ -2,7 +2,11 @@
   <div :class="$style.index">
     <div :class="$style.container">
       <ClientOnly>
-        <el-table :data="paginatedRequestList" :highlight-current-row="true">
+        <el-table
+          :data="paginatedRequestList"
+          :highlight-current-row="true"
+          :class="$style.table"
+        >
           <el-table-column type="expand">
             <template #default="props">
               <div style="margin: 12px">
@@ -25,7 +29,7 @@
                   설명: {{ props.row.explanation }}
                 </p>
                 <p
-                  v-if="props.row.other_type === 1"
+                  v-if="props.row.other_type === 'Y'"
                   style="margin-top: 0; margin-bottom: 6px"
                 >
                   신청한 유형: {{ props.row.comment }}
@@ -62,7 +66,12 @@
                 circle
                 @click="confirm('accept', props.row.id)"
               />
-              <el-button type="danger" icon="Delete" circle />
+              <el-button
+                type="danger"
+                icon="Delete"
+                circle
+                @click="confirm('reject', props.row.id)"
+              />
             </template>
           </el-table-column>
         </el-table>
@@ -108,8 +117,20 @@ type Status = "accept" | "reject"
 
 const confirm = async (status: Status, id: number) => {
   const response = await $apiPost<ConfirmResponse>("/auth/confirm", {
+    status: status,
     requestId: id,
   })
+
+  console.log(response)
+
+  if (response) {
+    requestList.value = requestList.value.filter((request) => request.id !== id)
+    console.log(requestList.value)
+    ElMessage({
+      message: `ID: ${id}, 성공적으로 처리되었습니다`,
+      type: "success",
+    })
+  }
 }
 </script>
 
@@ -118,6 +139,7 @@ const confirm = async (status: Status, id: number) => {
   min-height: 100dvh;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
   padding: 12px;
 
   > .container {
@@ -134,7 +156,10 @@ const confirm = async (status: Status, id: number) => {
     border-radius: 10px;
 
     padding: 12px;
-    margin-block: auto;
+
+    > .table {
+      border-radius: 10px;
+    }
 
     > .pagination {
       margin-top: 12px;

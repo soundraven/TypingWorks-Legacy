@@ -47,10 +47,14 @@
               />
             </el-form-item>
             <el-form-item label="Other type" label-position="left">
-              <el-switch v-model="ruleForm.otherSentenceType" />
+              <el-switch
+                v-model="ruleForm.otherSentenceType"
+                :active-value="'Y'"
+                :inactive-value="'N'"
+              />
             </el-form-item>
             <el-form-item
-              v-if="ruleForm.otherSentenceType"
+              v-if="ruleForm.otherSentenceType === 'Y'"
               label="comment"
               prop="comment"
               label-position="left"
@@ -156,7 +160,7 @@ const ruleForm = reactive<RuleForm>({
   requester: "",
   language: "",
   sentenceType: "",
-  otherSentenceType: false,
+  otherSentenceType: "N",
   comment: "",
   source: "",
   sentence: "",
