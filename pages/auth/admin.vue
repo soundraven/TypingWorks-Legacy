@@ -59,7 +59,7 @@
             </template>
           </el-table-column>
           <el-table-column label="확인" align="center">
-            <template #default="props">
+            <template #default="props" v-if="$indexStore.user().user.id === ">
               <el-button
                 type="success"
                 icon="Check"

@@ -19,10 +19,12 @@ export const useUserStore = defineStore("user", () => {
     user.value.isAuthenticated = true
   }
 
-  const logout = () => {
+  const logout = (): void => {
     user.value.id = 0
     user.value.nickname = ""
     user.value.isAuthenticated = false
+    Cookies.remove("accessToken")
+    Cookies.remove("refreshToken")
   }
 
   const me = async (): Promise<void> => {

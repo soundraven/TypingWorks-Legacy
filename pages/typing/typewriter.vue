@@ -5,9 +5,26 @@
         v-if="$indexStore.user().user.isAuthenticated"
         :class="$style.nickname"
       >
-        <el-icon><user /></el-icon>{{ $indexStore.user().user.nickname }} 님
+        <el-icon><user /></el-icon>
+        <el-dropdown>
+          <span :class="$style.loginUserName">
+            {{ $indexStore.user().user.nickname }} 님
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                @click="ElMessage({ message: '구현 준비중 입니다' })"
+              >
+                마이페이지
+              </el-dropdown-item>
+              <el-dropdown-item divided @click="$indexStore.user().logout">
+                로그아웃
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
-      <div v-else :class="$style.nickname">
+      <div v-else :class="$style.nickname" @click="openSidebar">
         <el-icon><user /></el-icon>Guest
       </div>
       <div :class="$style.menuContainer">
@@ -698,6 +715,11 @@ const getKeyThemeName = () => {
 
       &:hover {
         cursor: pointer;
+      }
+
+      .loginUserName {
+        font-size: 18px;
+        color: var(--color);
       }
     }
 
