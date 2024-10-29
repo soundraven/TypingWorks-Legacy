@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-const router = useRouter()
+import { navigateTo } from "nuxt/app"
 
 const title: Ref<string> = ref("Typingworks.Legacy")
 const splitedTitle: Ref<string[]> = ref([])

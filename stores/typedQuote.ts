@@ -12,7 +12,7 @@ export const useTypedQuote = defineStore("typingStack", () => {
     avgAccuracy: 0,
     avgProgress: 0,
     count: 0,
-    entireElapsedtime: 0,
+    entireelapsedTime: 0,
   })
 
   const typedQuote = ref([])

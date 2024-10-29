@@ -17,3 +17,7 @@ export interface RequestListResponse {
 export interface ConfirmResponse {
   success: boolean
 }
+
+export interface RecordResponse {
+  success: boolean
+}

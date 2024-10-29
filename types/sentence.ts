@@ -8,7 +8,7 @@ export interface TypingInfo {
   avgAccuracy: number
   avgProgress: number
   count: number
-  entireElapsedtime: number
+  entireElapsedTime: number
 }
 
 export enum TypoStatus {

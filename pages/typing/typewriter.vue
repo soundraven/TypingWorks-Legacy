@@ -480,13 +480,14 @@ const endTyping = () => {
 
   shiftSentence()
   resetInfo()
-  readySentence()
 
   if ($indexStore.typing().typingInfo.count >= oneCycle.value) {
     toggleShow()
+
     document.querySelectorAll("input").forEach((input) => {
       ;(input as HTMLElement).blur()
     })
+
     return
   }
 }
@@ -519,6 +520,7 @@ const finishCycle = (): void => {
   resetArray()
   $indexStore.typing().resetTypingInfo()
   toggleShow()
+  readySentence()
 
   const inputElement = document.querySelector("input")
   inputElement?.focus()

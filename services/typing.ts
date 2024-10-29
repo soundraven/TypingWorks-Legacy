@@ -26,7 +26,6 @@ export const submitForm = async (
   formEl: FormInstance | undefined,
   ruleForm: RuleForm,
 ): Promise<void> => {
-  console.log("진입")
   if (!formEl) return
 
   await formEl.validate(async (valid, fields) => {
@@ -34,7 +33,6 @@ export const submitForm = async (
       const result = await $apiPost<Success>("/typing/request", {
         form: ruleForm,
       })
-      console.log(result)
 
       if (result) {
         ElMessage({
