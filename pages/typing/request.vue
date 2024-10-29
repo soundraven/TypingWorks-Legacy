@@ -2,125 +2,142 @@
   <div :class="$style.index">
     <div :class="$style.container">
       <div :class="$style.form">
-        <el-form
-          ref="ruleFormRef"
-          style="min-width: 540px"
-          :model="ruleForm"
-          :rules="rules"
-          label-width="auto"
-          status-icon
-        >
-          <el-form-item label="Contributor" prop="name" label-position="left">
-            <el-input
-              v-model="ruleForm.name"
-              type="textarea"
-              resize="none"
-              :rows="1"
-              :input-style="{
-                backgroundColor: 'var(--bg-primary)',
-                color: 'var(--color)',
-                border: '1px solid var(--border-color)',
-              }"
-              placeholder="신청자의 이름을 작성해주세요"
-              maxlength="12"
-            />
-          </el-form-item>
-          <el-form-item label="Language" prop="language" label-position="left">
-            <el-segmented
-              v-model="ruleForm.language"
-              :options="$indexStore.sentenceInfo().languageNames"
-            />
-          </el-form-item>
-          <el-form-item
-            label="Sentence Type"
-            prop="sentenceType"
-            label-position="left"
+        <ClientOnly>
+          <el-form
+            ref="ruleFormRef"
+            style="min-width: 540px"
+            :model="ruleForm"
+            :rules="rules"
+            label-width="auto"
+            status-icon
           >
-            <el-segmented
-              v-model="ruleForm.sentenceType"
-              :options="$indexStore.sentenceInfo().typeNames"
-            />
-          </el-form-item>
-          <el-form-item label="Other type" label-position="left">
-            <el-switch v-model="ruleForm.otherSentenceType" />
-          </el-form-item>
-          <el-form-item
-            v-if="ruleForm.otherSentenceType"
-            label="comment"
-            prop="comment"
-            label-position="left"
-          >
-            <el-input
-              v-model="ruleForm.comment"
-              type="textarea"
-              resize="none"
-              autosize
-              :input-style="{
-                backgroundColor: 'var(--bg-primary)',
-                color: 'var(--color)',
-                border: '1px solid var(--border-color)',
-              }"
-              placeholder="추가를 원하는 문장의 유형을 간단히 작성해주세요"
-              maxlength="64"
-            />
-          </el-form-item>
-          <el-form-item label="Source" prop="source" label-position="left">
-            <el-input
-              v-model="ruleForm.source"
-              type="textarea"
-              resize="none"
-              :rows="1"
-              :input-style="{
-                backgroundColor: 'var(--bg-primary)',
-                color: 'var(--color)',
-                border: '1px solid var(--border-color)',
-              }"
-              placeholder="문장의 출처를 작성해주세요"
-              maxlength="32"
-            />
-          </el-form-item>
-          <el-form-item label="Sentence" prop="sentence" label-position="left">
-            <el-input
-              v-model="ruleForm.sentence"
-              type="textarea"
-              resize="none"
-              autosize
-              :input-style="{
-                backgroundColor: 'var(--bg-primary)',
-                color: 'var(--color)',
-                border: '1px solid var(--border-color)',
-              }"
-              placeholder="문장을 작성해주세요"
-              maxlength="64"
-            />
-          </el-form-item>
-          <el-form-item
-            label="Explanation"
-            prop="explanation"
-            label-position="left"
-            class="custom-label"
-          >
-            <el-input
-              v-model="ruleForm.explanation"
-              type="textarea"
-              resize="none"
-              autosize
-              :input-style="{
-                backgroundColor: 'var(--bg-primary)',
-                color: 'var(--color)',
-                border: '1px solid var(--border-color)',
-              }"
-              placeholder="문장에 대한 설명을 작성해주세요(선택)"
-              maxlength="64"
-            />
-          </el-form-item>
-          <div :class="$style.btn">
-            <el-button type="primary" @click="submitForm(ruleFormRef)">
-              Submit
-            </el-button>
-            <el-button @click="resetForm(ruleFormRef)">Reset</el-button>
-          </div>
-        </el-form>
+            <el-form-item label="Contributor" prop="name" label-position="left">
+              <el-input
+                v-model="ruleForm.requester"
+                type="textarea"
+                resize="none"
+                :rows="1"
+                :input-style="{
+                  backgroundColor: 'var(--bg-primary)',
+                  color: 'var(--color)',
+                  border: '1px solid var(--border-color)',
+                }"
+                placeholder="신청자의 이름을 작성해주세요"
+                maxlength="12"
+              />
+            </el-form-item>
+            <el-form-item
+              label="Language"
+              prop="language"
+              label-position="left"
+            >
+              <el-segmented
+                v-model="ruleForm.language"
+                :options="$indexStore.sentenceInfo().languageNames"
+              />
+            </el-form-item>
+            <el-form-item
+              label="Sentence Type"
+              prop="sentenceType"
+              label-position="left"
+            >
+              <el-segmented
+                v-model="ruleForm.sentenceType"
+                :options="$indexStore.sentenceInfo().typeNames"
+              />
+            </el-form-item>
+            <el-form-item label="Other type" label-position="left">
+              <el-switch
+                v-model="ruleForm.otherSentenceType"
+                :active-value="'Y'"
+                :inactive-value="'N'"
+              />
+            </el-form-item>
+            <el-form-item
+              v-if="ruleForm.otherSentenceType === 'Y'"
+              label="comment"
+              prop="comment"
+              label-position="left"
+            >
+              <el-input
+                v-model="ruleForm.comment"
+                type="textarea"
+                resize="none"
+                autosize
+                :input-style="{
+                  backgroundColor: 'var(--bg-primary)',
+                  color: 'var(--color)',
+                  border: '1px solid var(--border-color)',
+                }"
+                placeholder="추가를 원하는 문장의 유형을 간단히 작성해주세요"
+                maxlength="64"
+              />
+            </el-form-item>
+            <el-form-item label="Source" prop="source" label-position="left">
+              <el-input
+                v-model="ruleForm.source"
+                type="textarea"
+                resize="none"
+                :rows="1"
+                :input-style="{
+                  backgroundColor: 'var(--bg-primary)',
+                  color: 'var(--color)',
+                  border: '1px solid var(--border-color)',
+                }"
+                placeholder="문장의 출처를 작성해주세요"
+                maxlength="32"
+              />
+            </el-form-item>
+            <el-form-item
+              label="Sentence"
+              prop="sentence"
+              label-position="left"
+            >
+              <el-input
+                v-model="ruleForm.sentence"
+                type="textarea"
+                resize="none"
+                autosize
+                :input-style="{
+                  backgroundColor: 'var(--bg-primary)',
+                  color: 'var(--color)',
+                  border: '1px solid var(--border-color)',
+                }"
+                placeholder="문장을 작성해주세요"
+                maxlength="64"
+              />
+            </el-form-item>
+            <el-form-item
+              label="Explanation"
+              prop="explanation"
+              label-position="left"
+              class="custom-label"
+            >
+              <el-input
+                v-model="ruleForm.explanation"
+                type="textarea"
+                resize="none"
+                autosize
+                :input-style="{
+                  backgroundColor: 'var(--bg-primary)',
+                  color: 'var(--color)',
+                  border: '1px solid var(--border-color)',
+                }"
+                placeholder="문장에 대한 설명을 작성해주세요(선택)"
+                maxlength="64"
+              />
+            </el-form-item>
+            <div :class="$style.btn">
+              <el-button
+                type="primary"
+                @click="submitForm(ruleFormRef, ruleForm)"
+              >
+                Submit
+              </el-button>
+              <el-button @click="resetForm(ruleFormRef)">Reset</el-button>
+            </div>
+          </el-form>
+        </ClientOnly>
       </div>
     </div>
   </div>
@@ -128,8 +145,8 @@
 
 <script lang="ts" setup>
 import type { FormInstance, FormRules } from "element-plus"
-import { $apiPost } from "~/services/api"
 import type { RuleForm } from "~/types/request"
+import { submitForm } from "~/services/typing"
 
 const { $indexStore } = useNuxtApp()
 
@@ -140,10 +157,10 @@ onMounted(async () => {
 const ruleFormRef = ref<FormInstance>()
 
 const ruleForm = reactive<RuleForm>({
-  name: "",
+  requester: "",
   language: "",
   sentenceType: "",
-  otherSentenceType: false,
+  otherSentenceType: "N",
   comment: "",
   source: "",
   sentence: "",
@@ -152,7 +169,7 @@ const ruleForm = reactive<RuleForm>({
 
 const rules = computed(
   (): FormRules<RuleForm> => ({
-    name: [
+    requester: [
       { required: true, message: "Please input your name", trigger: "blur" },
       { min: 2, max: 12, message: "Length should be 2 to 12", trigger: "blur" },
     ],
@@ -203,27 +220,6 @@ const rules = computed(
     ],
   }),
 )
-
-const submitForm = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-
-  await formEl.validate(async (valid, fields) => {
-    if (valid) {
-      const result = await $apiPost<boolean>("/typing/request", {
-        form: ruleForm,
-      })
-
-      if (result) {
-        ElMessage({
-          message: "Successfully send your request",
-          type: "success",
-        })
-      }
-    } else {
-      ElMessage({ message: "Please input valid infomation", type: "error" })
-    }
-  })
-}
 
 const resetForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return

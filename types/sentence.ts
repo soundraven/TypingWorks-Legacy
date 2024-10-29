@@ -46,3 +46,15 @@ export interface SentenceInfo {
   languageInfo: Language[]
   typeInfo: Type[]
 }
+
+export interface Request {
+  id: number
+  requester: string
+  language: string
+  type: string | null
+  other_type: boolean
+  comment: string | null
+  source: string
+  sentence: string
+  explanation: string | null
+}

@@ -1,10 +1,14 @@
 export interface RuleForm {
-  name: string
+  requester: string
   language: string
   sentenceType: string
-  otherSentenceType: boolean
+  otherSentenceType: "Y" | "N"
   comment?: string
   source: string
   sentence: string
   explanation: string
+}
+
+export interface Success {
+  success: boolean
 }

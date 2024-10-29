@@ -5,9 +5,26 @@
         v-if="$indexStore.user().user.isAuthenticated"
         :class="$style.nickname"
       >
-        <el-icon><user /></el-icon>{{ $indexStore.user().user.nickname }} 님
+        <el-icon><user /></el-icon>
+        <el-dropdown>
+          <span :class="$style.loginUserName">
+            {{ $indexStore.user().user.nickname }} 님
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                @click="ElMessage({ message: '구현 준비중 입니다' })"
+              >
+                마이페이지
+              </el-dropdown-item>
+              <el-dropdown-item divided @click="$indexStore.user().logout">
+                로그아웃
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
-      <div v-else :class="$style.nickname">
+      <div v-else :class="$style.nickname" @click="openSidebar">
         <el-icon><user /></el-icon>Guest
       </div>
       <div :class="$style.menuContainer">
@@ -26,9 +43,6 @@
           v-for="(typedSentence, index) in $indexStore.typing()
             .typedSentenceList"
           :key="'quote_' + index"
-          @click="switchtargetSentence(targetSentence)"
-          @mouseenter="setHoverIndex(index)"
-          @mouseleave="setHoverIndex(null)"
         >
           <div :class="$style.list">{{ typedSentence.content }}</div>
         </div>
@@ -70,7 +84,7 @@
       </div>
 
       <div :class="[$style.keyTheme, $style.gridItem]">
-        {{ getElapsedTime() }}
+        {{ getElapsedTime(elapsedTime) }}
       </div>
       <div :class="[$style.person, $style.gridItem]">
         {{ targetSentence.source }}
@@ -127,7 +141,7 @@
 
 <script setup lang="ts">
 import { disassemble } from "hangul-js"
-import { ThemeColor } from "~/types/theme"
+import { ThemeColor } from "@/types/theme"
 import { vAutoAnimate } from "@formkit/auto-animate"
 import {
   TypoStatus,
@@ -135,11 +149,16 @@ import {
   type TypingInfo,
   Direction,
 } from "~/types/sentence"
-import { $apiGet } from "~/services/api"
 import Sidebar from "~/components/Sidebar.vue"
-import { calcSpeed, getPercentage } from "~/utils/number"
+import {
+  calcAccuracy,
+  calcSpeed,
+  getAvgValue,
+  getElapsedTime,
+} from "~/utils/number"
 import { ElMessage } from "element-plus"
 import Cookies from "js-cookie"
+import { getSentence } from "~/services/typing"
 
 const { $indexStore } = useNuxtApp()
 
@@ -216,19 +235,6 @@ const typingInfo: TypingInfo = reactive({
 
 const showResult: Ref<boolean> = ref(false)
 
-const hoverIndex: Ref<number | null> = ref(null)
-
-const setHoverIndex = (index) => {
-  hoverIndex.value = index
-}
-
-const isHovered = (index) => {
-  if (index !== null) {
-    return hoverIndex.value === index
-  }
-  return
-}
-
 const startTime: Ref<number> = ref(0)
 // 현재 경과시간만 초로 나오고 나머지는 타임스탬프 형식
 const elapsedTime: Ref<number> = ref(0)
@@ -252,7 +258,8 @@ onMounted(async () => {
 
   $indexStore.sentenceInfo().getSentenceInfo()
 
-  await getSentence()
+  readySentence()
+
   targetLanguage.value = targetSentence.value.language
   targetSentenceType.value = targetSentence.value.type
 })
@@ -262,7 +269,11 @@ onBeforeUnmount(() => {
 })
 
 const readySentence = async (): Promise<void> => {
-  oneCycleSentence.value = await getSentence()
+  oneCycleSentence.value = await getSentence(
+    oneCycle.value,
+    targetLanguage.value,
+    targetSentenceType.value,
+  )
   shiftSentence()
 }
 
@@ -315,7 +326,7 @@ const preventPaste = (e: ClipboardEvent) => {
   e.preventDefault()
 }
 
-const updateTypedText = (e) => {
+const updateTypedText = (e: any) => {
   typedText.value = (e.target as HTMLInputElement).value
 }
 
@@ -331,8 +342,8 @@ const startTyping = (text: string) => {
     startTypingSpeedCalc()
   }
 
-  calcAccuracy()
-  calcProgress()
+  accuracy.value = calcAccuracy(typoStatus.value)
+  progress.value = calcProgress(parsingText.value, targetSentence.value.content)
 }
 
 // 오타 확인을 위해 문장 글자단위로 분해
@@ -369,9 +380,9 @@ const refillTypoArrays = () => {
   parsingText.value = typedText.value
 
   for (let i = 0; i < parsingText.value.length; i++) {
-    if (typeof targetSentence.value[i] === "undefined") continue
+    if (typeof targetSentence.value.content[i] === "undefined") continue
 
-    if (targetSentence.value[i] === splitedParsingText[i]) {
+    if (targetSentence.value.content[i] === splitedParsingText[i]) {
       checkTypoArray.value[i] = TypoStatus.Correct
     } else {
       checkTypoArray.value[i] = TypoStatus.Error
@@ -403,8 +414,8 @@ const checkTypo = () => {
   }
 
   for (let i = 0; i < parsingText.value.length; i++) {
-    if (targetSentence.value[i] === undefined) continue
-    if (targetSentence.value[i] === splitedParsingText[i]) {
+    if (targetSentence.value.content[i] === undefined) continue
+    if (targetSentence.value.content[i] === splitedParsingText[i]) {
       checkTypoArray.value[i] = TypoStatus.Correct //입력받는대로 따라오는 오타 체크 배열
     } else {
       checkTypoArray.value[i] = TypoStatus.Error
@@ -449,24 +460,6 @@ const getLastTyped = (index: number): string | string[] => {
   }
 }
 
-const calcAccuracy = () => {
-  const typoCount: number = typoStatus.value.filter(
-    (value: TypoStatus) => value === TypoStatus.Error,
-  ).length
-
-  accuracy.value = getPercentage(
-    typoStatus.value.length - typoCount,
-    typoStatus.value.length,
-  )
-}
-
-const calcProgress = () => {
-  progress.value = getPercentage(
-    parsingText.value.split("").length,
-    targetSentence.value.content.split("").length,
-  )
-}
-
 const startTypingSpeedCalc = () => {
   elapsedTimerId.value = setInterval(keepCheckElapsedTime, 100)
 }
@@ -490,13 +483,6 @@ const pushCalculatedArray = () => {
   accuracyArray.value.push(accuracy.value)
   progressArray.value.push(progress.value)
   ElapsedTimeArray.value.push(elapsedTime.value)
-}
-
-const getAvgValue = (array: number[]) => {
-  const avg = Math.floor(
-    array.reduce((acc, cur) => acc + cur, 0) / array.length,
-  )
-  return avg
 }
 
 const calcTypingInfo = () => {
@@ -579,7 +565,7 @@ const finishCycle = () => {
   typingCount.value = 0
 
   toggleShow()
-  getSentence()
+  readySentence()
 }
 
 const calcTypingSpeed = (takenTime: number) => {
@@ -604,44 +590,6 @@ const calcTypingSpeed = (takenTime: number) => {
   }
 }
 
-const getSentence = async (): Promise<Sentence[] | undefined> => {
-  try {
-    const result = await $apiGet<Sentence[]>("/typing/sentence", {
-      oneCycle: oneCycle.value,
-      language: targetLanguage.value,
-      type: targetSentenceType.value,
-    })
-
-    await (oneCycleSentence.value = result)
-    shiftSentence()
-  } catch (error: any) {
-    ElMessage({ message: `"Error:", ${error.message}`, type: "error" })
-    return undefined
-  }
-}
-
-const getElapsedTime = (): string => {
-  if (elapsedTime.value === 0) {
-    return `${0}분 ${0}초`
-  }
-
-  const min: number = Math.floor(elapsedTime.value / 60)
-  const sec: number = elapsedTime.value % 60
-
-  return `${min}분 ${sec}초`
-}
-
-const getActiveClass = (lang: string): string => {
-  if (
-    lang === targetSentence.value.language ||
-    lang === targetSentence.value.type
-  ) {
-    return $style.active
-  } else {
-    return ""
-  }
-}
-
 watch(parsingText, (newValue) => {
   if (newValue === "") {
     resetInfo()
@@ -653,13 +601,6 @@ watch(parsingText, (newValue) => {
 
 const toggleShow = () => {
   showResult.value = !showResult.value
-}
-
-const switchtargetSentence = (switchedTargetSentence: Sentence) => {
-  targetSentence.value = switchedTargetSentence
-
-  splitText()
-  updateTypoStatus()
 }
 
 const getKeyThemeName = () => {
@@ -775,6 +716,11 @@ const getKeyThemeName = () => {
       &:hover {
         cursor: pointer;
       }
+
+      .loginUserName {
+        font-size: 18px;
+        color: var(--color);
+      }
     }
 
     > .menuContainer {
@@ -859,10 +805,6 @@ const getKeyThemeName = () => {
         animation: flash-box-shadow 1s;
 
         position: relative;
-
-        &:hover {
-          cursor: pointer;
-        }
 
         > .list {
           width: 100%;

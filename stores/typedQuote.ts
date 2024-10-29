@@ -1,4 +1,3 @@
-import { defineStore } from "pinia"
 import { type TypingInfo } from "~/types/sentence"
 
 export const useTypedQuote = defineStore("typingStack", () => {
