@@ -28,6 +28,7 @@
       </div>
     </div>
     <img
+      v-if="!$indexStore.user().user.isAuthenticated"
       src="assets/images/kakao_login_medium_wide.png"
       alt="kakaoLoginImage"
       :class="$style.kakaoLoginBtn"

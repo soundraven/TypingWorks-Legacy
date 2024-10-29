@@ -37,7 +37,8 @@
               />
             </el-form-item>
             <el-form-item
-              label="Sentence Type"
+              v-if="ruleForm.otherSentenceType === 'N'"
+              label="Type"
               prop="sentenceType"
               label-position="left"
             >
@@ -148,10 +149,13 @@ import type { FormInstance, FormRules } from "element-plus"
 import type { RuleForm } from "~/types/request"
 import { submitForm } from "~/services/typing"
 
+definePageMeta({ middleware: "kakao" })
+
 const { $indexStore } = useNuxtApp()
 
 onMounted(async () => {
   $indexStore.sentenceInfo().getSentenceInfo()
+  ruleForm.requester = $indexStore.user().user.nickname
 })
 
 const ruleFormRef = ref<FormInstance>()
@@ -182,7 +186,7 @@ const rules = computed(
     ],
     sentenceType: [
       {
-        required: !ruleForm.otherSentenceType,
+        required: ruleForm.otherSentenceType === "N",
         message: "Please select a sentence type",
         trigger: "change",
       },

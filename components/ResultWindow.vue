@@ -2,7 +2,6 @@
   <div :class="$style.index">
     <div :class="$style.infos">
       <div :class="$style.pageName">Typingworks.Legacy</div>
-      <div></div>
       <div :class="$style.currentTime">{{ formattedTime }}</div>
       <div :class="$style.typingMode">Typing Mode</div>
       <div :class="$style.typingModeInfo">
@@ -35,8 +34,6 @@
 </template>
 
 <script setup lang="ts">
-// import { useTypedQuote } from "~/stores/typedQuote"
-
 const $style = useCssModule()
 const store = useTypedQuote()
 

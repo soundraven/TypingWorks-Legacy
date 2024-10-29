@@ -20,6 +20,9 @@
               <el-dropdown-item divided @click="$indexStore.user().logout">
                 로그아웃
               </el-dropdown-item>
+              <el-dropdown-item divided @click="navigateTo('/auth/admin')">
+                관리자 페이지
+              </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -71,7 +74,7 @@
         진행도: {{ progress }}
       </div>
       <div :class="[$style.typingCount, $style.gridItem]">
-        count: {{ typingCount }}
+        count: {{ $indexStore.typing().typingInfo.count }}
       </div>
       <div :class="[$style.countLimit, $style.gridItem]">
         <div :class="$style.arrowBox" @click="editGoalCount(Direction.Reduce)">
@@ -124,7 +127,7 @@
     <ResultWindow
       v-if="showResult"
       :class="$style.resultWindow"
-      :typingInfo="typingInfo"
+      :typingInfo="$indexStore.typing().typingInfo"
       @closeResult="finishCycle"
     />
   </div>
@@ -143,22 +146,12 @@
 import { disassemble } from "hangul-js"
 import { ThemeColor } from "@/types/theme"
 import { vAutoAnimate } from "@formkit/auto-animate"
-import {
-  TypoStatus,
-  type Sentence,
-  type TypingInfo,
-  Direction,
-} from "~/types/sentence"
+import { TypoStatus, type Sentence, Direction } from "~/types/sentence"
 import Sidebar from "~/components/Sidebar.vue"
-import {
-  calcAccuracy,
-  calcSpeed,
-  getAvgValue,
-  getElapsedTime,
-} from "~/utils/number"
+import { calcAccuracy, calcSpeed, getElapsedTime } from "~/utils/number"
 import { ElMessage } from "element-plus"
-import Cookies from "js-cookie"
 import { getSentence } from "~/services/typing"
+import { navigateTo } from "nuxt/app"
 
 const { $indexStore } = useNuxtApp()
 
@@ -186,12 +179,11 @@ const nextSentence: Ref<Sentence> = ref({
   type: "",
 })
 
-const targetLanguage: Ref<string> = ref("")
-const targetSentenceType: Ref<string> = ref("")
+const targetLanguage: Ref<string> = ref("kr")
+const targetSentenceType: Ref<string> = ref("quote")
 
 const splitedtargetSentence: Ref<string[]> = ref([])
 
-const typingCount: Ref<number> = ref(0)
 const oneCycle: Ref<number> = ref(5)
 
 // 유저가 타이핑한 문장
@@ -206,32 +198,12 @@ const accuracy: Ref<number> = ref(0)
 const progress: Ref<number> = ref(0)
 const wpm: Ref<number> = ref(0)
 const cpm: Ref<number> = ref(0)
-const avgWpm: Ref<number> = ref(0)
-const avgCpm: Ref<number> = ref(0)
-const maxWpm: Ref<number> = ref(0)
-const maxCpm: Ref<number> = ref(0)
-const avgAccuracy: Ref<number> = ref(0)
-const avgProgress: Ref<number> = ref(0)
-const entireElapsedtime: Ref<number> = ref(0)
 
 const wpmArray: Ref<number[]> = ref([])
 const cpmArray: Ref<number[]> = ref([])
 const accuracyArray: Ref<number[]> = ref([])
 const progressArray: Ref<number[]> = ref([])
 const ElapsedTimeArray: Ref<number[]> = ref([])
-
-const typingInfo: TypingInfo = reactive({
-  targetLanguage: "",
-  targetSentenceType: targetSentenceType,
-  avgWpm: avgWpm,
-  avgCpm: avgCpm,
-  maxWpm: maxWpm,
-  maxCpm: maxCpm,
-  avgAccuracy: avgAccuracy,
-  avgProgress: avgProgress,
-  count: typingCount,
-  entireElapsedtime: entireElapsedtime,
-})
 
 const showResult: Ref<boolean> = ref(false)
 
@@ -249,19 +221,10 @@ const oneCycleSentence: Ref<Sentence[] | undefined> = ref(undefined)
 
 onMounted(async () => {
   if (process.server) return
-  const accessToken = Cookies.get("accessToken")
-  const refreshToken = Cookies.get("refreshToken")
-
-  if (accessToken || refreshToken) {
-    $indexStore.user().me()
-  }
 
   $indexStore.sentenceInfo().getSentenceInfo()
 
   readySentence()
-
-  targetLanguage.value = targetSentence.value.language
-  targetSentenceType.value = targetSentence.value.type
 })
 
 onBeforeUnmount(() => {
@@ -274,6 +237,11 @@ const readySentence = async (): Promise<void> => {
     targetLanguage.value,
     targetSentenceType.value,
   )
+
+  $indexStore
+    .typing()
+    .setLanguageAndType(targetLanguage.value, targetSentenceType.value)
+
   shiftSentence()
 }
 
@@ -485,31 +453,12 @@ const pushCalculatedArray = () => {
   ElapsedTimeArray.value.push(elapsedTime.value)
 }
 
-const calcTypingInfo = () => {
-  avgWpm.value = getAvgValue(wpmArray.value)
-  avgCpm.value = getAvgValue(cpmArray.value)
-  avgAccuracy.value = getAvgValue(accuracyArray.value)
-  avgProgress.value = getAvgValue(progressArray.value)
-
-  entireElapsedtime.value = ElapsedTimeArray.value.reduce(
-    (acc, cur) => acc + cur,
-  )
-
-  typingInfo.maxWpm = Math.max(...wpmArray.value)
-  typingInfo.maxCpm = Math.max(...cpmArray.value)
-  typingInfo.avgWpm = avgWpm.value
-  typingInfo.avgCpm = avgCpm.value
-  typingInfo.avgAccuracy = avgAccuracy.value
-  typingInfo.avgProgress = avgProgress.value
-  typingInfo.entireElapsedtime = entireElapsedtime.value
-}
-
 const endTyping = () => {
   if (showResult.value) return
 
   stopTypingSpeedCalc()
 
-  typingCount.value++
+  $indexStore.typing().countUp()
   $indexStore.typing().setTypedList(targetSentence.value)
   pushCalculatedArray()
 
@@ -518,18 +467,31 @@ const endTyping = () => {
   totalTime.value = (endTime.value - startTime.value) / 1000
 
   calcTypingSpeed(totalTime.value)
-  calcTypingInfo()
 
-  if (typingCount.value >= oneCycle.value) {
-    toggleShow()
-    return
-  }
+  $indexStore
+    .typing()
+    .updateTypingInfo(
+      wpmArray.value,
+      cpmArray.value,
+      accuracyArray.value,
+      progressArray.value,
+      ElapsedTimeArray.value,
+    )
 
   shiftSentence()
   resetInfo()
+  readySentence()
+
+  if ($indexStore.typing().typingInfo.count >= oneCycle.value) {
+    toggleShow()
+    document.querySelectorAll("input").forEach((input) => {
+      ;(input as HTMLElement).blur()
+    })
+    return
+  }
 }
 
-const resetInfo = () => {
+const resetInfo = (): void => {
   typedText.value = ""
   parsingText.value = ""
   startTime.value = 0
@@ -545,30 +507,24 @@ const resetInfo = () => {
   typoStatus.value = []
 }
 
-const finishCycle = () => {
-  resetInfo()
-
-  avgWpm.value = 0
-  avgCpm.value = 0
-  maxWpm.value = 0
-  maxCpm.value = 0
-  avgAccuracy.value = 0
-  avgProgress.value = 0
-  entireElapsedtime.value = 0
-
+const resetArray = (): void => {
   wpmArray.value = []
   cpmArray.value = []
   accuracyArray.value = []
   progressArray.value = []
   ElapsedTimeArray.value = []
-
-  typingCount.value = 0
-
-  toggleShow()
-  readySentence()
 }
 
-const calcTypingSpeed = (takenTime: number) => {
+const finishCycle = (): void => {
+  resetArray()
+  $indexStore.typing().resetTypingInfo()
+  toggleShow()
+
+  const inputElement = document.querySelector("input")
+  inputElement?.focus()
+}
+
+const calcTypingSpeed = (takenTime: number): void => {
   if (takenTime === 0) return
 
   const totalWords: string = parsingText.value.trim()
@@ -599,11 +555,11 @@ watch(parsingText, (newValue) => {
   checkTypo()
 })
 
-const toggleShow = () => {
+const toggleShow = (): void => {
   showResult.value = !showResult.value
 }
 
-const getKeyThemeName = () => {
+const getKeyThemeName = (): string => {
   let systemMode: boolean = false
 
   switch (colorMode.preference) {

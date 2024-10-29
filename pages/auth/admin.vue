@@ -54,12 +54,17 @@
                 inline-prompt
                 active-icon="Check"
                 inactive-icon="Close"
+                active-value="Y"
+                inactive-value="N"
                 disabled
-              ></el-switch>
+              />
             </template>
           </el-table-column>
           <el-table-column label="확인" align="center">
-            <template #default="props" v-if="$indexStore.user().user.id === ">
+            <template
+              #default="props"
+              v-if="$indexStore.user().user.id === 3754241750"
+            >
               <el-button
                 type="success"
                 icon="Check"
