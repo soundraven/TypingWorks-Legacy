@@ -146,7 +146,7 @@
 import { disassemble } from "hangul-js"
 import { ThemeColor } from "@/types/theme"
 import { vAutoAnimate } from "@formkit/auto-animate"
-import { TypoStatus, type Sentence, Direction } from "~/types/sentence"
+import { TypoStatus, type Sentence, Direction } from "~/types/typing"
 import Sidebar from "~/components/Sidebar.vue"
 import { calcAccuracy, calcSpeed, getElapsedTime } from "~/utils/number"
 import { ElMessage } from "element-plus"
@@ -276,10 +276,12 @@ const shiftSentence = () => {
 const editGoalCount = (direction: Direction) => {
   if (direction === "raise") {
     ++oneCycle.value
+    $indexStore.typing().resetTypingInfo()
     readySentence()
   } else {
     if (oneCycle.value <= 1) return
     --oneCycle.value
+    $indexStore.typing().resetTypingInfo()
     readySentence()
   }
 }
@@ -468,6 +470,11 @@ const endTyping = () => {
 
   calcTypingSpeed(totalTime.value)
 
+  const charCount: number = targetSentence.value.content.replace(
+    /\s+/g,
+    "",
+  ).length
+
   $indexStore
     .typing()
     .updateTypingInfo(
@@ -476,6 +483,7 @@ const endTyping = () => {
       accuracyArray.value,
       progressArray.value,
       ElapsedTimeArray.value,
+      charCount,
     )
 
   shiftSentence()
@@ -517,8 +525,9 @@ const resetArray = (): void => {
 }
 
 const finishCycle = (): void => {
+  console.log("finishCycle 진입")
   resetArray()
-  $indexStore.typing().resetTypingInfo()
+  $indexStore.typing().insertTypingInfo()
   toggleShow()
   readySentence()
 

@@ -1,4 +1,4 @@
-import type { Request } from "~/types/sentence"
+import type { Request } from "~/types/typing"
 
 export interface autoLoginResponse {
   id: number

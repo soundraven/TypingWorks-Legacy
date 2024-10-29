@@ -1,6 +1,6 @@
 import { $apiPost } from "~/services/api"
 import type { RecordResponse } from "~/types/apiResponse"
-import { type Sentence, type TypingInfo } from "~/types/sentence"
+import { type Sentence, type TypingInfo } from "~/types/typing"
 
 export const useTypingStore = defineStore("typing", () => {
   // State
@@ -15,6 +15,7 @@ export const useTypingStore = defineStore("typing", () => {
     avgProgress: 0,
     count: 0,
     entireElapsedTime: 0,
+    charCount: 0,
   })
 
   const typedSentenceList: Ref<Sentence[]> = ref([])
@@ -36,23 +37,26 @@ export const useTypingStore = defineStore("typing", () => {
     typingInfo.count++
   }
 
-  const resetTypingInfo = async (): Promise<void> => {
+  const resetTypingInfo = (): void => {
+    typingInfo.targetLanguage = ""
+    typingInfo.targetSentenceType = ""
+    typingInfo.avgWpm = 0
+    typingInfo.avgCpm = 0
+    typingInfo.maxWpm = 0
+    typingInfo.maxCpm = 0
+    typingInfo.avgAccuracy = 0
+    typingInfo.avgProgress = 0
+    typingInfo.count = 0
+    typingInfo.entireElapsedTime = 0
+    typingInfo.charCount = 0
+  }
+
+  const insertTypingInfo = async (): Promise<void> => {
     const response = await $apiPost<RecordResponse>("/typing/record", {
       typingInfo: typingInfo,
     })
 
-    if (response.success === true) {
-      typingInfo.targetLanguage = ""
-      typingInfo.targetSentenceType = ""
-      typingInfo.avgWpm = 0
-      typingInfo.avgCpm = 0
-      typingInfo.maxWpm = 0
-      typingInfo.maxCpm = 0
-      typingInfo.avgAccuracy = 0
-      typingInfo.avgProgress = 0
-      typingInfo.count = 0
-      typingInfo.entireElapsedTime = 0
-    }
+    if (response.success) resetTypingInfo()
   }
 
   const updateTypingInfo = (
@@ -61,6 +65,7 @@ export const useTypingStore = defineStore("typing", () => {
     accuracyArray: number[],
     progressArray: number[],
     elapsedTimeArray: number[],
+    charCount: number,
   ): void => {
     const avgWpm = getAvgValue(wpmArray)
     const avgCpm = getAvgValue(cpmArray)
@@ -76,6 +81,7 @@ export const useTypingStore = defineStore("typing", () => {
     typingInfo.avgAccuracy = avgAccuracy
     typingInfo.avgProgress = avgProgress
     typingInfo.entireElapsedTime = entireElapsedTime
+    typingInfo.charCount = typingInfo.charCount += charCount
   }
 
   return {
@@ -86,5 +92,6 @@ export const useTypingStore = defineStore("typing", () => {
     countUp,
     resetTypingInfo,
     updateTypingInfo,
+    insertTypingInfo,
   }
 })

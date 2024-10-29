@@ -1,4 +1,4 @@
-import { TypoStatus } from "~/types/sentence"
+import { TypoStatus } from "~/types/typing"
 
 export const getPercentage = (
   numerator: number,

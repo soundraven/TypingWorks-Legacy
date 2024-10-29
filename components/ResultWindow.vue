@@ -35,7 +35,6 @@
 
 <script setup lang="ts">
 const $style = useCssModule()
-const store = useTypedQuote()
 
 const emits = defineEmits()
 const props = defineProps(["typingInfo"])
@@ -46,7 +45,6 @@ const closeResult = (e: Event) => {
     (e as KeyboardEvent).key === "Escape" ||
     (e as MouseEvent).type === "click"
   ) {
-    store.resetList()
     emits("closeResult")
   }
 }
