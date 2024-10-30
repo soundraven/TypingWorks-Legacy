@@ -1,5 +1,5 @@
 import { $apiGet } from "~/services/api"
-import type { Language, SentenceInfo, Type } from "~/types/sentence"
+import type { Language, SentenceInfo, Type } from "~/types/typing"
 
 export const useSentenceInfoStore = defineStore("sentenceInfo", () => {
   const languages: Ref<Language[]> = ref([])

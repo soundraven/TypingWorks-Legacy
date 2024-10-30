@@ -52,11 +52,16 @@ export const useTypingStore = defineStore("typing", () => {
   }
 
   const insertTypingInfo = async (): Promise<void> => {
-    const response = await $apiPost<RecordResponse>("/typing/record", {
-      typingInfo: typingInfo,
-    })
+    const { $indexStore } = useNuxtApp()
 
-    if (response.success) resetTypingInfo()
+    if ($indexStore.user().user.isAuthenticated) {
+      const response = await $apiPost<RecordResponse>("/typing/record", {
+        typingInfo: typingInfo,
+        userId: $indexStore.user().user.id,
+      })
+    }
+
+    resetTypingInfo()
   }
 
   const updateTypingInfo = (
