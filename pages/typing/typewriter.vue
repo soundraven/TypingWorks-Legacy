@@ -48,7 +48,7 @@
           <div :class="$style.list">{{ typedSentence.content }}</div>
         </div>
       </div>
-      <div :class="[$style.language, $style.gridItem]" v-auto-animate>
+      <div :class="[$style.language, $style.gridItem]">
         {{ targetSentence.language === "kr" ? "Korean" : "English" }}
       </div>
       <div :class="[$style.screenMode, $style.gridItem]">
@@ -60,7 +60,7 @@
       <div :class="[$style.keyThemeName, $style.gridItem]">
         {{ getKeyThemeName() }}
       </div>
-      <div :class="[$style.sentenceType, $style.gridItem]" v-auto-animate>
+      <div :class="[$style.sentenceType, $style.gridItem]">
         {{ targetSentence.type }}
       </div>
       <div :class="[$style.wpm, $style.gridItem]">WPM: {{ wpm }}</div>
@@ -147,7 +147,6 @@ import { vAutoAnimate } from "@formkit/auto-animate"
 import { TypoStatus, type Sentence, Direction } from "~/types/typing"
 import Sidebar from "~/components/Sidebar.vue"
 import { calcAccuracy, calcSpeed, getElapsedTime } from "~/utils/number"
-import { ElMessage } from "element-plus"
 import { getSentence } from "~/services/typing"
 import { navigateTo } from "nuxt/app"
 
