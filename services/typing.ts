@@ -1,7 +1,7 @@
 import type { FormInstance } from "element-plus"
 import { $apiGet, $apiPost } from "~/services/api"
 import type { RuleForm, Success } from "~/types/request"
-import type { Sentence } from "~/types/sentence"
+import type { Sentence } from "~/types/typing"
 
 export const getSentence = async (
   oneCycle: number,

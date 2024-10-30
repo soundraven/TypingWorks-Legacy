@@ -1,7 +1,9 @@
 export default defineNuxtRouteMiddleware((to, from) => {
-  const { $indexStore } = useNuxtApp()
+  if (process.server) {
+    return
+  }
 
-  if (!$indexStore.user().user.isAuthenticated) {
+  if (!sessionStorage.getItem("user")) {
     ElMessage({ message: "Please use kakao login first.", type: "warning" })
     return navigateTo(from.fullPath)
   }

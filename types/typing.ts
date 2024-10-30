@@ -12,6 +12,22 @@ export interface TypingInfo {
   charCount: number
 }
 
+export interface Record {
+  registered_by: number
+  language: string
+  type: string
+  avg_wpm: number
+  avg_cpm: number
+  max_wpm: number
+  max_cpm: number
+  avg_accuracy: number
+  avg_progress: number
+  count: number
+  time: number
+  char_count: number
+  registered_date: Date
+}
+
 export enum TypoStatus {
   NotInput = 0,
   Correct = 1,

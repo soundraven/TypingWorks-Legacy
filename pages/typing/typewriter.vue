@@ -12,9 +12,7 @@
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item
-                @click="ElMessage({ message: '구현 준비중 입니다' })"
-              >
+              <el-dropdown-item @click="navigateTo('/auth/mypage')">
                 마이페이지
               </el-dropdown-item>
               <el-dropdown-item divided @click="$indexStore.user().logout">

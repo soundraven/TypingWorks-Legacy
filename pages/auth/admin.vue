@@ -96,7 +96,7 @@
 <script lang="ts" setup>
 import { $apiGet, $apiPost } from "~/services/api"
 import type { ConfirmResponse, RequestListResponse } from "~/types/apiResponse"
-import type { Request } from "~/types/sentence"
+import type { Request } from "~/types/typing"
 const { $indexStore } = useNuxtApp()
 
 const requestList: Ref<Request[]> = ref([])

@@ -17,12 +17,15 @@ export const useUserStore = defineStore("user", () => {
     user.value.id = id
     user.value.nickname = nickname
     user.value.isAuthenticated = true
+
+    sessionStorage.setItem("user", JSON.stringify(user.value))
   }
 
   const logout = (): void => {
     user.value.id = 0
     user.value.nickname = ""
     user.value.isAuthenticated = false
+    sessionStorage.removeItem("user")
     Cookies.remove("accessToken")
     Cookies.remove("refreshToken")
   }

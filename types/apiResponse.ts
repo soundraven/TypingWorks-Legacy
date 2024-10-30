@@ -1,4 +1,4 @@
-import type { Request } from "~/types/typing"
+import type { Record, Request } from "~/types/typing"
 
 export interface autoLoginResponse {
   id: number
@@ -20,4 +20,8 @@ export interface ConfirmResponse {
 
 export interface RecordResponse {
   success: boolean
+}
+
+export interface RecentRecordResponse {
+  records: Record[]
 }

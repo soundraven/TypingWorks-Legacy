@@ -39,24 +39,97 @@
           </el-menu-item>
         </el-menu>
       </div>
-      <div :class="$style.chartContainer"></div>
+      <div :class="$style.chartContainer">
+        <div ref="chart" style="width: 100%; height: 400px"></div>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {
-  Document,
-  Menu as IconMenu,
-  Location,
-  Setting,
-} from "@element-plus/icons-vue"
+import { $apiGet } from "~/services/api"
+import type { RecentRecordResponse } from "~/types/apiResponse"
+import type { Record } from "~/types/typing"
+
+const { $echarts } = useNuxtApp()
+
+definePageMeta({ middleware: "kakao" })
+
+const chart = ref(null)
+
+const typingRecords: Ref<Record[]> = ref([])
+
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
 const handleClose = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
 }
+
+const getRecentRecord = async (userId: number) => {
+  console.log(userId, "현재 query")
+  const response = await $apiGet<RecentRecordResponse>("/chart/recentRecord", {
+    userId: userId,
+  })
+  console.log(response.records)
+  typingRecords.value = response.records
+}
+
+onMounted(async () => {
+  const userJson = sessionStorage.getItem("user")
+  if (userJson) {
+    const user = JSON.parse(userJson)
+
+    await getRecentRecord(user.id)
+
+    if (chart.value) {
+      const myChart = $echarts.init(chart.value)
+
+      const option = {
+        title: {
+          text: "Recent Typing Statistics",
+        },
+        tooltip: {
+          trigger: "axis",
+        },
+        legend: {
+          data: ["Avg CPM", "Avg WPM", "Max CPM", "Max WPM"],
+        },
+        xAxis: {
+          type: "category",
+          data: typingRecords.value.map((item) => item.registered_date),
+        },
+        yAxis: {
+          type: "value",
+        },
+        series: [
+          {
+            name: "Avg CPM",
+            type: "line",
+            data: typingRecords.value.map((item) => item.avg_cpm),
+          },
+          {
+            name: "Avg WPM",
+            type: "line",
+            data: typingRecords.value.map((item) => item.avg_wpm),
+          },
+          {
+            name: "Max CPM",
+            type: "line",
+            data: typingRecords.value.map((item) => item.max_cpm),
+          },
+          {
+            name: "Max WPM",
+            type: "line",
+            data: typingRecords.value.map((item) => item.max_wpm),
+          },
+        ],
+      }
+
+      myChart.setOption(option)
+    }
+  }
+})
 </script>
 
 <style lang="scss" module>
@@ -72,6 +145,8 @@ const handleClose = (key: string, keyPath: string[]) => {
 
     border: 1px solid var(--border-color);
 
+    display: flex;
+
     > .menuContainer {
       width: 250px;
       height: 100%;
@@ -81,6 +156,7 @@ const handleClose = (key: string, keyPath: string[]) => {
     }
 
     > .chartContainer {
+      width: 100%;
     }
   }
 }
