@@ -3,44 +3,48 @@
     <div :class="$style.container">
       <div :class="$style.menuContainer">
         <el-menu
-          default-active="1"
+          default-active="1-1-1"
           :class="$style.menu"
           @open="handleOpen"
           @close="handleClose"
         >
           <el-sub-menu index="1">
             <template #title>
-              <el-icon><location /></el-icon>
-              <span>Navigator One</span>
+              <span>
+                <el-icon><Calendar /></el-icon>최근 기록
+              </span>
             </template>
-            <el-menu-item-group title="Group One">
-              <el-menu-item index="1-1">item one</el-menu-item>
-              <el-menu-item index="1-2">item two</el-menu-item>
-            </el-menu-item-group>
-            <el-menu-item-group title="Group Two">
-              <el-menu-item index="1-3">item three</el-menu-item>
-            </el-menu-item-group>
-            <el-sub-menu index="1-4">
-              <template #title>item four</template>
-              <el-menu-item index="1-4-1">item one</el-menu-item>
+            <el-sub-menu index="1-1">
+              <template #title>
+                <el-icon><Stopwatch /></el-icon>Typing Speed
+              </template>
+              <el-menu-item index="1-1-1">CPM</el-menu-item>
+              <el-menu-item index="1-1-2">WPM</el-menu-item>
             </el-sub-menu>
+            <el-menu-item index="1-2">
+              <el-icon><Document /></el-icon>Other Info
+            </el-menu-item>
           </el-sub-menu>
-          <el-menu-item index="2">
-            <el-icon><icon-menu /></el-icon>
-            <span>Navigator Two</span>
-          </el-menu-item>
-          <el-menu-item index="3" disabled>
-            <el-icon><document /></el-icon>
-            <span>Navigator Three</span>
-          </el-menu-item>
-          <el-menu-item index="4">
-            <el-icon><setting /></el-icon>
-            <span>Navigator Four</span>
-          </el-menu-item>
+          <el-sub-menu index="2">
+            <template #title>
+              <el-icon><icon-menu /></el-icon>
+              <span>전체 기록</span>
+            </template>
+            <el-sub-menu index="2-1">
+              <template #title>
+                <el-icon><Stopwatch /></el-icon>Typing Speed
+              </template>
+              <el-menu-item index="2-1-1">CPM</el-menu-item>
+              <el-menu-item index="2-1-2">WPM</el-menu-item>
+            </el-sub-menu>
+            <el-menu-item index="2-2">
+              <el-icon><Document /></el-icon>Other Info
+            </el-menu-item>
+          </el-sub-menu>
         </el-menu>
       </div>
       <div :class="$style.chartContainer">
-        <div ref="chart" style="width: 100%; height: 400px"></div>
+        <div ref="chart" style="width: 100%; height: 800px"></div>
       </div>
     </div>
   </div>
@@ -50,6 +54,7 @@
 import { $apiGet } from "~/services/api"
 import type { RecentRecordResponse } from "~/types/apiResponse"
 import type { Record } from "~/types/typing"
+import { getRecentTypingOptions } from "~/utils/chartOptions"
 
 const { $echarts } = useNuxtApp()
 
@@ -75,6 +80,8 @@ const getRecentRecord = async (userId: number) => {
   typingRecords.value = response.records
 }
 
+const chartOptions = computed(() => getRecentTypingOptions(typingRecords.value))
+
 onMounted(async () => {
   const userJson = sessionStorage.getItem("user")
   if (userJson) {
@@ -84,52 +91,88 @@ onMounted(async () => {
 
     if (chart.value) {
       const myChart = $echarts.init(chart.value)
+      console.log(chartOptions.value)
 
-      const option = {
-        title: {
-          text: "Recent Typing Statistics",
-        },
-        tooltip: {
-          trigger: "axis",
-        },
-        legend: {
-          data: ["Avg CPM", "Avg WPM", "Max CPM", "Max WPM"],
-        },
-        xAxis: {
-          type: "category",
-          data: typingRecords.value.map((item) => item.registered_date),
-        },
-        yAxis: {
-          type: "value",
-        },
-        series: [
-          {
-            name: "Avg CPM",
-            type: "line",
-            data: typingRecords.value.map((item) => item.avg_cpm),
-          },
-          {
-            name: "Avg WPM",
-            type: "line",
-            data: typingRecords.value.map((item) => item.avg_wpm),
-          },
-          {
-            name: "Max CPM",
-            type: "line",
-            data: typingRecords.value.map((item) => item.max_cpm),
-          },
-          {
-            name: "Max WPM",
-            type: "line",
-            data: typingRecords.value.map((item) => item.max_wpm),
-          },
-        ],
-      }
-
-      myChart.setOption(option)
+      myChart.setOption(chartOptions.value)
     }
   }
 })
+
+// const option = {
+//         title: {
+//           text: "Recent Typing Statistics",
+//         },
+//         tooltip: {
+//           trigger: "axis",
+//         },
+//         legend: {
+//           data: [
+//             "Avg CPM",
+//             "Avg WPM",
+//             "Max CPM",
+//             "Max WPM",
+//             "Avg Accuracy",
+//             "Avg Progress",
+//             "Sentence Count",
+//             "Typing Time",
+//             "Char Count",
+//           ],
+//         },
+//         xAxis: {
+//           type: "category",
+//           data: typingRecords.value.map((item) => item.registered_date),
+//         },
+//         yAxis: {
+//           type: "value",
+//         },
+//         series: [
+//           {
+//             name: "Avg CPM",
+//             type: "line",
+//             data: typingRecords.value.map((item) => item.avg_cpm),
+//           },
+//           {
+//             name: "Avg WPM",
+//             type: "line",
+//             data: typingRecords.value.map((item) => item.avg_wpm),
+//           },
+//           {
+//             name: "Max CPM",
+//             type: "line",
+//             data: typingRecords.value.map((item) => item.max_cpm),
+//           },
+//           {
+//             name: "Max WPM",
+//             type: "line",
+//             data: typingRecords.value.map((item) => item.max_wpm),
+//           },
+//           {
+//             name: "Avg Accuracy",
+//             type: "line",
+//             data: typingRecords.value.map((item) => item.avg_accuracy),
+//           },
+//           {
+//             name: "Avg Progress",
+//             type: "line",
+//             data: typingRecords.value.map((item) => item.avg_progress),
+//           },
+//           {
+//             name: "Sentence Count",
+//             type: "line",
+//             data: typingRecords.value.map((item) => item.count),
+//           },
+//           {
+//             name: "Typing Time",
+//             type: "line",
+//             data: typingRecords.value.map((item) => item.time),
+//           },
+//           {
+//             name: "Char Count",
+//             type: "line",
+//             data: typingRecords.value.map((item) => item.char_count),
+//           },
+//         ],
+//       }
 </script>
 
 <style lang="scss" module>

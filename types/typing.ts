@@ -1,3 +1,5 @@
+import type { Dayjs } from "dayjs"
+
 export interface TypingInfo {
   targetLanguage: string
   targetSentenceType: string
@@ -25,7 +27,7 @@ export interface Record {
   count: number
   time: number
   char_count: number
-  registered_date: Date
+  registered_date: Dayjs
 }
 
 export enum TypoStatus {
