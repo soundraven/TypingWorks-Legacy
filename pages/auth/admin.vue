@@ -63,7 +63,7 @@
           <el-table-column label="확인" align="center">
             <template
               #default="props"
-              v-if="$indexStore.user().user.id === 3754241750"
+              v-if="$indexStore.user().user.id === ADMIN_ID"
             >
               <el-button
                 type="success"
@@ -99,6 +99,9 @@ import { getRequestList } from "~/services/auth"
 import type { ConfirmResponse } from "~/types/apiResponse"
 import type { Request } from "~/types/typing"
 const { $indexStore } = useNuxtApp()
+
+const config = useRuntimeConfig()
+const ADMIN_ID = Number(config.public.ADMIN_ID)
 
 const requestList: Ref<Request[]> = ref([])
 const currentPage: Ref<number> = ref(1)

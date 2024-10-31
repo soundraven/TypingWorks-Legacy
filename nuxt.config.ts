@@ -30,6 +30,7 @@ export default defineNuxtConfig({
       PUBLIC_PATH: "/_nuxt/",
       KAKAO_REST_API_KEY: process.env.KAKAO_REST_API_KEY,
       REDIRECT_URI: process.env.REDIRECT_URI,
+      ADMIN_ID: process.env.ADMIN_ID,
     },
   },
 
