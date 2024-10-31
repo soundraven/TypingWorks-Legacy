@@ -31,19 +31,17 @@ export const useUserStore = defineStore("user", () => {
   }
 
   const me = async (): Promise<void> => {
-    const { $indexStore } = useNuxtApp()
     const accessToken = Cookies.get("accessToken")
     const refreshToken = Cookies.get("refreshToken")
 
     if (accessToken) {
       try {
-        const user = await $apiPost<autoLoginResponse>("/auth/me", {
+        const response = await $apiPost<autoLoginResponse>("/auth/me", {
           accessToken: accessToken,
         })
 
-        if (user) {
-          login(user.id, user.nickname)
-          console.log($indexStore.user().user)
+        if (response) {
+          login(response.user.id, response.user.nickname)
           return
         }
       } catch (error: any) {

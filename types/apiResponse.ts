@@ -1,12 +1,12 @@
 import type { Record, Request } from "~/types/typing"
+import type { User } from "~/types/user"
 
 export interface autoLoginResponse {
-  id: number
-  nickname: string
+  user: User
 }
 
 export interface refreshTokenResponse {
-  user: autoLoginResponse
+  user: User
   accessToken: string
 }
 
