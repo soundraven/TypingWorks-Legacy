@@ -38,12 +38,21 @@
               <template #title>
                 <el-icon><Stopwatch /></el-icon>Typing Speed
               </template>
-              <el-menu-item index="2-1-1">CPM</el-menu-item>
-              <el-menu-item index="2-1-2">WPM</el-menu-item>
+              <el-menu-item index="2-1-1" @click="handleMenuClick('2-1-1')">
+                CPM
+              </el-menu-item>
+              <el-menu-item index="2-1-2" @click="handleMenuClick('2-1-2')">
+                WPM
+              </el-menu-item>
             </el-sub-menu>
-            <el-menu-item index="2-2">
-              <el-icon><Document /></el-icon>Other Info
-            </el-menu-item>
+            <el-sub-menu index="2-2" @click="handleMenuClick('2-2')">
+              <template #title>
+                <el-icon><Document /></el-icon>Other Info
+              </template>
+              <el-menu-item index="2-2-1" @click="handleMenuClick('2-2-1')">
+                Acc & Prg
+              </el-menu-item>
+            </el-sub-menu>
           </el-sub-menu>
         </el-menu>
       </div>
@@ -81,6 +90,12 @@ const handleMenuClick = (index: string) => {
     condition.value = "recentWpm"
   } else if (index === "1-2-1") {
     condition.value = "recentAccPrg"
+  } else if (index === "2-1-1") {
+    condition.value = "entireCpm"
+  } else if (index === "2-1-2") {
+    condition.value = "entireWpm"
+  } else if (index === "2-2-1") {
+    condition.value = "entireAccPrg"
   }
 }
 
@@ -107,6 +122,12 @@ const chartOptions = computed(() => {
     return getRecentWpmOptions(recentTypingRecords.value)
   } else if (condition.value === "recentAccPrg") {
     return getRecentAccPrgOptions(recentTypingRecords.value)
+  } else if (condition.value === "entireCpm") {
+    return getEntireCpmOptions(entireTypingRecords.value)
+  } else if (condition.value === "entireWpm") {
+    return getEntireWpmOptions(entireTypingRecords.value)
+  } else if (condition.value === "entireAccPrg") {
+    return getEntireAccPrgOptions(entireTypingRecords.value)
   }
 
   return {} as EChartsOption
