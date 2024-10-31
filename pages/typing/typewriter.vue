@@ -18,7 +18,11 @@
               <el-dropdown-item divided @click="$indexStore.user().logout">
                 로그아웃
               </el-dropdown-item>
-              <el-dropdown-item divided @click="navigateTo('/auth/admin')">
+              <el-dropdown-item
+                divided
+                v-if="$indexStore.user().user.id === ADMIN_ID"
+                @click="navigateTo('/auth/admin')"
+              >
                 관리자 페이지
               </el-dropdown-item>
             </el-dropdown-menu>
@@ -151,6 +155,9 @@ import { getSentence } from "~/services/typing"
 import { navigateTo } from "nuxt/app"
 
 const { $indexStore } = useNuxtApp()
+
+const config = useRuntimeConfig()
+const ADMIN_ID = Number(config.public.ADMIN_ID)
 
 const $style = useCssModule()
 const colorMode = useColorMode()
