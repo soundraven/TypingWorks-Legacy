@@ -5,6 +5,6 @@ export default defineNuxtRouteMiddleware((to, from) => {
 
   if (!sessionStorage.getItem("user")) {
     ElMessage({ message: "Please use kakao login first.", type: "warning" })
-    return navigateTo(from.fullPath)
+    return navigateTo("/typing/typewriter")
   }
 })
