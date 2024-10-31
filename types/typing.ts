@@ -1,3 +1,5 @@
+import type { Dayjs } from "dayjs"
+
 export interface TypingInfo {
   targetLanguage: string
   targetSentenceType: string
@@ -8,7 +10,24 @@ export interface TypingInfo {
   avgAccuracy: number
   avgProgress: number
   count: number
-  entireElapsedtime: number
+  entireElapsedTime: number
+  charCount: number
+}
+
+export interface Record {
+  registered_by: number
+  language: string
+  type: string
+  avg_wpm: number
+  avg_cpm: number
+  max_wpm: number
+  max_cpm: number
+  avg_accuracy: number
+  avg_progress: number
+  count: number
+  time: number
+  char_count: number
+  registered_date: Dayjs
 }
 
 export enum TypoStatus {

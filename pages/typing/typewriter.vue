@@ -12,9 +12,7 @@
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item
-                @click="ElMessage({ message: '구현 준비중 입니다' })"
-              >
+              <el-dropdown-item @click="navigateTo('/auth/mypage')">
                 마이페이지
               </el-dropdown-item>
               <el-dropdown-item divided @click="$indexStore.user().logout">
@@ -50,7 +48,7 @@
           <div :class="$style.list">{{ typedSentence.content }}</div>
         </div>
       </div>
-      <div :class="[$style.language, $style.gridItem]" v-auto-animate>
+      <div :class="[$style.language, $style.gridItem]">
         {{ targetSentence.language === "kr" ? "Korean" : "English" }}
       </div>
       <div :class="[$style.screenMode, $style.gridItem]">
@@ -62,7 +60,7 @@
       <div :class="[$style.keyThemeName, $style.gridItem]">
         {{ getKeyThemeName() }}
       </div>
-      <div :class="[$style.sentenceType, $style.gridItem]" v-auto-animate>
+      <div :class="[$style.sentenceType, $style.gridItem]">
         {{ targetSentence.type }}
       </div>
       <div :class="[$style.wpm, $style.gridItem]">WPM: {{ wpm }}</div>
@@ -146,10 +144,9 @@
 import { disassemble } from "hangul-js"
 import { ThemeColor } from "@/types/theme"
 import { vAutoAnimate } from "@formkit/auto-animate"
-import { TypoStatus, type Sentence, Direction } from "~/types/sentence"
+import { TypoStatus, type Sentence, Direction } from "~/types/typing"
 import Sidebar from "~/components/Sidebar.vue"
 import { calcAccuracy, calcSpeed, getElapsedTime } from "~/utils/number"
-import { ElMessage } from "element-plus"
 import { getSentence } from "~/services/typing"
 import { navigateTo } from "nuxt/app"
 
@@ -276,10 +273,12 @@ const shiftSentence = () => {
 const editGoalCount = (direction: Direction) => {
   if (direction === "raise") {
     ++oneCycle.value
+    $indexStore.typing().resetTypingInfo()
     readySentence()
   } else {
     if (oneCycle.value <= 1) return
     --oneCycle.value
+    $indexStore.typing().resetTypingInfo()
     readySentence()
   }
 }
@@ -468,6 +467,11 @@ const endTyping = () => {
 
   calcTypingSpeed(totalTime.value)
 
+  const charCount: number = targetSentence.value.content.replace(
+    /\s+/g,
+    "",
+  ).length
+
   $indexStore
     .typing()
     .updateTypingInfo(
@@ -476,17 +480,19 @@ const endTyping = () => {
       accuracyArray.value,
       progressArray.value,
       ElapsedTimeArray.value,
+      charCount,
     )
 
   shiftSentence()
   resetInfo()
-  readySentence()
 
   if ($indexStore.typing().typingInfo.count >= oneCycle.value) {
     toggleShow()
+
     document.querySelectorAll("input").forEach((input) => {
       ;(input as HTMLElement).blur()
     })
+
     return
   }
 }
@@ -516,9 +522,11 @@ const resetArray = (): void => {
 }
 
 const finishCycle = (): void => {
+  console.log("finishCycle 진입")
   resetArray()
-  $indexStore.typing().resetTypingInfo()
+  $indexStore.typing().insertTypingInfo()
   toggleShow()
+  readySentence()
 
   const inputElement = document.querySelector("input")
   inputElement?.focus()
@@ -804,28 +812,6 @@ const getKeyThemeName = (): string => {
         border: 2px solid var(--border-color);
         border-radius: 7px;
         box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.15);
-
-        transition:
-          width 0.2s,
-          height 0.2s,
-          font-size 0.2s,
-          line-height 0.2s;
-
-        &:hover {
-          cursor: pointer;
-          top: -3px;
-        }
-
-        // &:active {
-        //   width: 50px;
-        //   height: 25px;
-        //   font-size: 9px;
-        //   line-height: 25px;
-        // }
-      }
-
-      > .active {
-        background-color: var(--color-primary);
       }
     }
 
@@ -880,28 +866,6 @@ const getKeyThemeName = (): string => {
         border: 2px solid var(--border-color);
         border-radius: 7px;
         box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.15);
-
-        transition:
-          width 0.2s,
-          height 0.2s,
-          font-size 0.2s,
-          line-height 0.2s;
-
-        &:hover {
-          cursor: pointer;
-          top: -3px;
-        }
-
-        &:active {
-          width: 50px;
-          height: 25px;
-          font-size: 9px;
-          line-height: 25px;
-        }
-      }
-
-      > .active {
-        background-color: var(--color-primary);
       }
     }
 
@@ -1089,22 +1053,5 @@ const getKeyThemeName = (): string => {
       }
     }
   }
-}
-
-.hoverQuote {
-  width: 100%;
-  height: 30px;
-
-  font-size: 20px;
-  line-height: 30px;
-
-  background-color: var(--bg);
-
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 1000;
-
-  animation: flash-box-shadow 0.5s;
 }
 </style>

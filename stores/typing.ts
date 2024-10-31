@@ -1,4 +1,6 @@
-import { type Sentence, type TypingInfo } from "~/types/sentence"
+import { $apiPost } from "~/services/api"
+import type { RecordResponse } from "~/types/apiResponse"
+import { type Sentence, type TypingInfo } from "~/types/typing"
 
 export const useTypingStore = defineStore("typing", () => {
   // State
@@ -12,7 +14,8 @@ export const useTypingStore = defineStore("typing", () => {
     avgAccuracy: 0,
     avgProgress: 0,
     count: 0,
-    entireElapsedtime: 0,
+    entireElapsedTime: 0,
+    charCount: 0,
   })
 
   const typedSentenceList: Ref<Sentence[]> = ref([])
@@ -44,7 +47,21 @@ export const useTypingStore = defineStore("typing", () => {
     typingInfo.avgAccuracy = 0
     typingInfo.avgProgress = 0
     typingInfo.count = 0
-    typingInfo.entireElapsedtime = 0
+    typingInfo.entireElapsedTime = 0
+    typingInfo.charCount = 0
+  }
+
+  const insertTypingInfo = async (): Promise<void> => {
+    const { $indexStore } = useNuxtApp()
+
+    if ($indexStore.user().user.isAuthenticated) {
+      const response = await $apiPost<RecordResponse>("/typing/record", {
+        typingInfo: typingInfo,
+        userId: $indexStore.user().user.id,
+      })
+    }
+
+    resetTypingInfo()
   }
 
   const updateTypingInfo = (
@@ -52,14 +69,15 @@ export const useTypingStore = defineStore("typing", () => {
     cpmArray: number[],
     accuracyArray: number[],
     progressArray: number[],
-    ElapsedTimeArray: number[],
+    elapsedTimeArray: number[],
+    charCount: number,
   ): void => {
     const avgWpm = getAvgValue(wpmArray)
     const avgCpm = getAvgValue(cpmArray)
     const avgAccuracy = getAvgValue(accuracyArray)
     const avgProgress = getAvgValue(progressArray)
 
-    const entireElapsedtime = ElapsedTimeArray.reduce((acc, cur) => acc + cur)
+    const entireElapsedTime = elapsedTimeArray.reduce((acc, cur) => acc + cur)
 
     typingInfo.maxWpm = Math.max(...wpmArray)
     typingInfo.maxCpm = Math.max(...cpmArray)
@@ -67,8 +85,8 @@ export const useTypingStore = defineStore("typing", () => {
     typingInfo.avgCpm = avgCpm
     typingInfo.avgAccuracy = avgAccuracy
     typingInfo.avgProgress = avgProgress
-    typingInfo.entireElapsedtime = entireElapsedtime
-    console.log(typingInfo)
+    typingInfo.entireElapsedTime = entireElapsedTime
+    typingInfo.charCount = typingInfo.charCount += charCount
   }
 
   return {
@@ -79,5 +97,6 @@ export const useTypingStore = defineStore("typing", () => {
     countUp,
     resetTypingInfo,
     updateTypingInfo,
+    insertTypingInfo,
   }
 })

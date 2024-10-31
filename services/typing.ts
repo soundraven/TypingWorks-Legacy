@@ -1,7 +1,8 @@
 import type { FormInstance } from "element-plus"
 import { $apiGet, $apiPost } from "~/services/api"
-import type { RuleForm, Success } from "~/types/request"
-import type { Sentence } from "~/types/sentence"
+import type { SubmitFormResponse } from "~/types/apiResponse"
+import type { RuleForm } from "~/types/request"
+import type { Sentence } from "~/types/typing"
 
 export const getSentence = async (
   oneCycle: number,
@@ -9,15 +10,15 @@ export const getSentence = async (
   targetSentenceType: string,
 ): Promise<Sentence[] | undefined> => {
   try {
-    const result = await $apiGet<Sentence[]>("/typing/sentence", {
+    const response = await $apiGet<Sentence[]>("/typing/sentence", {
       oneCycle: oneCycle,
       language: targetLanguage,
       type: targetSentenceType,
     })
 
-    return result
+    return response
   } catch (error: any) {
-    ElMessage({ message: `"Error:", ${error.message}`, type: "error" })
+    ElMessage({ message: error.message, type: "error" })
     return undefined
   }
 }
@@ -26,25 +27,26 @@ export const submitForm = async (
   formEl: FormInstance | undefined,
   ruleForm: RuleForm,
 ): Promise<void> => {
-  console.log("진입")
   if (!formEl) return
 
   await formEl.validate(async (valid, fields) => {
     if (valid) {
-      const result = await $apiPost<Success>("/typing/request", {
-        form: ruleForm,
-      })
-      console.log(result)
+      try {
+        const response = await $apiPost<SubmitFormResponse>("/typing/request", {
+          form: ruleForm,
+        })
 
-      if (result) {
         ElMessage({
           message: "Successfully send your request",
           type: "success",
         })
+
         navigateTo("/typing/typewriter")
+      } catch (error: any) {
+        ElMessage({ message: error.message, type: "error" })
       }
     } else {
-      ElMessage({ message: "Please input valid infomation", type: "error" })
+      ElMessage({ message: "Please input valid information", type: "error" })
     }
   })
 }

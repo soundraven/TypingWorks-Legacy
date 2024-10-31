@@ -1,4 +1,4 @@
-import type { Request } from "~/types/sentence"
+import type { Record, Request } from "~/types/typing"
 
 export interface autoLoginResponse {
   id: number
@@ -16,4 +16,31 @@ export interface RequestListResponse {
 
 export interface ConfirmResponse {
   success: boolean
+}
+
+export interface RecordResponse {
+  success: boolean
+}
+
+export interface RecentRecordResponse {
+  records: Record[]
+}
+
+export interface EntireRecordResponse {
+  records: Record[]
+}
+
+export interface SubmitFormResponse {
+  success: boolean
+}
+
+export interface KakaoLoginResponse {
+  accessToken: string
+  refreshToken: string
+  user: {
+    id: number
+    properties: {
+      nickname: string
+    }
+  }
 }

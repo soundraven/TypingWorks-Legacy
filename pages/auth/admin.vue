@@ -94,9 +94,10 @@
 </template>
 
 <script lang="ts" setup>
-import { $apiGet, $apiPost } from "~/services/api"
-import type { ConfirmResponse, RequestListResponse } from "~/types/apiResponse"
-import type { Request } from "~/types/sentence"
+import { $apiPost } from "~/services/api"
+import { getRequestList } from "~/services/auth"
+import type { ConfirmResponse } from "~/types/apiResponse"
+import type { Request } from "~/types/typing"
 const { $indexStore } = useNuxtApp()
 
 const requestList: Ref<Request[]> = ref([])
@@ -113,9 +114,7 @@ const paginatedRequestList = computed(() => {
 })
 
 onMounted(async () => {
-  const response = await $apiGet<RequestListResponse>("/auth/admin")
-  console.log("API결과", response)
-  requestList.value = response.requestList
+  requestList.value = await getRequestList()
 })
 
 type Status = "accept" | "reject"
@@ -126,14 +125,16 @@ const confirm = async (status: Status, id: number) => {
     requestId: id,
   })
 
-  console.log(response)
-
   if (response) {
     requestList.value = requestList.value.filter((request) => request.id !== id)
-    console.log(requestList.value)
     ElMessage({
-      message: `ID: ${id}, 성공적으로 처리되었습니다`,
+      message: `ID: ${id}, Successfully confirmed.`,
       type: "success",
+    })
+  } else {
+    ElMessage({
+      message: "Confirm failure.",
+      type: "error",
     })
   }
 }
