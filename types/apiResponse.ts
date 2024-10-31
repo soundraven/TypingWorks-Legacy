@@ -29,3 +29,18 @@ export interface RecentRecordResponse {
 export interface EntireRecordResponse {
   records: Record[]
 }
+
+export interface SubmitFormResponse {
+  success: boolean
+}
+
+export interface KakaoLoginResponse {
+  accessToken: string
+  refreshToken: string
+  user: {
+    id: number
+    properties: {
+      nickname: string
+    }
+  }
+}

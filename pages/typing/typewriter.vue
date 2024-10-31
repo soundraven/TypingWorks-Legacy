@@ -812,28 +812,6 @@ const getKeyThemeName = (): string => {
         border: 2px solid var(--border-color);
         border-radius: 7px;
         box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.15);
-
-        transition:
-          width 0.2s,
-          height 0.2s,
-          font-size 0.2s,
-          line-height 0.2s;
-
-        &:hover {
-          cursor: pointer;
-          top: -3px;
-        }
-
-        // &:active {
-        //   width: 50px;
-        //   height: 25px;
-        //   font-size: 9px;
-        //   line-height: 25px;
-        // }
-      }
-
-      > .active {
-        background-color: var(--color-primary);
       }
     }
 
@@ -888,28 +866,6 @@ const getKeyThemeName = (): string => {
         border: 2px solid var(--border-color);
         border-radius: 7px;
         box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.15);
-
-        transition:
-          width 0.2s,
-          height 0.2s,
-          font-size 0.2s,
-          line-height 0.2s;
-
-        &:hover {
-          cursor: pointer;
-          top: -3px;
-        }
-
-        &:active {
-          width: 50px;
-          height: 25px;
-          font-size: 9px;
-          line-height: 25px;
-        }
-      }
-
-      > .active {
-        background-color: var(--color-primary);
       }
     }
 
@@ -1097,22 +1053,5 @@ const getKeyThemeName = (): string => {
       }
     }
   }
-}
-
-.hoverQuote {
-  width: 100%;
-  height: 30px;
-
-  font-size: 20px;
-  line-height: 30px;
-
-  background-color: var(--bg);
-
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 1000;
-
-  animation: flash-box-shadow 0.5s;
 }
 </style>

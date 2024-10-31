@@ -46,8 +46,8 @@ export const useUserStore = defineStore("user", () => {
           console.log($indexStore.user().user)
           return
         }
-      } catch (error) {
-        console.error("자동 로그인 실패:", error)
+      } catch (error: any) {
+        ElMessage({ message: error.message, type: "error" })
       }
     } else if (refreshToken) {
       try {
@@ -67,17 +67,18 @@ export const useUserStore = defineStore("user", () => {
             refreshTokenResponse.user.id,
             refreshTokenResponse.user.nickname,
           )
-          console.log("액세스토큰생성자동로그인성공")
+
           return
         }
-      } catch (error) {
-        console.error("자동 로그인 실패:", error)
+      } catch (error: any) {
+        ElMessage({ message: error.message, type: "error" })
       }
     } else {
       ElMessage({
-        message: "로그인 정보가 없습니다. 다시 로그인해 주세요.",
+        message: "There's no login info. Please login first.",
         type: "error",
       })
+      logout()
     }
   }
 
