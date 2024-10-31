@@ -246,8 +246,9 @@ const resetForm = (formEl: FormInstance | undefined) => {
 
     background-color: var(--bg-secondary);
 
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     border-radius: 10px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
 
     padding: 12px;
     margin-block: auto;
@@ -261,8 +262,9 @@ const resetForm = (formEl: FormInstance | undefined) => {
 
       background-color: var(--bg);
 
-      border: 1px solid var(--border-color);
+      border: 2px solid var(--border-color);
       border-radius: 10px;
+      box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
 
       padding: 12px;
 

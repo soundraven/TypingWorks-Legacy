@@ -2,12 +2,7 @@
   <div :class="$style.index">
     <div :class="$style.container">
       <div :class="$style.menuContainer">
-        <el-menu
-          default-active="1-1-1"
-          :class="$style.menu"
-          @open="handleOpen"
-          @close="handleClose"
-        >
+        <el-menu default-active="1-1-1" :class="$style.menu">
           <el-sub-menu index="1">
             <template #title>
               <span>
@@ -18,12 +13,21 @@
               <template #title>
                 <el-icon><Stopwatch /></el-icon>Typing Speed
               </template>
-              <el-menu-item index="1-1-1">CPM</el-menu-item>
-              <el-menu-item index="1-1-2">WPM</el-menu-item>
+              <el-menu-item index="1-1-1" @click="handleMenuClick('1-1-1')">
+                CPM
+              </el-menu-item>
+              <el-menu-item index="1-1-2" @click="handleMenuClick('1-1-2')">
+                WPM
+              </el-menu-item>
             </el-sub-menu>
-            <el-menu-item index="1-2">
-              <el-icon><Document /></el-icon>Other Info
-            </el-menu-item>
+            <el-sub-menu index="1-2" @click="handleMenuClick('1-2')">
+              <template #title>
+                <el-icon><Document /></el-icon>Other Info
+              </template>
+              <el-menu-item index="1-2-1" @click="handleMenuClick('1-2-1')">
+                Acc & Prg
+              </el-menu-item>
+            </el-sub-menu>
           </el-sub-menu>
           <el-sub-menu index="2">
             <template #title>
@@ -57,7 +61,7 @@ import type {
   RecentRecordResponse,
 } from "~/types/apiResponse"
 import type { Record } from "~/types/typing"
-import { getRecentTypingOptions } from "~/utils/chartOptions"
+import type { EChartsOption } from "echarts"
 
 const { $echarts } = useNuxtApp()
 
@@ -65,31 +69,50 @@ definePageMeta({ middleware: "kakao" })
 
 const chart = ref(null)
 
-const RecentTypingRecords: Ref<Record[]> = ref([])
+const condition: Ref<string> = ref("recentCpm")
 
-const handleOpen = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
-}
-const handleClose = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
+const recentTypingRecords: Ref<Record[]> = ref([])
+const entireTypingRecords: Ref<Record[]> = ref([])
+
+const handleMenuClick = (index: string) => {
+  if (index === "1-1-1") {
+    condition.value = "recentCpm"
+  } else if (index === "1-1-2") {
+    condition.value = "recentWpm"
+  } else if (index === "1-2-1") {
+    condition.value = "recentAccPrg"
+  }
 }
 
 const getRecentRecord = async (userId: number) => {
   const response = await $apiGet<RecentRecordResponse>("/chart/recentRecord", {
     userId: userId,
   })
-  RecentTypingRecords.value = response.records
+
+  recentTypingRecords.value = response.records
 }
 
 const getEntireRecord = async (userId: number) => {
   const response = await $apiGet<EntireRecordResponse>("/chart/entireRecord", {
     userId: userId,
   })
+
+  entireTypingRecords.value = response.records
 }
 
-const chartOptions = computed(() =>
-  getRecentTypingOptions(RecentTypingRecords.value),
-)
+const chartOptions = computed(() => {
+  if (condition.value === "recentCpm") {
+    return getRecentCpmOptions(recentTypingRecords.value)
+  } else if (condition.value === "recentWpm") {
+    return getRecentWpmOptions(recentTypingRecords.value)
+  } else if (condition.value === "recentAccPrg") {
+    return getRecentAccPrgOptions(recentTypingRecords.value)
+  }
+
+  return {} as EChartsOption
+})
+
+let myChart: echarts.ECharts | null = null
 
 onMounted(async () => {
   const userJson = sessionStorage.getItem("user")
@@ -97,91 +120,25 @@ onMounted(async () => {
     const user = JSON.parse(userJson)
 
     await getRecentRecord(user.id)
+    await getEntireRecord(user.id)
 
     if (chart.value) {
-      const myChart = $echarts.init(chart.value)
+      myChart = $echarts.init(chart.value)
       console.log(chartOptions.value)
 
       myChart.setOption(chartOptions.value)
     }
+  } else {
+    ElMessage({ message: "Please use kakao login first.", type: "warning" })
+    return navigateTo("/typing/typewriter", { replace: true })
   }
 })
 
-// const option = {
-//         title: {
-//           text: "Recent Typing Statistics",
-//         },
-//         tooltip: {
-//           trigger: "axis",
-//         },
-//         legend: {
-//           data: [
-//             "Avg CPM",
-//             "Avg WPM",
-//             "Max CPM",
-//             "Max WPM",
-//             "Avg Accuracy",
-//             "Avg Progress",
-//             "Sentence Count",
-//             "Typing Time",
-//             "Char Count",
-//           ],
-//         },
-//         xAxis: {
-//           type: "category",
-//           data: typingRecords.value.map((item) => item.registered_date),
-//         },
-//         yAxis: {
-//           type: "value",
-//         },
-//         series: [
-//           {
-//             name: "Avg CPM",
-//             type: "line",
-//             data: typingRecords.value.map((item) => item.avg_cpm),
-//           },
-//           {
-//             name: "Avg WPM",
-//             type: "line",
-//             data: typingRecords.value.map((item) => item.avg_wpm),
-//           },
-//           {
-//             name: "Max CPM",
-//             type: "line",
-//             data: typingRecords.value.map((item) => item.max_cpm),
-//           },
-//           {
-//             name: "Max WPM",
-//             type: "line",
-//             data: typingRecords.value.map((item) => item.max_wpm),
-//           },
-//           {
-//             name: "Avg Accuracy",
-//             type: "line",
-//             data: typingRecords.value.map((item) => item.avg_accuracy),
-//           },
-//           {
-//             name: "Avg Progress",
-//             type: "line",
-//             data: typingRecords.value.map((item) => item.avg_progress),
-//           },
-//           {
-//             name: "Sentence Count",
-//             type: "line",
-//             data: typingRecords.value.map((item) => item.count),
-//           },
-//           {
-//             name: "Typing Time",
-//             type: "line",
-//             data: typingRecords.value.map((item) => item.time),
-//           },
-//           {
-//             name: "Char Count",
-//             type: "line",
-//             data: typingRecords.value.map((item) => item.char_count),
-//           },
-//         ],
-//       }
+watch(chartOptions, (newOptions) => {
+  if (myChart && newOptions) {
+    myChart.setOption(newOptions, true)
+  }
+})
 </script>
 
 <style lang="scss" module>
@@ -195,20 +152,26 @@ onMounted(async () => {
     width: 1340px;
     height: 800px;
 
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
 
     display: flex;
+
+    padding: 12px;
 
     > .menuContainer {
       width: 250px;
       height: 100%;
 
       > .menu {
+        border-right: none;
       }
     }
 
     > .chartContainer {
       width: 100%;
+      padding-inline: 12px;
     }
   }
 }

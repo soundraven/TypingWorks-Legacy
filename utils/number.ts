@@ -1,4 +1,4 @@
-import { TypoStatus } from "~/types/typing"
+import { TypoStatus, type Record } from "~/types/typing"
 
 export const getPercentage = (
   numerator: number,
@@ -43,4 +43,9 @@ export const getElapsedTime = (elapsedTime: number): string => {
   const sec: number = elapsedTime % 60
 
   return `${min}분 ${sec}초`
+}
+
+export const calcAvg = (typingRecords: Record[], field: string) => {
+  const total = typingRecords.reduce((sum, record) => sum + record[field], 0)
+  return total / typingRecords.length
 }
