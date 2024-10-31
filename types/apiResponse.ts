@@ -25,3 +25,7 @@ export interface RecordResponse {
 export interface RecentRecordResponse {
   records: Record[]
 }
+
+export interface EntireRecordResponse {
+  records: Record[]
+}

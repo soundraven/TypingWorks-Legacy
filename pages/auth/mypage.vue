@@ -52,7 +52,10 @@
 
 <script lang="ts" setup>
 import { $apiGet } from "~/services/api"
-import type { RecentRecordResponse } from "~/types/apiResponse"
+import type {
+  EntireRecordResponse,
+  RecentRecordResponse,
+} from "~/types/apiResponse"
 import type { Record } from "~/types/typing"
 import { getRecentTypingOptions } from "~/utils/chartOptions"
 
@@ -62,7 +65,7 @@ definePageMeta({ middleware: "kakao" })
 
 const chart = ref(null)
 
-const typingRecords: Ref<Record[]> = ref([])
+const RecentTypingRecords: Ref<Record[]> = ref([])
 
 const handleOpen = (key: string, keyPath: string[]) => {
   console.log(key, keyPath)
@@ -72,15 +75,21 @@ const handleClose = (key: string, keyPath: string[]) => {
 }
 
 const getRecentRecord = async (userId: number) => {
-  console.log(userId, "현재 query")
   const response = await $apiGet<RecentRecordResponse>("/chart/recentRecord", {
     userId: userId,
   })
-  console.log(response.records)
-  typingRecords.value = response.records
+  RecentTypingRecords.value = response.records
 }
 
-const chartOptions = computed(() => getRecentTypingOptions(typingRecords.value))
+const getEntireRecord = async (userId: number) => {
+  const response = await $apiGet<EntireRecordResponse>("/chart/entireRecord", {
+    userId: userId,
+  })
+}
+
+const chartOptions = computed(() =>
+  getRecentTypingOptions(RecentTypingRecords.value),
+)
 
 onMounted(async () => {
   const userJson = sessionStorage.getItem("user")
