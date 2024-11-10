@@ -1,7 +1,7 @@
 // utils/chartOptions.ts
-import type { Record } from "~/types/typing"
+import type { TypingRecord } from "~/types/typing"
 
-export const getRecentCpmOptions = (typingRecords: Record[]) => ({
+export const getRecentCpmOptions = (typingRecords: TypingRecord[]) => ({
   title: {
     text: "Recent Cpm Statistics",
   },
@@ -32,7 +32,7 @@ export const getRecentCpmOptions = (typingRecords: Record[]) => ({
   ],
 })
 
-export const getRecentWpmOptions = (typingRecords: Record[]) => ({
+export const getRecentWpmOptions = (typingRecords: TypingRecord[]) => ({
   title: {
     text: "Recent Wpm Statistics",
   },
@@ -63,7 +63,7 @@ export const getRecentWpmOptions = (typingRecords: Record[]) => ({
   ],
 })
 
-export const getEntireCpmOptions = (typingRecords: Record[]) => ({
+export const getEntireCpmOptions = (typingRecords: TypingRecord[]) => ({
   title: {
     text: "Recent Cpm Statistics",
   },
@@ -94,7 +94,7 @@ export const getEntireCpmOptions = (typingRecords: Record[]) => ({
   ],
 })
 
-export const getEntireWpmOptions = (typingRecords: Record[]) => ({
+export const getEntireWpmOptions = (typingRecords: TypingRecord[]) => ({
   title: {
     text: "Recent Wpm Statistics",
   },
@@ -125,7 +125,7 @@ export const getEntireWpmOptions = (typingRecords: Record[]) => ({
   ],
 })
 
-export const getRecentAccPrgOptions = (typingRecords: Record[]) => {
+export const getRecentAccPrgOptions = (typingRecords: TypingRecord[]) => {
   const avgAccuracy = calcAvg(typingRecords, "avg_accuracy")
   const avgProgress = calcAvg(typingRecords, "avg_progress")
 
@@ -209,7 +209,7 @@ export const getRecentAccPrgOptions = (typingRecords: Record[]) => {
   }
 }
 
-export const getEntireAccPrgOptions = (typingRecords: Record[]) => {
+export const getEntireAccPrgOptions = (typingRecords: TypingRecord[]) => {
   const avgAccuracy = calcAvg(typingRecords, "avg_accuracy")
   const avgProgress = calcAvg(typingRecords, "avg_progress")
 

@@ -10,28 +10,14 @@
           <el-table-column type="expand">
             <template #default="props">
               <div style="margin: 12px">
-                <p style="margin-top: 0; margin-bottom: 6px">
-                  언어: {{ props.row.language }}
-                </p>
-                <p style="margin-top: 0; margin-bottom: 6px">
-                  문장 유형: {{ props.row.type }}
-                </p>
-                <p style="margin-top: 0; margin-bottom: 6px">
-                  출처: {{ props.row.source }}
-                </p>
-                <p style="margin-top: 0; margin-bottom: 6px">
-                  문장: {{ props.row.sentence }}
-                </p>
-                <p
-                  v-if="props.row.explanation !== null"
-                  style="margin-top: 0; margin-bottom: 6px"
-                >
+                <p>언어: {{ props.row.language }}</p>
+                <p>문장 유형: {{ props.row.type }}</p>
+                <p>출처: {{ props.row.source }}</p>
+                <p>문장: {{ props.row.sentence }}</p>
+                <p v-if="props.row.explanation !== null">
                   설명: {{ props.row.explanation }}
                 </p>
-                <p
-                  v-if="props.row.other_type === 'Y'"
-                  style="margin-top: 0; margin-bottom: 6px"
-                >
+                <p v-if="props.row.other_type === 'Y'">
                   신청한 유형: {{ props.row.comment }}
                 </p>
               </div>
@@ -61,10 +47,7 @@
             </template>
           </el-table-column>
           <el-table-column label="확인" align="center">
-            <template
-              #default="props"
-              v-if="$indexStore.user().user.id === ADMIN_ID"
-            >
+            <template #default="props" v-if="isAdmin">
               <el-button
                 type="success"
                 icon="Check"
@@ -102,6 +85,7 @@ const { $indexStore } = useNuxtApp()
 
 const config = useRuntimeConfig()
 const ADMIN_ID = Number(config.public.ADMIN_ID)
+const isAdmin = computed(() => $indexStore.user().user.id === ADMIN_ID)
 
 const requestList: Ref<Request[]> = ref([])
 const currentPage: Ref<number> = ref(1)
@@ -117,38 +101,53 @@ const paginatedRequestList = computed(() => {
 })
 
 onMounted(async () => {
-  requestList.value = await getRequestList()
+  try {
+    requestList.value = await getRequestList()
+  } catch (error: any) {
+    ElMessage.error(error.message || "Failed to fetch request list.")
+  }
 })
-
 type Status = "accept" | "reject"
 
 const confirm = async (status: Status, id: number) => {
-  const response = await $apiPost<ConfirmResponse>("/auth/confirm", {
-    status: status,
-    requestId: id,
-  })
+  try {
+    const response = await $apiPost<ConfirmResponse>("/auth/confirm", {
+      status: status,
+      requestId: id,
+    })
 
-  if (response) {
-    requestList.value = requestList.value.filter((request) => request.id !== id)
-    ElMessage({
-      message: `ID: ${id}, Successfully confirmed.`,
-      type: "success",
-    })
-  } else {
-    ElMessage({
-      message: "Confirm failure.",
-      type: "error",
-    })
+    if (response?.success) {
+      requestList.value = requestList.value.filter(
+        (request) => request.id !== id,
+      )
+      ElMessage.success(`ID: ${id}, Successfully confirmed.`)
+    }
+  } catch (error: any) {
+    ElMessage.error(error.message || "Confirm failure")
   }
 }
+
+watch(
+  () => requestList.value.length,
+  (newLength) => {
+    if (
+      newLength > 0 &&
+      currentPage.value > Math.ceil(newLength / pageSize.value)
+    ) {
+      currentPage.value -= 1
+    }
+  },
+)
 </script>
 
 <style lang="scss" module>
 .index {
   min-height: 100dvh;
+
   display: flex;
   justify-content: center;
   align-items: flex-start;
+
   padding: 12px;
 
   > .container {
@@ -168,6 +167,11 @@ const confirm = async (status: Status, id: number) => {
 
     > .table {
       border-radius: 10px;
+
+      p {
+        margin-top: 0;
+        margin-bottom: 6px;
+      }
     }
 
     > .pagination {

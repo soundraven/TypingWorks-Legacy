@@ -69,7 +69,7 @@ import type {
   EntireRecordResponse,
   RecentRecordResponse,
 } from "~/types/apiResponse"
-import type { Record } from "~/types/typing"
+import type { TypingRecord } from "~/types/typing"
 import type { EChartsOption } from "echarts"
 
 const { $echarts } = useNuxtApp()
@@ -80,23 +80,20 @@ const chart = ref(null)
 
 const condition: Ref<string> = ref("recentCpm")
 
-const recentTypingRecords: Ref<Record[]> = ref([])
-const entireTypingRecords: Ref<Record[]> = ref([])
+const recentTypingRecords: Ref<TypingRecord[]> = ref([])
+const entireTypingRecords: Ref<TypingRecord[]> = ref([])
+
+const menuMapping: Record<string, string> = {
+  "1-1-1": "recentCpm",
+  "1-1-2": "recentWpm",
+  "1-2-1": "recentAccPrg",
+  "2-1-1": "entireCpm",
+  "2-1-2": "entireWpm",
+  "2-2-1": "entireAccPrg",
+}
 
 const handleMenuClick = (index: string) => {
-  if (index === "1-1-1") {
-    condition.value = "recentCpm"
-  } else if (index === "1-1-2") {
-    condition.value = "recentWpm"
-  } else if (index === "1-2-1") {
-    condition.value = "recentAccPrg"
-  } else if (index === "2-1-1") {
-    condition.value = "entireCpm"
-  } else if (index === "2-1-2") {
-    condition.value = "entireWpm"
-  } else if (index === "2-2-1") {
-    condition.value = "entireAccPrg"
-  }
+  condition.value = menuMapping[index] || ""
 }
 
 const getRecentRecord = async (userId: number) => {
@@ -116,21 +113,22 @@ const getEntireRecord = async (userId: number) => {
 }
 
 const chartOptions = computed(() => {
-  if (condition.value === "recentCpm") {
-    return getRecentCpmOptions(recentTypingRecords.value)
-  } else if (condition.value === "recentWpm") {
-    return getRecentWpmOptions(recentTypingRecords.value)
-  } else if (condition.value === "recentAccPrg") {
-    return getRecentAccPrgOptions(recentTypingRecords.value)
-  } else if (condition.value === "entireCpm") {
-    return getEntireCpmOptions(entireTypingRecords.value)
-  } else if (condition.value === "entireWpm") {
-    return getEntireWpmOptions(entireTypingRecords.value)
-  } else if (condition.value === "entireAccPrg") {
-    return getEntireAccPrgOptions(entireTypingRecords.value)
+  switch (condition.value) {
+    case "recentCpm":
+      return getRecentCpmOptions(recentTypingRecords.value)
+    case "recentWpm":
+      return getRecentWpmOptions(recentTypingRecords.value)
+    case "recentAccPrg":
+      return getRecentAccPrgOptions(recentTypingRecords.value)
+    case "entireCpm":
+      return getEntireCpmOptions(entireTypingRecords.value)
+    case "entireWpm":
+      return getEntireWpmOptions(entireTypingRecords.value)
+    case "entireAccPrg":
+      return getEntireAccPrgOptions(entireTypingRecords.value)
+    default:
+      return {} as EChartsOption
   }
-
-  return {} as EChartsOption
 })
 
 let myChart: echarts.ECharts | null = null
@@ -140,13 +138,10 @@ onMounted(async () => {
   if (userJson) {
     const user = JSON.parse(userJson)
 
-    await getRecentRecord(user.id)
-    await getEntireRecord(user.id)
+    await Promise.all([getRecentRecord(user.id), getEntireRecord(user.id)])
 
     if (chart.value) {
       myChart = $echarts.init(chart.value)
-      console.log(chartOptions.value)
-
       myChart.setOption(chartOptions.value)
     }
   } else {
