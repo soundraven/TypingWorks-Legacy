@@ -14,7 +14,7 @@ export interface TypingInfo {
   charCount: number
 }
 
-export interface Record {
+export interface TypingRecord {
   registered_by: number
   language: string
   type: string
@@ -27,7 +27,7 @@ export interface Record {
   count: number
   time: number
   char_count: number
-  registered_date: Dayjs
+  registered_date: string
 }
 
 export enum TypoStatus {
