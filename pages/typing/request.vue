@@ -129,10 +129,7 @@
               />
             </el-form-item>
             <div :class="$style.btn">
-              <el-button
-                type="primary"
-                @click="submitForm(ruleFormRef, ruleForm)"
-              >
+              <el-button type="primary" @click="showSubmitModal">
                 Submit
               </el-button>
               <el-button @click="resetForm(ruleFormRef)">Reset</el-button>
@@ -142,23 +139,38 @@
       </div>
     </div>
   </div>
+  <Modal
+    v-model="isModalVisible"
+    :title="`${modalTitle}`"
+    @confirm="modalConfirmAction"
+  ></Modal>
 </template>
 
 <script lang="ts" setup>
 import type { FormInstance, FormRules } from "element-plus"
 import type { RuleForm } from "~/types/request"
-import { submitForm } from "~/services/typing"
+import { useModal } from "~/composables/useModal"
+import type { SubmitFormResponse } from "~/types/apiResponse"
+import { $apiPost } from "~/services/api"
 
 definePageMeta({ middleware: "kakao" })
 
 const { $indexStore } = useNuxtApp()
+
+const {
+  isModalVisible,
+  modalTitle,
+  modalContent,
+  modalConfirmAction,
+  openModal,
+} = useModal()
 
 onMounted(async () => {
   $indexStore.sentenceInfo().getSentenceInfo()
   ruleForm.requester = $indexStore.user().user.nickname
 })
 
-const ruleFormRef = ref<FormInstance>()
+const ruleFormRef = ref<FormInstance | null>(null)
 
 const ruleForm = reactive<RuleForm>({
   requester: "",
@@ -225,9 +237,43 @@ const rules = computed(
   }),
 )
 
-const resetForm = (formEl: FormInstance | undefined) => {
+const submitForm = async (
+  formEl: FormInstance | null,
+  ruleForm: RuleForm,
+): Promise<void> => {
   if (!formEl) return
-  formEl.resetFields()
+
+  await formEl?.validate(async (valid, fields) => {
+    if (valid) {
+      try {
+        const response = await $apiPost<SubmitFormResponse>("/typing/request", {
+          form: ruleForm,
+        })
+
+        ElMessage({
+          message: "Successfully send your request",
+          type: "success",
+        })
+
+        navigateTo("/typing/typewriter")
+      } catch (error: any) {
+        ElMessage({ message: error.message, type: "error" })
+      }
+    } else {
+      ElMessage({ message: "Please input valid information", type: "error" })
+    }
+  })
+}
+
+const resetForm = (formEl: FormInstance | null) => {
+  if (!formEl) return
+  formEl?.resetFields()
+}
+
+const showSubmitModal = () => {
+  openModal("Submit Request", "Are you sure want to request this form?", () => {
+    submitForm(ruleFormRef.value, ruleForm)
+  })
 }
 </script>
 
