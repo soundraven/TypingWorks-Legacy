@@ -539,27 +539,83 @@ const finishCycle = (): void => {
   inputElement?.focus()
 }
 
-const calcTypingSpeed = (takenTime: number): void => {
+const pipe =
+  (...fns) =>
+  (init) =>
+    fns.reduce((acc, fn) => fn(acc), init)
+const go = (init, ...fns) => pipe(...fns)(init)
+
+const extractWordLength = (text): number => {
+  return text === "" ? 0 : text.split(" ").length
+}
+
+const disassembleText = (text): string[] => disassemble(text)
+
+const setWpm = (value): void => (wpm.value = value)
+const setCpm = (value): void => (cpm.value = value)
+
+const calcTypingSpeed = (takenTime: number) => {
   if (takenTime === 0) return
 
-  const totalWords: string = parsingText.value.trim()
-  const splitByWords: number =
-    totalWords === "" ? 0 : totalWords.split(" ").length
+  go(
+    parsingText.value.trim(),
 
-  switch (targetSentence.value.language) {
-    case "en": {
-      wpm.value = calcSpeed(splitByWords, takenTime)
-      cpm.value = calcSpeed(totalWords.length, takenTime)
-    }
+    //영어-한글 여부에 따른 분기
+    (text) => ({
+      text,
+      language: targetLanguage.value,
+    }),
 
-    case "kr": {
-      const disassembleText: string[] = disassemble(parsingText.value)
+    //언어별 분석 방법 적용
+    ({ text, language }) => {
+      const wordLength = extractWordLength(text)
+      switch (language) {
+        case "en":
+          return {
+            wpm: calcSpeed(wordLength, takenTime),
+            cpm: calcSpeed(text.length, takenTime),
+          }
+        case "kr": {
+          const disassembled = disassembleText(text)
+          return {
+            wpm: calcSpeed(wordLength, takenTime),
+            cpm: calcSpeed(disassembled.length, takenTime),
+          }
+        }
+        default:
+          return { wpm: 0, cpm: 0 }
+      }
+    },
 
-      wpm.value = calcSpeed(splitByWords, takenTime)
-      cpm.value = calcSpeed(disassembleText.length, takenTime)
-    }
-  }
+    //결과물을 상태에 반영
+    ({ wpm, cpm }) => {
+      setWpm(wpm), setCpm(cpm)
+      return { wpm, cpm }
+    },
+  )
 }
+
+// const calcTypingSpeed = (takenTime: number): void => {
+//   if (takenTime === 0) return
+
+//   const totalWords: string = parsingText.value.trim()
+//   const splitByWords: number =
+//     totalWords === "" ? 0 : totalWords.split(" ").length
+
+//   switch (targetSentence.value.language) {
+//     case "en": {
+//       wpm.value = calcSpeed(splitByWords, takenTime)
+//       cpm.value = calcSpeed(totalWords.length, takenTime)
+//     }
+
+//     case "kr": {
+//       const disassembleText: string[] = disassemble(parsingText.value)
+
+//       wpm.value = calcSpeed(splitByWords, takenTime)
+//       cpm.value = calcSpeed(disassembleText.length, takenTime)
+//     }
+//   }
+// }
 
 watch(parsingText, (newValue) => {
   if (newValue === "") {
